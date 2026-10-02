@@ -4,7 +4,7 @@ import type { UsersListParams } from "@/features/users/schemas/user.schema";
 
 /**
  * Query-key registry. Every React Query key MUST be created here
- * (lint: `project/query-keys-from-constants`).
+ * (lint: `project/no-inline-query-keys`).
  *
  * Keys are hierarchical (`all` → `lists` → `list(params)`), so invalidating a parent key
  * invalidates every child. Use these keys as `relatedKeys` in `makeQuery` to link queries

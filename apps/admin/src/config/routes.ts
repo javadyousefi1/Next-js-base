@@ -2,7 +2,7 @@
  * Single source of truth for every pathname in the app.
  *
  * Never hard-code a path in `<Link href>`, `router.push/replace`, `redirect()` or anywhere else —
- * import it from here. Enforced by the `project/routes-from-constants` lint rule.
+ * import it from here. Enforced by the `project/no-hardcoded-routes` lint rule.
  * Paths are locale-agnostic: the i18n-aware `Link`/`useAppRouter`/`redirect` add the locale.
  */
 export const ROUTES = {

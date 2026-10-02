@@ -1,0 +1,16 @@
+# Keep the build context small and secret-free (the Dockerfile runs `turbo prune` on it).
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+**/coverage
+**/playwright-report
+**/test-results
+**/*.tsbuildinfo
+**/.env
+**/.env.*
+!**/.env.example
+.git
+.husky
+.claude
+docs

@@ -1,0 +1,61 @@
+# Production-like stack: admin (Next.js standalone) + Redis.
+#   bun run docker:up      → docker compose up -d   (http://localhost:3000)
+#   bun run docker:redis   → only Redis, for `bun run dev`
+# Values come from the shell or a root `.env` file (see apps/admin/.env.example).
+name: next-js-base
+
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_SITE_INDEXABLE: ${NEXT_PUBLIC_SITE_INDEXABLE:-false}
+    image: next-js-base/admin:latest
+    restart: unless-stopped
+    ports:
+      - "${ADMIN_PORT:-3000}:3000"
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-https://api.example.test}
+      # `enabled` answers the API with the built-in MSW + Faker mock (demo mode).
+      # Real deployment: API_MOCKING=disabled and API_BASE_URL=<your API>.
+      API_MOCKING: ${API_MOCKING:-enabled}
+      REDIS_URL: redis://redis:6379
+      REDIS_KEY_PREFIX: ${REDIS_KEY_PREFIX:-admin:}
+      AUTH_ACCESS_TOKEN_TTL_SECONDS: ${AUTH_ACCESS_TOKEN_TTL_SECONDS:-900}
+      AUTH_REFRESH_TOKEN_TTL_SECONDS: ${AUTH_REFRESH_TOKEN_TTL_SECONDS:-604800}
+    depends_on:
+      redis:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+      ]
+    ports:
+      # Bound to localhost only: reachable by `bun run dev`, not from the network.
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  redis-data:

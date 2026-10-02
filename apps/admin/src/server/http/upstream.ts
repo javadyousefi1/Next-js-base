@@ -12,6 +12,9 @@ export const upstream = axios.create({
   baseURL: serverEnv.API_BASE_URL,
   timeout: 10_000,
   headers: { Accept: "application/json" },
+  // MSW intercepts requests inside this process: a mocked upstream must never go through an
+  // HTTP(S)_PROXY from the environment (the proxy would receive — and reject — the call).
+  ...(serverEnv.API_MOCKING === "enabled" && { proxy: false as const }),
 });
 
 upstream.interceptors.response.use(

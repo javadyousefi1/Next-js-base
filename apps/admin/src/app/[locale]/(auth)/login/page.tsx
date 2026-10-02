@@ -27,7 +27,9 @@ export default async function LoginPage() {
     <main className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-xl">{t("title")}</CardTitle>
+          <CardTitle className="text-xl">
+            <h1>{t("title")}</h1>
+          </CardTitle>
           <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
