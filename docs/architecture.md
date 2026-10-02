@@ -1,0 +1,76 @@
+# Architecture
+
+## Monorepo
+
+```
+apps/admin                Next.js 16 app (App Router, Cache Components, React Compiler)
+packages/ui               shadcn/ui (base-nova, Base UI) + Tailwind 4 tokens + cn()
+packages/oxlint-plugin    project lint rules (project/*)
+packages/typescript-config  tsconfig presets
+```
+
+Turborepo runs every task (`build`, `typecheck`, `test`, `test:e2e`, root `lint`/`format:check`)
+with content-hash caching; strict env mode means only declared variables reach a task and change
+its hash. Bun installs dependencies (isolated layout) and runs scripts/unit tests; Next.js runs on
+Node in production (standalone output).
+
+## Request flow
+
+```
+Browser ──page request──▶ proxy.ts ── i18n (next-intl): "/" → "/en", locale cookie
+                              └── guard: no auth cookie on a protected page → /<locale>/login?callbackUrl=…
+        ──/api/auth/*────▶ BFF route handlers ── upstream /auth/* ── Set-Cookie (httpOnly)
+        ──/api/proxy/*───▶ BFF catch-all ── Bearer <access_token cookie> ──▶ upstream API
+                              └── 401 → refresh once → retry → rotate cookies │ fail → clear cookies → 401
+Server Components ── (prefetch) ── upstream API with the cookie token ── dehydrate → HydrationBoundary
+MSW (API_MOCKING=enabled) intercepts every upstream call inside the Node process (instrumentation.ts)
+```
+
+- The browser never sees a token: cookies are `httpOnly`, `Secure` in production, `SameSite=Lax`.
+- `proxy.ts` only checks cookie presence (fast, optimistic). The upstream API is the authority.
+- A 401 that survives the refresh clears the cookies and makes the client redirect to login
+  (`emitUnauthorized` → `useUnauthorizedRedirect`), keeping `callbackUrl` (validated against open
+  redirects).
+- Login is rate limited per IP in Redis (5/minute); Redis being down never blocks login.
+
+## Data flow (client)
+
+```
+view ──calls──▶ feature hook ──▶ xQuery.useQuery(params)
+                                   │ params ── zod parse (VALIDATION on failure)
+                                   │ fetcher ── apiClient (/api/proxy) ── BFF ── upstream
+                                   │ response ── zod parse (INVALID_RESPONSE on failure)
+                                   ▼
+                              React Query cache (key from QUERY_KEYS)
+mutation success ──▶ invalidate `invalidates` keys ──▶ + every query whose `relatedKeys` match
+                                                      (transitively, cycle-safe)
+```
+
+Tables keep `page`, `pageSize`, `q`, `sortBy`, `order` and feature filters in the URL (nuqs).
+The same parsers (`nuqs/server`) feed the server-side prefetch, so the first render already has
+data and the query key matches on both sides.
+
+## Caching layers
+
+| Layer          | What                                                                         | Invalidation                     |
+| -------------- | ---------------------------------------------------------------------------- | -------------------------------- |
+| Next.js        | `'use cache'` + `cacheLife` + `cacheTag` (dashboard stats)                   | `updateTag()` in a Server Action |
+| Static shell   | Partial prerendering of every page (Cache Components)                        | Rebuild / deploy                 |
+| React Query    | Per-key cache in the browser (staleTime 60s default)                         | `invalidates` / `relatedKeys`    |
+| Redis          | `remember()` cache-aside, rate-limit counters                                | TTL / key delete                 |
+| HTTP           | `/_next/static/*` immutable, icons 7 days, `/sw.js` no-cache, BFF `no-store` | file hashes                      |
+| Service worker | `/_next/static/*` cache-first, offline page precached                        | bump `VERSION` in `public/sw.js` |
+| Turborepo      | Task outputs keyed by inputs + env                                           | content hash                     |
+
+## PWA
+
+`app/manifest.ts` (installable, maskable icons), `public/sw.js` (offline fallback page per locale,
+static assets cache-first, never API/auth), `useServiceWorker` (production only), install card in
+Settings (`beforeinstallprompt`, iOS hint), offline banner (`next/offline`).
+
+## SEO
+
+Locale-prefixed URLs with `hreflang` alternates and canonical URLs (`lib/seo/metadata.ts`);
+`robots.txt` and `sitemap.xml` from `app/robots.ts` / `app/sitemap.ts`. Indexing is opt-in with
+`NEXT_PUBLIC_SITE_INDEXABLE=true`; otherwise every page sends `noindex` and robots disallows all —
+the safe default for an admin panel and for preview deployments.
