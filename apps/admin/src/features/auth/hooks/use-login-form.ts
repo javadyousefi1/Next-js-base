@@ -1,0 +1,67 @@
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import { useQueryState } from "nuqs";
+import { useForm } from "react-hook-form";
+
+import { CALLBACK_URL_PARAM, sanitizeCallbackUrl } from "@/config/routes";
+import { useAppRouter } from "@/hooks/use-app-router";
+import type { ApiError } from "@/lib/http/errors";
+
+import { loginMutation, sessionQuery } from "../api/auth.queries";
+import { loginInputSchema, PASSWORD_MIN_LENGTH, type LoginInput } from "../schemas/auth.schema";
+
+type ValidationKey = "usernameRequired" | "passwordMin";
+
+/**
+ * Login form logic: react-hook-form + the same zod schema the BFF validates with, the login
+ * mutation, error → message mapping and the post-login redirect (`?callbackUrl=`).
+ */
+export function useLoginForm() {
+  // react-hook-form keeps mutable state in refs; opt this hook out of React Compiler memoization.
+  "use no memo";
+
+  const t = useTranslations("Auth");
+  const router = useAppRouter();
+  const queryClient = useQueryClient();
+  const [callbackUrl] = useQueryState(CALLBACK_URL_PARAM);
+
+  const form = useForm<LoginInput>({
+    resolver: zodResolver(loginInputSchema),
+    defaultValues: { username: "", password: "" },
+  });
+
+  const mutation = loginMutation.useMutation({
+    onSuccess: (session) => {
+      sessionQuery.setData(queryClient, undefined, () => session);
+      router.replace(sanitizeCallbackUrl(callbackUrl));
+    },
+  });
+
+  // Schema messages are i18n keys (see auth.schema.ts).
+  const fieldError = (name: keyof LoginInput) => {
+    const key = form.formState.errors[name]?.message as ValidationKey | undefined;
+    return key ? t(`validation.${key}`, { min: PASSWORD_MIN_LENGTH }) : undefined;
+  };
+
+  const formError = (error: ApiError | null) => {
+    if (!error) return null;
+    if (error.code === "RATE_LIMITED") {
+      return t("errors.rateLimited", { seconds: error.retryAfterSeconds ?? 60 });
+    }
+    if (error.code === "UNAUTHORIZED" || error.code === "VALIDATION") {
+      return t("errors.invalidCredentials");
+    }
+    return t("errors.generic");
+  };
+
+  return {
+    register: form.register,
+    onSubmit: form.handleSubmit((values) => mutation.mutate(values)),
+    errors: { username: fieldError("username"), password: fieldError("password") },
+    formError: formError(mutation.error),
+    isSubmitting: mutation.isPending || mutation.isSuccess,
+  };
+}

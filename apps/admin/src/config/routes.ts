@@ -10,12 +10,14 @@ export const ROUTES = {
   login: "/login",
   users: "/users",
   settings: "/settings",
+  /** Fallback page precached by the service worker. */
+  offline: "/offline",
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];
 
 /** Pages reachable without a session. Every other page is protected by `src/proxy.ts`. */
-export const PUBLIC_ROUTES: readonly AppRoute[] = [ROUTES.login];
+export const PUBLIC_ROUTES: readonly AppRoute[] = [ROUTES.login, ROUTES.offline];
 
 /** Landing page after login, and where authenticated users are sent from public pages. */
 export const DEFAULT_AUTHENTICATED_ROUTE: AppRoute = ROUTES.dashboard;

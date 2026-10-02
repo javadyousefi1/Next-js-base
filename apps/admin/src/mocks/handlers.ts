@@ -1,6 +1,7 @@
 import { http, HttpResponse } from "msw/http";
 import { delay } from "msw/utils/delay";
 
+import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { serverEnv } from "@/env/server";
 
 import { db, DEMO_CREDENTIALS, USER_ROLES, type MockUser } from "./db";
@@ -33,7 +34,7 @@ function currentUser(request: Request): MockUser | undefined {
 const unauthorized = () => HttpResponse.json({ message: "Invalid or expired token" }, { status: 401 });
 
 export const handlers = [
-  http.post(url("/auth/login"), async ({ request }) => {
+  http.post(url(API_ENDPOINTS.auth.login), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const body = (await request.json()) as { username?: string; password?: string };
     const isValid =
@@ -46,7 +47,7 @@ export const handlers = [
     return HttpResponse.json({ ...user, ...issueTokens(user.id) });
   }),
 
-  http.post(url("/auth/refresh"), async ({ request }) => {
+  http.post(url(API_ENDPOINTS.auth.refresh), async ({ request }) => {
     const { refreshToken } = (await request.json()) as { refreshToken?: string };
     const session = refreshToken ? db.refreshTokens.get(refreshToken) : undefined;
 
@@ -55,12 +56,12 @@ export const handlers = [
     return HttpResponse.json(issueTokens(session.userId));
   }),
 
-  http.get(url("/auth/me"), ({ request }) => {
+  http.get(url(API_ENDPOINTS.auth.me), ({ request }) => {
     const user = currentUser(request);
     return user ? HttpResponse.json(user) : unauthorized();
   }),
 
-  http.get(url("/users"), async ({ request }) => {
+  http.get(url(API_ENDPOINTS.users.list), async ({ request }) => {
     if (!currentUser(request)) return unauthorized();
     await delay(RESPONSE_DELAY_MS);
 
@@ -84,7 +85,7 @@ export const handlers = [
     return HttpResponse.json({ users: users.slice(skip, skip + limit), total: users.length, skip, limit });
   }),
 
-  http.get(url("/stats"), async () => {
+  http.get(url(API_ENDPOINTS.stats), async () => {
     await delay(RESPONSE_DELAY_MS);
     const roles = Object.fromEntries(
       USER_ROLES.map((role) => [role, db.users.filter((user) => user.role === role).length]),

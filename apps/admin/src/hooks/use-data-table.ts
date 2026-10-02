@@ -1,12 +1,12 @@
 "use client";
 
-import { useTable, type ColumnDef } from "@tanstack/react-table";
+import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table";
 
 import { dataTableFeatures, type DataTableFeatures } from "@/lib/table/features";
 
-import type { SortOrder } from "./use-table-url-state";
+import type { SortOrder } from "@/lib/table/search-params";
 
-type UseDataTableOptions<TData> = {
+type UseDataTableOptions<TData extends RowData> = {
   data: TData[];
   columns: ColumnDef<DataTableFeatures, TData, any>[];
   /** Total rows on the server (for page count). */
@@ -25,7 +25,7 @@ type UseDataTableOptions<TData> = {
  * Binds TanStack Table to externally controlled (URL) state. Pagination and sorting are
  * "manual": the table only renders what the server returned and reports user intents.
  */
-export function useDataTable<TData>(options: UseDataTableOptions<TData>) {
+export function useDataTable<TData extends RowData>(options: UseDataTableOptions<TData>) {
   const pagination = { pageIndex: options.page - 1, pageSize: options.pageSize };
   const sorting = options.sortBy ? [{ id: options.sortBy, desc: options.order === "desc" }] : [];
 

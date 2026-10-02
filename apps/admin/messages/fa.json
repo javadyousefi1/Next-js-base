@@ -27,7 +27,9 @@
     "toggleSidebar": "باز و بسته کردن منو",
     "account": "حساب کاربری",
     "logout": "خروج",
-    "skipToContent": "رفتن به محتوا"
+    "skipToContent": "رفتن به محتوا",
+    "language": "زبان",
+    "theme": "پوسته"
   },
   "Auth": {
     "title": "ورود",
@@ -49,7 +51,7 @@
   },
   "Dashboard": {
     "title": "داشبورد",
-    "description": "نمای کلی سامانه. آمار روی سرور کش می‌شود (`use cache: remote` با Redis).",
+    "description": "نمای کلی سامانه. آمار روی سرور با `use cache` (cacheLife و cacheTag) کش می‌شود.",
     "stats": {
       "totalUsers": "کل کاربران",
       "admins": "مدیران",
@@ -65,10 +67,12 @@
         "query": "ری‌اکت کوئری با makeQuery و makeMutation و باطل‌سازی خودکار کلیدهای مرتبط",
         "table": "جستجو، فیلتر، مرتب‌سازی و صفحه‌بندی همگام با URL (useDataTable)",
         "i18n": "انگلیسی و فارسی با پشتیبانی کامل از راست‌به‌چپ",
-        "cache": "Cache Components نکست و کش ریموت روی Redis",
-        "pwa": "قابلیت نصب PWA با صفحه‌ی آفلاین"
+        "cache": "Cache Components نکست (`use cache`) و Redis برای محدودیت نرخ و کش",
+        "pwa": "قابلیت نصب PWA با صفحه‌ی آفلاین",
+        "mocks": "API ساختگی با MSW و Faker (بدون نیاز به بک‌اند)"
       }
-    }
+    },
+    "refresh": "به‌روزرسانی آمار"
   },
   "Users": {
     "title": "کاربران",
@@ -88,19 +92,6 @@
       "age": "سن",
       "company": "شرکت"
     },
-    "sort": {
-      "asc": "مرتب‌سازی صعودی",
-      "desc": "مرتب‌سازی نزولی"
-    },
-    "pagination": {
-      "summary": "صفحه‌ی {page} از {pageCount}",
-      "rowsPerPage": "ردیف در هر صفحه",
-      "first": "صفحه‌ی اول",
-      "previous": "صفحه‌ی قبل",
-      "next": "صفحه‌ی بعد",
-      "last": "صفحه‌ی آخر",
-      "total": "{total, plural, =0 {کاربری نیست} other {# کاربر}}"
-    },
     "empty": {
       "title": "کاربری پیدا نشد",
       "description": "جستجوی دیگری امتحان کنید یا فیلترها را پاک کنید."
@@ -112,10 +103,7 @@
     "description": "تنظیمات شخصی روی همین دستگاه ذخیره می‌شوند.",
     "appearance": {
       "title": "ظاهر",
-      "description": "حالت روشن، تیره یا هماهنگ با سیستم را انتخاب کنید.",
-      "light": "روشن",
-      "dark": "تیره",
-      "system": "سیستم"
+      "description": "حالت روشن، تیره یا هماهنگ با سیستم را انتخاب کنید."
     },
     "language": {
       "title": "زبان",
@@ -136,5 +124,25 @@
       "description": "صفحه‌ای که دنبالش هستید وجود ندارد یا جابه‌جا شده است.",
       "back": "بازگشت به داشبورد"
     }
+  },
+  "Theme": {
+    "toggle": "تغییر پوسته",
+    "light": "روشن",
+    "dark": "تیره",
+    "system": "سیستم"
+  },
+  "DataTable": {
+    "total": "{total, plural, =0 {نتیجه‌ای نیست} other {# نتیجه}}",
+    "rowsPerPage": "ردیف در هر صفحه",
+    "summary": "صفحه‌ی {page} از {pageCount}",
+    "first": "صفحه‌ی اول",
+    "previous": "صفحه‌ی قبل",
+    "next": "صفحه‌ی بعد",
+    "last": "صفحه‌ی آخر"
+  },
+  "Offline": {
+    "title": "اتصال برقرار نیست",
+    "description": "این صفحه به صورت آفلاین در دسترس نیست. اتصال خود را بررسی و دوباره تلاش کنید.",
+    "retry": "تلاش دوباره"
   }
 }

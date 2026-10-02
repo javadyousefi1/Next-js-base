@@ -26,18 +26,31 @@ function shouldRetry(failureCount: number, error: ApiError): boolean {
   return failureCount < 2 && !NON_RETRYABLE.has(error.code);
 }
 
-export function makeQueryClient({ onError }: { onError?: ErrorReporter } = {}): QueryClient {
+let reportError: ErrorReporter | undefined;
+
+/**
+ * Registers the global error UI (toasts). Called once by `useQueryErrorToasts`; returns the
+ * unregister function so it can be used as an effect cleanup.
+ */
+export function setErrorReporter(reporter: ErrorReporter): () => void {
+  reportError = reporter;
+  return () => {
+    if (reportError === reporter) reportError = undefined;
+  };
+}
+
+export function makeQueryClient(): QueryClient {
   return new QueryClient({
     queryCache: new QueryCache({
       // Only background refetch failures are reported globally; first loads render their own
       // error state in the view.
       onError: (error, query) => {
-        if (query.state.data !== undefined) onError?.(error);
+        if (query.state.data !== undefined) reportError?.(error);
       },
     }),
     mutationCache: new MutationCache({
       onError: (error, _variables, _onMutateResult, mutation) => {
-        if (!mutation.meta?.silent) onError?.(error);
+        if (!mutation.meta?.silent) reportError?.(error);
       },
     }),
     defaultOptions: {
@@ -64,8 +77,8 @@ let browserQueryClient: QueryClient | undefined;
  * Server: a new client per request (never share user data between requests).
  * Browser: one client for the whole session (survives re-renders/suspense).
  */
-export function getQueryClient(options?: { onError?: ErrorReporter }): QueryClient {
-  if (isServer) return makeQueryClient(options);
-  browserQueryClient ??= makeQueryClient(options);
+export function getQueryClient(): QueryClient {
+  if (isServer) return makeQueryClient();
+  browserQueryClient ??= makeQueryClient();
   return browserQueryClient;
 }

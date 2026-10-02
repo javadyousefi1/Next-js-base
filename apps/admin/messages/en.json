@@ -27,7 +27,9 @@
     "toggleSidebar": "Toggle sidebar",
     "account": "Account",
     "logout": "Log out",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "language": "Language",
+    "theme": "Theme"
   },
   "Auth": {
     "title": "Sign in",
@@ -49,7 +51,7 @@
   },
   "Dashboard": {
     "title": "Dashboard",
-    "description": "Overview of the platform. Stats are cached on the server (`use cache: remote`, Redis).",
+    "description": "Overview of the platform. Stats are cached on the server with `use cache` (cacheLife + cacheTag).",
     "stats": {
       "totalUsers": "Total users",
       "admins": "Admins",
@@ -65,10 +67,12 @@
         "query": "React Query wrapped by makeQuery / makeMutation with related-key invalidation",
         "table": "URL-synced search, filters, sorting and pagination (useDataTable)",
         "i18n": "English + Persian with full RTL support",
-        "cache": "Next.js Cache Components + Redis remote cache handler",
-        "pwa": "Installable PWA with an offline fallback"
+        "cache": "Next.js Cache Components (`use cache`) + Redis for rate limiting and cache-aside",
+        "pwa": "Installable PWA with an offline fallback",
+        "mocks": "Fake upstream API with MSW + Faker (no backend needed)"
       }
-    }
+    },
+    "refresh": "Refresh stats"
   },
   "Users": {
     "title": "Users",
@@ -88,19 +92,6 @@
       "age": "Age",
       "company": "Company"
     },
-    "sort": {
-      "asc": "Sort ascending",
-      "desc": "Sort descending"
-    },
-    "pagination": {
-      "summary": "Page {page} of {pageCount}",
-      "rowsPerPage": "Rows per page",
-      "first": "First page",
-      "previous": "Previous page",
-      "next": "Next page",
-      "last": "Last page",
-      "total": "{total, plural, =0 {No users} one {# user} other {# users}}"
-    },
     "empty": {
       "title": "No users found",
       "description": "Try a different search or clear the filters."
@@ -112,10 +103,7 @@
     "description": "Personal preferences are stored on this device.",
     "appearance": {
       "title": "Appearance",
-      "description": "Choose light, dark or follow the system.",
-      "light": "Light",
-      "dark": "Dark",
-      "system": "System"
+      "description": "Choose light, dark or follow the system."
     },
     "language": {
       "title": "Language",
@@ -136,5 +124,25 @@
       "description": "The page you are looking for doesn't exist or was moved.",
       "back": "Back to dashboard"
     }
+  },
+  "Theme": {
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "DataTable": {
+    "total": "{total, plural, =0 {No results} one {# result} other {# results}}",
+    "rowsPerPage": "Rows per page",
+    "summary": "Page {page} of {pageCount}",
+    "first": "First page",
+    "previous": "Previous page",
+    "next": "Next page",
+    "last": "Last page"
+  },
+  "Offline": {
+    "title": "You are offline",
+    "description": "This page isn't available offline. Check your connection and try again.",
+    "retry": "Try again"
   }
 }

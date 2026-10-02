@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { PAGE_SIZES, SORT_ORDERS } from "@/lib/table/search-params";
+
 export const USER_ROLES = ["admin", "moderator", "user"] as const;
 export const userRoleSchema = z.enum(USER_ROLES);
 export type UserRole = z.infer<typeof userRoleSchema>;
@@ -18,17 +20,19 @@ export const userSchema = z.object({
 export type User = z.infer<typeof userSchema>;
 
 export const USER_SORT_FIELDS = ["firstName", "email", "age", "role"] as const;
-export const SORT_ORDERS = ["asc", "desc"] as const;
-export const PAGE_SIZES = [10, 20, 50] as const;
 
-/** Input contract of the users list query (also mirrors the URL state of the table). */
+/**
+ * Input contract of the users list query. It mirrors the table URL state, so every field
+ * `.catch()`es to its default: a hand-edited URL (`?page=-3&sortBy=hack`) is sanitized instead
+ * of failing the query.
+ */
 export const usersListParamsSchema = z.object({
-  page: z.number().int().min(1).default(1),
-  pageSize: z.number().int().min(1).max(100).default(PAGE_SIZES[0]),
-  q: z.string().trim().default(""),
-  role: userRoleSchema.nullable().default(null),
-  sortBy: z.enum(USER_SORT_FIELDS).nullable().default(null),
-  order: z.enum(SORT_ORDERS).default("asc"),
+  page: z.number().int().min(1).catch(1),
+  pageSize: z.number().int().min(1).max(100).catch(PAGE_SIZES[0]),
+  q: z.string().trim().catch(""),
+  role: userRoleSchema.nullable().catch(null),
+  sortBy: z.enum(USER_SORT_FIELDS).nullable().catch(null),
+  order: z.enum(SORT_ORDERS).catch("asc"),
 });
 export type UsersListParams = z.output<typeof usersListParamsSchema>;
 export type UsersListParamsInput = z.input<typeof usersListParamsSchema>;

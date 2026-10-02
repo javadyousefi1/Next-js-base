@@ -4,7 +4,23 @@ import { createClient } from "redis";
 
 import { serverEnv } from "@/env/server";
 
-type RedisClient = ReturnType<typeof createClient>;
+function createRedisClient() {
+  const client = createClient({
+    url: serverEnv.REDIS_URL,
+    keyPrefix: serverEnv.REDIS_KEY_PREFIX,
+    disableOfflineQueue: true,
+    socket: {
+      connectTimeout: 2_000,
+      // Back off up to 10s between reconnect attempts while Redis is down.
+      reconnectStrategy: (retries: number) => Math.min(retries * 500, 10_000),
+    },
+  });
+  client.on("error", (error: Error) => console.error("[redis]", error.message));
+  client.connect().catch((error: Error) => console.error("[redis] connect failed:", error.message));
+  return client;
+}
+
+type RedisClient = ReturnType<typeof createRedisClient>;
 
 const globalForRedis = globalThis as typeof globalThis & { redisClient?: RedisClient };
 
@@ -17,17 +33,7 @@ const globalForRedis = globalThis as typeof globalThis & { redisClient?: RedisCl
  * - Every key is namespaced with `REDIS_KEY_PREFIX`.
  */
 export function getRedis(): RedisClient {
-  if (!globalForRedis.redisClient) {
-    const client = createClient({
-      url: serverEnv.REDIS_URL,
-      keyPrefix: serverEnv.REDIS_KEY_PREFIX,
-      disableOfflineQueue: true,
-      socket: { connectTimeout: 2_000 },
-    });
-    client.on("error", (error: Error) => console.error("[redis]", error.message));
-    client.connect().catch((error: Error) => console.error("[redis] connect failed:", error.message));
-    globalForRedis.redisClient = client;
-  }
+  globalForRedis.redisClient ??= createRedisClient();
   return globalForRedis.redisClient;
 }
 

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_rethrow } from "next/navigation";
 import { NextResponse } from "next/server";
 
 import type { TokenPair } from "@/features/auth/schemas/auth.schema";
@@ -23,6 +24,8 @@ export function bffJson(
  * unknown errors never leak internals. A 401 also clears the auth cookies (session is over).
  */
 export function bffError(error: unknown): NextResponse {
+  // Never swallow Next.js control-flow errors (prerender bailouts, redirect, notFound).
+  unstable_rethrow(error);
   const apiError = toApiError(error);
   const status = apiError.status ?? 502;
   const message = status >= 500 ? "Upstream service error" : apiError.message;

@@ -21,15 +21,11 @@ type FetcherContext = { signal: AbortSignal };
  */
 export type QueryFetcher<TParams> = (params: TParams, context: FetcherContext) => Promise<unknown>;
 
-type MakeQueryConfig<
-  TParamsSchema extends z.ZodType,
-  TResponseSchema extends z.ZodType,
-  TKey extends QueryKey,
-> = {
+type MakeQueryConfig<TParamsSchema extends z.ZodType, TResponseSchema extends z.ZodType> = {
   /** Debug label used in validation errors, e.g. "users.list". */
   name: string;
   /** Key factory from `QUERY_KEYS` (never an inline array). Receives the parsed params. */
-  key: (params: z.output<TParamsSchema>) => TKey;
+  key: (params: z.output<TParamsSchema>) => QueryKey;
   /** Input contract. Use `z.void()` for queries without params. */
   params: TParamsSchema;
   /** Output contract. The fetcher result is parsed with it before reaching the cache. */
@@ -44,9 +40,9 @@ type MakeQueryConfig<
   gcTime?: number;
 };
 
-type QueryOverrides<TData, TKey extends QueryKey> = Partial<
+type QueryOverrides<TData> = Partial<
   Pick<
-    UseQueryOptions<TData, ApiError, TData, TKey>,
+    UseQueryOptions<TData, ApiError, TData, QueryKey>,
     | "enabled"
     | "placeholderData"
     | "staleTime"
@@ -74,11 +70,9 @@ type QueryOverrides<TData, TKey extends QueryKey> = Partial<
  * });
  * const query = usersListQuery.useQuery(params); // inside a feature hook
  */
-export function makeQuery<
-  TParamsSchema extends z.ZodType,
-  TResponseSchema extends z.ZodType,
-  TKey extends QueryKey,
->(config: MakeQueryConfig<TParamsSchema, TResponseSchema, TKey>) {
+export function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema extends z.ZodType>(
+  config: MakeQueryConfig<TParamsSchema, TResponseSchema>,
+) {
   type TParamsInput = z.input<TParamsSchema>;
   type TParams = z.output<TParamsSchema>;
   type TData = z.output<TResponseSchema>;
@@ -94,7 +88,7 @@ export function makeQuery<
     // The key is built from the parsed params so `{}` and `{ page: 1 }` share one cache entry.
     const { params, valid } = resolveParams(input);
 
-    return queryOptions<TData, ApiError, TData, TKey>({
+    return queryOptions<TData, ApiError, TData, QueryKey>({
       queryKey: config.key(params),
       queryFn: async ({ signal }) => {
         const parsedParams = valid ? params : parseInput(config.params, input, config.name);
@@ -112,7 +106,7 @@ export function makeQuery<
     key: config.key,
     options,
 
-    useQuery(params: TParamsInput, overrides?: QueryOverrides<TData, TKey>) {
+    useQuery(params: TParamsInput, overrides?: QueryOverrides<TData>) {
       return useQuery({ ...options(params), ...overrides });
     },
 

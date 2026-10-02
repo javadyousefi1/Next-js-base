@@ -1,0 +1,10 @@
+/*
+ * App stylesheet: design tokens + Tailwind come from @repo/ui. Only app-level overrides here.
+ * Fonts are loaded with next/font in `app/[locale]/layout.tsx` (CSS variables on <html>):
+ * Roboto for Latin, Vazirmatn as the fallback for Persian glyphs.
+ */
+@import "@repo/ui/globals.css";
+
+@theme inline {
+  --font-sans: var(--font-roboto), var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+}
