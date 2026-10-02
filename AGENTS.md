@@ -11,7 +11,7 @@ this repository. Read this file completely before changing anything. App-specifi
    or two sentences, and propose the alternative. Never silently comply with something broken and
    never silently deviate from what was asked.
 2. **Don't invent APIs.** Every dependency here is newer than most training data (Next.js 16,
-   React 19.3, TypeScript 7, Tailwind 4, TanStack Query 5 / Table 9, zod 4, nuqs 2, next-intl 4,
+   React 19.3, TypeScript 7, Tailwind 4, TanStack Query 5, zod 4, nuqs 2, next-intl 4,
    MSW 3, Oxlint). Read the installed version: types in `node_modules/<pkg>`, Next.js docs in
    `node_modules/next/dist/docs/`, Turborepo docs in the installed `turbo` package (see the block
    at the end of this file). If you can't verify an API, say so.

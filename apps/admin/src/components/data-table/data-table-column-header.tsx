@@ -1,34 +1,24 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
-import type { CellData, Column, RowData } from "@tanstack/react-table";
 import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDownIcon } from "lucide-react";
 
-import type { DataTableFeatures } from "@/lib/table/features";
+import type { SortOrder } from "@/lib/table/search-params";
 
 const SORT_ICONS = { asc: ArrowUpIcon, desc: ArrowDownIcon, none: ChevronsUpDownIcon };
 
-type DataTableColumnHeaderProps<TData extends RowData, TValue extends CellData> = {
-  column: Column<DataTableFeatures, TData, TValue>;
+type DataTableColumnHeaderProps = {
   title: string;
+  /** Current sort of this column, `null` when the table is not sorted by it. */
+  direction: SortOrder | null;
+  onSort: () => void;
 };
 
-/** Sortable column title. Sorting itself is reported to `useDataTable` (URL state). */
-export function DataTableColumnHeader<TData extends RowData, TValue extends CellData>({
-  column,
-  title,
-}: DataTableColumnHeaderProps<TData, TValue>) {
-  if (!column.getCanSort()) return <span>{title}</span>;
-
-  const SortIcon = SORT_ICONS[column.getIsSorted() || "none"];
+export function DataTableColumnHeader({ title, direction, onSort }: DataTableColumnHeaderProps) {
+  const SortIcon = SORT_ICONS[direction ?? "none"];
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="-ms-2.5"
-      onClick={column.getToggleSortingHandler()}
-    >
+    <Button variant="ghost" size="sm" className="-ms-2.5" onClick={onSort}>
       {title}
       <SortIcon data-icon="inline-end" />
     </Button>

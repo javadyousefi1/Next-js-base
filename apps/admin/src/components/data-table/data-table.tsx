@@ -9,73 +9,64 @@ import {
   TableRow,
 } from "@repo/ui/components/table";
 import { cn } from "@repo/ui/lib/utils";
-import { FlexRender, type RowData } from "@tanstack/react-table";
 
 import { QueryError } from "@/components/feedback/query-error";
-import type { DataTableInstance } from "@/lib/table/use-data-table";
+import type { DataTableColumn, TableController } from "@/lib/table/types";
 
+import { DataTableColumnHeader } from "./data-table-column-header";
 import { DataTableEmpty } from "./data-table-empty";
 import { DataTableSkeleton } from "./data-table-skeleton";
 
-type DataTableProps<TData extends RowData> = {
-  table: DataTableInstance<TData>;
-  /** First load (no data yet) → skeleton. */
-  isLoading?: boolean;
-  /** Refetching with the previous page still visible → rows are dimmed. */
-  isFetching?: boolean;
-  /** Failed with no data to show → error with a retry button. */
-  isError?: boolean;
-  onRetry?: () => void;
+type DataTableProps<TRow extends { id: string | number }> = {
+  table: TableController<TRow>;
+  columns: DataTableColumn<TRow>[];
 };
 
-/** Renders the rows of a `useDataTable` table, plus its loading / error / empty states. */
-export function DataTable<TData extends RowData>({
+/** Rows of a server-driven table, with its loading / error / empty states and sortable headers. */
+export function DataTable<TRow extends { id: string | number }>({
   table,
-  isLoading = false,
-  isFetching = false,
-  isError = false,
-  onRetry,
-}: DataTableProps<TData>) {
-  const columnCount = table.getVisibleLeafColumns().length;
-
-  if (isLoading) {
-    return <DataTableSkeleton columns={columnCount} rows={table.state.pagination.pageSize} />;
+  columns,
+}: DataTableProps<TRow>) {
+  if (table.isLoading) {
+    return <DataTableSkeleton columns={columns.length} rows={table.state.pageSize} />;
   }
-  if (isError) return <QueryError onRetry={() => onRetry?.()} />;
-
-  const rows = table.getRowModel().rows;
+  if (table.isError) return <QueryError onRetry={table.retry} />;
 
   return (
     <div className="overflow-hidden rounded-lg border">
       <Table>
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder ? null : <FlexRender header={header} />}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
+          <TableRow>
+            {columns.map((column) => (
+              <TableHead key={column.id}>
+                {column.sortable ? (
+                  <DataTableColumnHeader
+                    title={column.header}
+                    direction={table.state.sortBy === column.id ? table.state.order : null}
+                    onSort={() => table.toggleSort(column.id)}
+                  />
+                ) : (
+                  column.header
+                )}
+              </TableHead>
+            ))}
+          </TableRow>
         </TableHeader>
         <TableBody
-          aria-busy={isFetching}
-          className={cn("transition-opacity", isFetching && "opacity-60")}
+          aria-busy={table.isFetching}
+          className={cn("transition-opacity", table.isFetching && "opacity-60")}
         >
-          {rows.length === 0 ? (
+          {table.rows.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columnCount}>
-                <DataTableEmpty table={table} />
+              <TableCell colSpan={columns.length}>
+                <DataTableEmpty hasFilters={table.hasFilters} onReset={table.resetFilters} />
               </TableCell>
             </TableRow>
           ) : (
-            rows.map((row) => (
+            table.rows.map((row) => (
               <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    <FlexRender cell={cell} />
-                  </TableCell>
+                {columns.map((column) => (
+                  <TableCell key={column.id}>{column.cell(row)}</TableCell>
                 ))}
               </TableRow>
             ))

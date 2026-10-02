@@ -71,7 +71,7 @@ proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان +
 | 10  | `makeQuery` با کلیدهای مرتبط که با تغییرشان آپدیت شود           | ✅    | `relatedKeys` + invalidation زنجیره‌ای و امن در برابر حلقه (`lib/query/invalidate.ts` + تست)                                                |
 | 11  | ورودی/خروجی makeQuery و makeMutation با zod ولیدیت شود          | ✅    | `params`/`variables` قبل از درخواست و `response` قبل از رسیدن به کش parse می‌شوند؛ خطاها `VALIDATION` و `INVALID_RESPONSE`                  |
 | 12  | کلی هوک کاستوم مفید                                             | ✅    | ۱۵ هوک در `src/hooks` (بخش ۵)                                                                                                               |
-| 13  | هوک مدیریت سرچ/فیلتر/صفحه‌بندی جدول با separation of concerns   | ✅    | الگوی shadcn data-table: `useDataTable` کنترل‌شده + کامپوننت‌هایی که فقط `table` می‌گیرند + فیلتر روی `meta` ستون                           |
+| 13  | هوک مدیریت سرچ/فیلتر/صفحه‌بندی جدول با separation of concerns   | ✅    | `useTableState` (وضعیت URL + اکشن‌ها) + کامپوننت‌های ساده؛ ستون‌ها و فیلترها آرایه‌ی ساده‌اند (بدون کتابخانه‌ی جدول)                        |
 | 14  | دیزاین سیستم shadcn                                             | ✅    | `packages/ui` با CLI رسمی shadcn، استایل base-nova، پشتیبانی RTL، ۳۳ کامپوننت                                                               |
 | 15  | فول TypeScript                                                  | ✅    | TypeScript 7 (کامپایلر native) با strict و `noUncheckedIndexedAccess`                                                                       |
 | 16  | Tailwind                                                        | ✅    | Tailwind CSS 4.3                                                                                                                            |
@@ -111,15 +111,15 @@ proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان +
 
 ## ۴. نسخه‌ی پکیج‌های اصلی (pin دقیق)
 
-| حوزه         | پکیج‌ها                                                                                                                  |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------ |
-| فریم‌ورک     | next 16.3.8، react / react-dom 19.3.0، babel-plugin-react-compiler 1.0.0                                                 |
-| زبان و ابزار | typescript 7.0.2، turbo 2.11.6، bun 1.4.2                                                                                |
-| کیفیت کد     | oxlint 1.86.0، oxlint-tsgolint 7.0.2003، oxfmt 0.71.0، husky 9.1.7، lint-staged 17.6.0، commitlint 21.2.3                |
-| UI           | shadcn 4.21.1، @base-ui/react 1.8.0، tailwindcss 4.3.3، lucide-react 1.49.0، next-themes 0.4.6، sonner 2.0.8، cn 0.4.0   |
-| دیتا         | @tanstack/react-query 5.104.0، @tanstack/react-table 9.2.4، axios 1.20.0، zod 4.6.5، nuqs 2.10.1، react-hook-form 7.89.0 |
-| زیرساخت      | next-intl 4.14.8، redis 6.3.0، @t3-oss/env-nextjs 0.13.11، nextjs-toploader 3.9.17                                       |
-| تست و ماک    | @playwright/test 1.63.0، msw 3.0.1، @faker-js/faker 10.6.0                                                               |
+| حوزه         | پکیج‌ها                                                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| فریم‌ورک     | next 16.3.8، react / react-dom 19.3.0، babel-plugin-react-compiler 1.0.0                                               |
+| زبان و ابزار | typescript 7.0.2، turbo 2.11.6، bun 1.4.2                                                                              |
+| کیفیت کد     | oxlint 1.86.0، oxlint-tsgolint 7.0.2003، oxfmt 0.71.0، husky 9.1.7، lint-staged 17.6.0، commitlint 21.2.3              |
+| UI           | shadcn 4.21.1، @base-ui/react 1.8.0، tailwindcss 4.3.3، lucide-react 1.49.0، next-themes 0.4.6، sonner 2.0.8، cn 0.4.0 |
+| دیتا         | @tanstack/react-query 5.104.0، axios 1.20.0، zod 4.6.5، nuqs 2.10.1، react-hook-form 7.89.0                            |
+| زیرساخت      | next-intl 4.14.8، redis 6.3.0، @t3-oss/env-nextjs 0.13.11، nextjs-toploader 3.9.17                                     |
+| تست و ماک    | @playwright/test 1.63.0، msw 3.0.1، @faker-js/faker 10.6.0                                                             |
 
 به‌روزرسانی: `bun outdated` و سپس `bun update --latest`، و بعد حتماً `bun run check` و
 `bun run test:e2e`.
@@ -192,38 +192,31 @@ upstream اجرا می‌کند و کش را dehydrate می‌کند. برای �
 - `callbackUrl` در برابر open redirect محافظت شده است. ورود با Redis محدود می‌شود (۵ بار در
   دقیقه برای هر IP).
 
-### ۵.۴ جدول‌ها: یک الگو برای همه‌ی صفحه‌ها (الگوی shadcn data-table)
+### ۵.۴ جدول‌ها: یک الگو برای همه‌ی صفحه‌ها (React ساده، بدون کتابخانه‌ی جدول)
 
-منبع حقیقت فقط نمونه‌ی `table` در TanStack است و هر تکه‌ی UI فقط همان `table` (یا یک `column`) را
-می‌گیرد. هر تکه یک کار دارد و فقط به یک چیز وابسته است:
+صفحه‌بندی، مرتب‌سازی و فیلتر روی API انجام می‌شود و UI فقط صفحه‌ی فعلی را نمایش می‌دهد. برای همین
+کتابخانه‌ی جدول لازم نیست:
 
-| تکه                                                               | کارش                                                                 | وابسته به    |
-| ----------------------------------------------------------------- | -------------------------------------------------------------------- | ------------ |
-| `users.search-params.ts`                                          | قرارداد URL (پارسرهای nuqs)؛ هم صفحه‌ی سرور و هم هوک از آن می‌خوانند | هیچ‌چیز      |
-| `useDataTable({ data, rowCount, columns, state, onStateChange })` | وضعیت URL ⇄ وضعیت جدول (کنترل‌شده، مثل یک input)                     | فقط TanStack |
-| `DataTableToolbar`، `DataTable`، `DataTablePagination`            | نمایش؛ فیلترها از `meta` ستون‌ها می‌آیند                             | فقط `table`  |
-| `useUsersTable`                                                   | سه خط سیم‌کشی: URL ⇐ کوئری ⇐ جدول                                    | سه مورد بالا |
+| تکه                                                    | کارش                                                                                                                                                   |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `users.search-params.ts`                               | قرارداد URL با پارسرهای nuqs؛ هم صفحه‌ی سرور و هم هوک از آن می‌خوانند                                                                                  |
+| `useTableState(parsers)`                               | وضعیت URL + اکشن‌ها (`setSearch`، `setFilter`، `toggleSort`، `setPage`، `setPageSize`، `resetFilters`)؛ هر تغییر غیر از صفحه، صفحه را به ۱ برمی‌گرداند |
+| `useUsersTable`                                        | وضعیت URL ⇐ کوئری ⇐ `TableController` (کنترل‌ها + ردیف‌ها + حالت‌ها)                                                                                   |
+| `columns` و `filters`                                  | دو آرایه‌ی ساده: `{ id, header, cell, sortable }` و `{ id, title, options }`                                                                           |
+| `DataTableToolbar`، `DataTable`، `DataTablePagination` | کامپوننت‌های ساده با `<table>`                                                                                                                         |
 
-```ts
-// ۱) قرارداد URL
-export const usersSearchParams = { ...tableSearchParams, sortBy: parseAsStringLiteral(USER_SORT_FIELDS), role: parseAsStringLiteral(USER_ROLES) };
+```tsx
+const table = useUsersTable();
+const columns = useUsersColumns();
+const filters = useUsersFilters();
 
-// ۲) ستونی که فیلتر دارد، خودش اعلام می‌کند (id ستون = کلید URL)
-columnHelper.accessor("role", { meta: { filter: { title: t("roleFilter"), options } } });
-
-// ۳) هوک
-const [params, setParams] = useQueryStates(usersSearchParams, TABLE_URL_OPTIONS);
-const query = usersListQuery.useQuery({ ...params, q: useDebouncedValue(params.q, 300) }, { placeholderData: keepPreviousData });
-const table = useDataTable({ data, rowCount, columns, state: params, onStateChange: setParams });
-
-// ۴) ویو
-<DataTableToolbar table={table} searchPlaceholder={t("searchPlaceholder")} />
-<DataTable table={table} isLoading={isLoading} isFetching={isFetching} isError={isError} onRetry={retry} />
+<DataTableToolbar table={table} filters={filters} searchPlaceholder={t("searchPlaceholder")} />
+<DataTable table={table} columns={columns} />
 <DataTablePagination table={table} />
 ```
 
-- فیلتر جدید یعنی یک پارسر در `search-params` به‌علاوه‌ی `meta.filter` روی ستونی با همان id.
-- نوع جدید فیلتر (بازه‌ی تاریخ، چندانتخابی) فقط یک‌بار در `DataTableColumnMeta` و تولبار اضافه می‌شود.
+- فیلتر جدید یعنی یک پارسر در `search-params` به‌علاوه‌ی یک آیتم در آرایه‌ی `filters`، با همان id.
+- id ستون‌ها همان فیلد مرتب‌سازی API است.
 
 ### ۵.۴.۱ هوک‌های عمومی (`src/hooks`)
 
@@ -231,7 +224,7 @@ const table = useDataTable({ data, rowCount, columns, state: params, onStateChan
 `use-local-storage` (با اعتبارسنجی zod و همگام بین تب‌ها)، `use-media-query`، `use-is-client`،
 `use-disclosure`، `use-copy-to-clipboard`، `use-interval`، `use-event-listener`، `use-latest`،
 `use-previous`، `use-isomorphic-layout-effect`، و در `packages/ui`: `use-mobile`. هوک جدول در
-`lib/table/use-data-table.ts` است (`useDataTable`).
+`lib/table/use-table-state.ts` است (`useTableState`).
 
 ### ۵.۵ کشینگ
 
@@ -358,8 +351,6 @@ const table = useDataTable({ data, rowCount, columns, state: params, onStateChan
     اضافه می‌کند. آن را نگه دارید؛ اگر حذف شود دوباره اضافه می‌شود.
 17. **React Compiler و react-hook-form:** هوک فرم ورود با `"use no memo"` از کامپایلر مستثنا شده است،
     چون RHF state قابل‌تغییر دارد.
-18. **TanStack Table v9** نسخه‌ی جدیدی است و API آن با v8 فرق دارد (`tableFeatures`، `useTable`،
-    `FlexRender`). نمونه‌های اینترنتی v8 را کپی نکنید.
 
 ---
 
@@ -405,6 +396,8 @@ const table = useDataTable({ data, rowCount, columns, state: params, onStateChan
 
 ## ۱۰. ساده‌سازی جدول‌ها (بازبینی دوم)
 
+> این نسخه بعداً در بازبینی سوم (بخش ۱۱) با پیاده‌سازی دستی و بدون کتابخانه جایگزین شد.
+
 نسخه‌ی قبلی (`defineDataTable` ⇐ `useDataTableState` ⇐ `useQueryTable` ⇐ `DataTableView`) لایه‌های
 تودرتو داشت: لیبل‌ها، وضعیت URL و مدل جدول در یک زنجیره قاطی شده بودند. حق با شما بود. بعد از
 بررسی الگوهای مرجع (راهنمای data-table شادسی‌ان و پروژه‌ی tablecn که همین ترکیب shadcn + TanStack
@@ -421,3 +414,22 @@ Table v9 + nuqs را دارد) دوباره نوشته شد:
 خطای 401 می‌شد. همین گاهی ریدایرکت «سشن منقضی شد» را جلو می‌انداخت. حالا خروج با بارگذاری کامل
 صفحه انجام می‌شود، که هر داده‌ای از کاربر قبلی را هم از حافظه پاک می‌کند. تست‌های e2e هر کدام سه
 بار اجرا شدند (۴۵ از ۴۵ سبز).
+
+---
+
+## ۱۱. حذف TanStack Table (بازبینی سوم)
+
+طبق خواسته‌ی شما کتابخانه‌ی `@tanstack/react-table` کامل حذف شد و منطق جدول دستی نوشته شد. برای
+جدول‌های سمت سرور این کتابخانه فقط یک لایه‌ی اضافه بود.
+
+| حالا                                                                    | فایل                                   |
+| ----------------------------------------------------------------------- | -------------------------------------- |
+| وضعیت URL + اکشن‌ها                                                     | `lib/table/use-table-state.ts`         |
+| تایپ‌های ساده (`TableController`، `DataTableColumn`، `DataTableFilter`) | `lib/table/types.ts`                   |
+| جدول با `<table>` ساده و هدرهای قابل مرتب‌سازی                          | `components/data-table/data-table.tsx` |
+| تولبار، فیلتر select و صفحه‌بندی                                        | `components/data-table/*`              |
+
+بده‌بستان: اگر بعداً قابلیت‌های سمت کلاینت مثل جابه‌جایی یا تغییر عرض ستون یا virtualization لازم
+شد، باید خودمان بسازیم یا آن موقع کتابخانه را برگردانیم.
+
+تست‌های e2e هر کدام سه بار اجرا شدند (۴۵ از ۴۵ سبز).

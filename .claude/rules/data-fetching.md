@@ -28,9 +28,9 @@ paths:
 - Endpoints: paths in `src/config/api-endpoints.ts` (the BFF proxy maps them 1:1). Server-only
   code calls `upstreamGet(url, schema)` / `upstreamPost(url, body, schema)` — validated and
   labelled by the endpoint. `bffClient` is only for login/logout (they set cookies).
-- Tables: `<x>.search-params.ts` (nuqs parsers) + `useDataTable({ data, rowCount, columns, state,
-onStateChange })` + `<DataTableToolbar|DataTable|DataTablePagination table={table}>`. Filters are
-  declared on columns (`meta.filter`). Never a per-page toolbar, URL-state hook or prefetch function.
+- Tables: `<x>.search-params.ts` (nuqs parsers) + `useTableState` + plain `columns`/`filters`
+  arrays + `<DataTableToolbar|DataTable|DataTablePagination table={table}>`. No table library.
+  Never a per-page toolbar, URL-state hook or prefetch function.
 - Every upstream endpoint used by the app has an MSW handler in `src/mocks/handlers.ts` with
   Faker data in `src/mocks/db.ts`, so the app runs without a backend (`API_MOCKING=enabled`).
 - Errors are `ApiError` (`code`, `status`, `retryAfterSeconds`); branch on `code`, never on text.

@@ -48,9 +48,9 @@ mutation success ──▶ invalidate `invalidates` keys ──▶ + every query
 
 Tables follow the shadcn data-table pattern: a feature's `<x>.search-params.ts` (nuqs parsers)
 is the URL contract, read by `useQueryStates` in the browser and by `createLoader` in
-`<PrefetchBoundary>` on the server, so both build the same query key. `useDataTable` is a
-controlled TanStack table (URL state in, partial updates out) and the toolbar, table and
-pagination components only receive `table`. Token-issuing endpoints (`/auth/login`,
+`<PrefetchBoundary>` on the server, so both build the same query key. `useTableState` turns
+that URL state into actions (search, filter, sort, page) and the toolbar, table and pagination
+components are plain React (no table library). Token-issuing endpoints (`/auth/login`,
 `/auth/refresh`) are blocked in the proxy; the current user is `/auth/me`.
 
 ## Caching layers

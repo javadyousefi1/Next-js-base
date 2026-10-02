@@ -8,7 +8,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
-import type { RowData } from "@tanstack/react-table";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -18,21 +17,20 @@ import {
 import { useTranslations } from "next-intl";
 
 import { PAGE_SIZES } from "@/lib/table/search-params";
-import type { DataTableInstance } from "@/lib/table/use-data-table";
+import type { TableController } from "@/lib/table/types";
 
-type DataTablePaginationProps<TData extends RowData> = {
-  table: DataTableInstance<TData>;
+type DataTablePaginationProps = {
+  table: TableController<unknown>;
 };
 
-export function DataTablePagination<TData extends RowData>({
-  table,
-}: DataTablePaginationProps<TData>) {
+export function DataTablePagination({ table }: DataTablePaginationProps) {
   const t = useTranslations("DataTable");
-  const { pageIndex, pageSize } = table.state.pagination;
+  const { page, pageSize } = table.state;
+  const pageCount = Math.max(1, Math.ceil(table.total / pageSize));
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-      <p className="text-muted-foreground">{t("total", { total: table.getRowCount() })}</p>
+      <p className="text-muted-foreground">{t("total", { total: table.total })}</p>
 
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
@@ -51,17 +49,15 @@ export function DataTablePagination<TData extends RowData>({
           </Select>
         </div>
 
-        <span className="tabular-nums">
-          {t("summary", { page: pageIndex + 1, pageCount: Math.max(table.getPageCount(), 1) })}
-        </span>
+        <span className="tabular-nums">{t("summary", { page, pageCount })}</span>
 
         <div className="flex items-center gap-1">
           <Button
             variant="outline"
             size="icon-sm"
             aria-label={t("first")}
-            disabled={!table.getCanPreviousPage()}
-            onClick={() => table.firstPage()}
+            disabled={page <= 1}
+            onClick={() => table.setPage(1)}
           >
             <ChevronsLeftIcon className="rtl:rotate-180" />
           </Button>
@@ -69,8 +65,8 @@ export function DataTablePagination<TData extends RowData>({
             variant="outline"
             size="icon-sm"
             aria-label={t("previous")}
-            disabled={!table.getCanPreviousPage()}
-            onClick={() => table.previousPage()}
+            disabled={page <= 1}
+            onClick={() => table.setPage(page - 1)}
           >
             <ChevronLeftIcon className="rtl:rotate-180" />
           </Button>
@@ -78,8 +74,8 @@ export function DataTablePagination<TData extends RowData>({
             variant="outline"
             size="icon-sm"
             aria-label={t("next")}
-            disabled={!table.getCanNextPage()}
-            onClick={() => table.nextPage()}
+            disabled={page >= pageCount}
+            onClick={() => table.setPage(page + 1)}
           >
             <ChevronRightIcon className="rtl:rotate-180" />
           </Button>
@@ -87,8 +83,8 @@ export function DataTablePagination<TData extends RowData>({
             variant="outline"
             size="icon-sm"
             aria-label={t("last")}
-            disabled={!table.getCanNextPage()}
-            onClick={() => table.lastPage()}
+            disabled={page >= pageCount}
+            onClick={() => table.setPage(pageCount)}
           >
             <ChevronsRightIcon className="rtl:rotate-180" />
           </Button>

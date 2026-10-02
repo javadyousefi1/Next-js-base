@@ -21,9 +21,10 @@ request conflicts with AGENTS.md (e.g. "fetch directly in the component"), say s
    and `api/<name>.queries.ts` (`makeQuery`/`makeMutation`). Use the `add-query` /
    `add-mutation` skills.
 5. **Logic** — `hooks/use-<name>-<thing>.ts`: one hook per view, returning a render-ready model.
-   Tables: `<name>.search-params.ts` (`{ ...tableSearchParams, sortBy, <filters> }`), columns with
-   `meta.filter`, a hook that does URL state → query → `useDataTable` (copy `use-users-table.ts`),
-   and a view with `<DataTableToolbar>`, `<DataTable>`, `<DataTablePagination>` (copy `users-table.tsx`).
+   Tables: `<name>.search-params.ts` (`{ ...tableSearchParams, sortBy, <filters> }`), a hook that
+   does `useTableState` → query → `TableController` (copy `use-users-table.ts`), `columns` and
+   `filters` arrays, and a view with `<DataTableToolbar>`, `<DataTable>`, `<DataTablePagination>`
+   (copy `users-table.tsx`).
 6. **Views** — `components/*.tsx`: call the hook, render with `@repo/ui` components. No logic.
 7. **Route** — use the `add-page` skill (`ROUTES`, page, metadata, nav item, i18n).
 8. **SSR (optional)** — in the page: `<PrefetchBoundary queries={[xQuery.with(params)]}

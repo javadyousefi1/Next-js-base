@@ -12,7 +12,7 @@ a requirement-by-requirement checklist and the caveats.
   **TypeScript 7**, **Tailwind 4**, **shadcn/ui** (Base UI, RTL) in `packages/ui`
 - **BFF auth**: tokens only in httpOnly cookies; `/api/auth/*` + `/api/proxy/*` with refresh
 - **Data**: axios + TanStack Query wrapped by `makeQuery` / `makeMutation` (zod-validated input
-  and output, related-key invalidation); URL-synced tables (nuqs + TanStack Table v9)
+  and output, related-key invalidation); URL-synced tables (nuqs, no table library)
 - **i18n** (next-intl, English + Persian RTL), dark/light mode, top loader, SEO, **PWA**
 - **Redis** (rate limiting, cache-aside), env validation (t3-env + zod), **MSW + Faker** mock API
 - **Quality**: Oxlint (type-aware + project rules), Oxfmt, Husky, commitlint, lint-staged

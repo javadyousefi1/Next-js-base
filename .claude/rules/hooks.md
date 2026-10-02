@@ -10,9 +10,9 @@ paths:
 - A feature hook returns a ready-to-render model: plain values + callbacks named for the view
   (`status`, `rows`, `search`, `setSearch`, `onSubmit`, `errors`). The view must not compute.
 - Data: only through `*.queries.ts` definitions (`xQuery.useQuery`, `xMutation.useMutation`).
-- Tables (copy `use-users-table.ts`): `useQueryStates(<x>SearchParams)` → `xQuery.useQuery({
-...params, q: debouncedSearch })` → `useDataTable({ data, rowCount, columns, state: params,
-onStateChange: setParams })`. Return `table` + loading flags; the components read `table`.
+- Tables (copy `use-users-table.ts`): `useTableState(<x>SearchParams)` → `xQuery.useQuery({
+...params, q: debouncedSearch })` → return `{ ...controls, rows, total, isLoading, isFetching,
+isError, retry }` (a `TableController`) for the data-table components.
 - Other URL state: nuqs parsers from a shared module importing `nuqs/server`.
 - Navigation: `useAppRouter()` with `ROUTES`. Forms: react-hook-form + `zodResolver(schema)`
   with the same schema the BFF validates; zod messages are i18n keys.

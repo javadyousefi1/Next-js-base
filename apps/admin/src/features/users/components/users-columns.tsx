@@ -1,13 +1,11 @@
 "use client";
 
 import { Badge } from "@repo/ui/components/badge";
-import { createColumnHelper } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 
-import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import type { DataTableFeatures } from "@/lib/table/features";
+import type { DataTableColumn } from "@/lib/table/types";
 
-import { USER_ROLES, type User, type UserRole } from "../schemas/user.schema";
+import type { User, UserRole } from "../schemas/user.schema";
 
 const ROLE_BADGE_VARIANTS = {
   admin: "default",
@@ -15,52 +13,39 @@ const ROLE_BADGE_VARIANTS = {
   user: "outline",
 } as const satisfies Record<UserRole, "default" | "secondary" | "outline">;
 
-const columnHelper = createColumnHelper<DataTableFeatures, User>();
-
-/**
- * Users table columns. Column ids match the API sort fields; `meta.filter` makes the toolbar
- * render a filter for the column (its id is the URL key: `?role=admin`).
- */
-export function useUsersColumns() {
+/** Column ids are the API sort fields (`USER_SORT_FIELDS`). */
+export function useUsersColumns(): DataTableColumn<User>[] {
   const t = useTranslations("Users");
 
-  return columnHelper.columns([
-    columnHelper.accessor("firstName", {
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t("columns.name")} />,
-      cell: ({ row }) => (
+  return [
+    {
+      id: "firstName",
+      header: t("columns.name"),
+      sortable: true,
+      cell: (user) => (
         <div className="flex flex-col">
           <span className="font-medium">
-            {row.original.firstName} {row.original.lastName}
+            {user.firstName} {user.lastName}
           </span>
-          <span className="text-xs text-muted-foreground">@{row.original.username}</span>
+          <span className="text-xs text-muted-foreground">@{user.username}</span>
         </div>
       ),
-    }),
-    columnHelper.accessor("email", {
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t("columns.email")} />,
-    }),
-    columnHelper.accessor("role", {
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t("columns.role")} />,
-      cell: ({ getValue }) => (
-        <Badge variant={ROLE_BADGE_VARIANTS[getValue()]}>{t(`roles.${getValue()}`)}</Badge>
+    },
+    { id: "email", header: t("columns.email"), sortable: true, cell: (user) => user.email },
+    {
+      id: "role",
+      header: t("columns.role"),
+      sortable: true,
+      cell: (user) => (
+        <Badge variant={ROLE_BADGE_VARIANTS[user.role]}>{t(`roles.${user.role}`)}</Badge>
       ),
-      meta: {
-        filter: {
-          title: t("roleFilter"),
-          options: USER_ROLES.map((role) => ({ value: role, label: t(`roles.${role}`) })),
-        },
-      },
-    }),
-    columnHelper.accessor("age", {
-      header: ({ column }) => <DataTableColumnHeader column={column} title={t("columns.age")} />,
-      cell: ({ getValue }) => <span className="tabular-nums">{getValue()}</span>,
-    }),
-    columnHelper.accessor((user) => user.company?.name ?? "—", {
-      id: "company",
-      enableSorting: false,
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title={t("columns.company")} />
-      ),
-    }),
-  ]);
+    },
+    {
+      id: "age",
+      header: t("columns.age"),
+      sortable: true,
+      cell: (user) => <span className="tabular-nums">{user.age}</span>,
+    },
+    { id: "company", header: t("columns.company"), cell: (user) => user.company?.name ?? "—" },
+  ];
 }

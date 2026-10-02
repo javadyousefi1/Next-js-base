@@ -65,7 +65,7 @@
       "items": {
         "bff": "BFF auth: tokens live only in httpOnly cookies, every request goes through /api/proxy",
         "query": "React Query wrapped by makeQuery / makeMutation with related-key invalidation",
-        "table": "URL-synced search, filters, sorting and pagination (useDataTable)",
+        "table": "URL-synced search, filters, sorting and pagination (useTableState)",
         "i18n": "English + Persian with full RTL support",
         "cache": "Next.js Cache Components (`use cache`) + Redis for rate limiting and cache-aside",
         "pwa": "Installable PWA with an offline fallback",

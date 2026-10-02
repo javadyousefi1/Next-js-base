@@ -8,20 +8,14 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@repo/ui/components/empty";
-import type { RowData } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 
-import {
-  isTableFiltered,
-  resetTableFilters,
-  type DataTableInstance,
-} from "@/lib/table/use-data-table";
+type DataTableEmptyProps = {
+  hasFilters: boolean;
+  onReset: () => void;
+};
 
-export function DataTableEmpty<TData extends RowData>({
-  table,
-}: {
-  table: DataTableInstance<TData>;
-}) {
+export function DataTableEmpty({ hasFilters, onReset }: DataTableEmptyProps) {
   const t = useTranslations("DataTable");
 
   return (
@@ -30,9 +24,9 @@ export function DataTableEmpty<TData extends RowData>({
         <EmptyTitle>{t("empty.title")}</EmptyTitle>
         <EmptyDescription>{t("empty.description")}</EmptyDescription>
       </EmptyHeader>
-      {isTableFiltered(table) ? (
+      {hasFilters ? (
         <EmptyContent>
-          <Button variant="outline" onClick={() => resetTableFilters(table)}>
+          <Button variant="outline" onClick={onReset}>
             {t("resetFilters")}
           </Button>
         </EmptyContent>

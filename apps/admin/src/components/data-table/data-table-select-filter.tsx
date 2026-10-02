@@ -7,32 +7,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
-import type { Column, RowData } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 
-import type { DataTableFeatures } from "@/lib/table/features";
+import type { DataTableFilter } from "@/lib/table/types";
 
-type DataTableSelectFilterProps<TData extends RowData> = {
-  column: Column<DataTableFeatures, TData>;
+type DataTableSelectFilterProps = {
+  filter: DataTableFilter;
+  value: string | null;
+  onChange: (value: string | null) => void;
 };
 
-/** Single-choice filter for a column with `meta.filter` ("Role: All" = no filter). */
-export function DataTableSelectFilter<TData extends RowData>({
-  column,
-}: DataTableSelectFilterProps<TData>) {
+/** Single-choice filter; `null` = not filtered ("Role: All"). */
+export function DataTableSelectFilter({ filter, value, onChange }: DataTableSelectFilterProps) {
   const t = useTranslations("DataTable");
-  const filter = column.columnDef.meta?.filter;
-  if (!filter) return null;
-
-  const value = column.getFilterValue();
   const items = [{ value: null, label: t("anyValue", { title: filter.title }) }, ...filter.options];
 
   return (
-    <Select
-      items={items}
-      value={typeof value === "string" ? value : null}
-      onValueChange={(next) => column.setFilterValue(next ?? undefined)}
-    >
+    <Select items={items} value={value} onValueChange={onChange}>
       <SelectTrigger className="w-44" aria-label={filter.title}>
         <SelectValue />
       </SelectTrigger>

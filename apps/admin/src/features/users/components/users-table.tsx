@@ -8,21 +8,22 @@ import { DataTableToolbar } from "@/components/data-table/data-table-toolbar";
 
 import { useUsersTable } from "../hooks/use-users-table";
 import { useUsersColumns } from "./users-columns";
+import { useUsersFilters } from "./users-filters";
 
 export function UsersTable() {
   const t = useTranslations("Users");
-  const { table, isLoading, isFetching, isError, retry } = useUsersTable(useUsersColumns());
+  const table = useUsersTable();
+  const columns = useUsersColumns();
+  const filters = useUsersFilters();
 
   return (
     <div className="flex flex-col gap-4">
-      <DataTableToolbar table={table} searchPlaceholder={t("searchPlaceholder")} />
-      <DataTable
+      <DataTableToolbar
         table={table}
-        isLoading={isLoading}
-        isFetching={isFetching}
-        isError={isError}
-        onRetry={retry}
+        filters={filters}
+        searchPlaceholder={t("searchPlaceholder")}
       />
+      <DataTable table={table} columns={columns} />
       <DataTablePagination table={table} />
     </div>
   );
