@@ -1,5 +1,4 @@
 import "server-only";
-
 import { dehydrate } from "@tanstack/react-query";
 import type { SearchParams } from "nuqs/server";
 

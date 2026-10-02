@@ -32,7 +32,10 @@ export function parseResponse<TSchema extends z.ZodType>(
   if (result.success) return result.data;
 
   if (process.env.NODE_ENV !== "production") {
-    console.error(`[api-contract] ${label} returned an unexpected shape`, z.treeifyError(result.error));
+    console.error(
+      `[api-contract] ${label} returned an unexpected shape`,
+      z.treeifyError(result.error),
+    );
   }
   throw new ApiError(`Unexpected response from ${label}`, {
     status: null,

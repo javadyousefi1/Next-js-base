@@ -9,10 +9,25 @@ import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "../..");
 const iconsDir = path.join(root, "apps/admin/public/icons");
+/** The tiny slice of the Playwright API this script uses. */
+type Page = {
+  setViewportSize(size: { width: number; height: number }): Promise<void>;
+  setContent(html: string): Promise<void>;
+  screenshot(options: { path: string; omitBackground: boolean }): Promise<unknown>;
+};
+type Playwright = {
+  chromium: {
+    launch(options: { executablePath?: string }): Promise<{
+      newPage(): Promise<Page>;
+      close(): Promise<void>;
+    }>;
+  };
+};
+
 // @playwright/test is a dependency of the admin app: resolve it from there.
 const { chromium } = (await import(
   Bun.resolveSync("@playwright/test", path.join(root, "apps/admin"))
-)) as typeof import("@playwright/test");
+)) as Playwright;
 
 const svg = await readFile(path.join(iconsDir, "icon.svg"), "utf8");
 const dataUrl = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;

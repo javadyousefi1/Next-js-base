@@ -33,7 +33,7 @@ export function UserMenu() {
         </Avatar>
         <div className="grid flex-1 text-start text-sm leading-tight">
           <span className="truncate font-medium">{fullName}</span>
-          <span className="text-muted-foreground truncate text-xs">{user.email}</span>
+          <span className="truncate text-xs text-muted-foreground">{user.email}</span>
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="top" align="end" className="min-w-56">

@@ -9,9 +9,9 @@ type DataTableSkeletonProps = {
 export function DataTableSkeleton({ columns, rows = 10 }: DataTableSkeletonProps) {
   return (
     <div className="flex flex-col gap-2 rounded-lg border p-3" aria-hidden>
-      {Array.from({ length: rows + 1 }, (_, row) => (
+      {Array.from({ length: rows + 1 }, (_row, row) => (
         <div key={row} className="flex gap-3">
-          {Array.from({ length: columns }, (_, column) => (
+          {Array.from({ length: columns }, (_column, column) => (
             <Skeleton key={column} className="h-7 flex-1" />
           ))}
         </div>

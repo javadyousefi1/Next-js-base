@@ -11,8 +11,6 @@ import {
 import { LanguagesIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { AppLocale } from "@/i18n/routing";
-
 import { useLocaleSwitcher } from "../hooks/use-locale-switcher";
 
 export function LocaleSwitcher() {
@@ -21,11 +19,13 @@ export function LocaleSwitcher() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label={t("language")} />}>
+      <DropdownMenuTrigger
+        render={<Button variant="ghost" size="icon" aria-label={t("language")} />}
+      >
         <LanguagesIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuRadioGroup value={locale} onValueChange={(value) => switchTo(value as AppLocale)}>
+        <DropdownMenuRadioGroup value={locale} onValueChange={switchTo}>
           {locales.map((item) => (
             <DropdownMenuRadioItem key={item.value} value={item.value}>
               {item.label}

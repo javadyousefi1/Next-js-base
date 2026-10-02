@@ -23,7 +23,7 @@ export function InstallAppCard() {
         <CardTitle>{t("title")}</CardTitle>
         <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
-      <CardContent className="text-muted-foreground text-sm">
+      <CardContent className="text-sm text-muted-foreground">
         {status === "available" && (
           <Button onClick={install}>
             <DownloadIcon data-icon="inline-start" />

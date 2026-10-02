@@ -1,5 +1,4 @@
 import "server-only";
-
 import { getRedis } from "./client";
 
 export type RateLimitResult = { allowed: boolean; remaining: number; retryAfterSeconds: number };

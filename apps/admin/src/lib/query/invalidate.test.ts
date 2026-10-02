@@ -27,7 +27,9 @@ describe("collectAffectedQueries", () => {
     const client = new QueryClient();
     const stats = seed(client, ["dashboard", "stats"], [["users"]]);
 
-    expect(collectAffectedQueries(client, [["users", "detail", 7]]).has(stats.queryHash)).toBe(true);
+    expect(collectAffectedQueries(client, [["users", "detail", 7]]).has(stats.queryHash)).toBe(
+      true,
+    );
     expect(collectAffectedQueries(client, [["users"]]).has(stats.queryHash)).toBe(true);
     expect(collectAffectedQueries(client, [["posts"]]).has(stats.queryHash)).toBe(false);
   });
@@ -40,6 +42,6 @@ describe("collectAffectedQueries", () => {
 
     const affected = collectAffectedQueries(client, [["c"]]);
 
-    expect([...affected].sort()).toEqual([a.queryHash, b.queryHash, c.queryHash].sort());
+    expect([...affected].toSorted()).toEqual([a.queryHash, b.queryHash, c.queryHash].toSorted());
   });
 });

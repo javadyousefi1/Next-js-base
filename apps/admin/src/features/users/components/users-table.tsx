@@ -1,7 +1,13 @@
 "use client";
 
 import { Button } from "@repo/ui/components/button";
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from "@repo/ui/components/empty";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@repo/ui/components/empty";
 import { useTranslations } from "next-intl";
 
 import { DataTable } from "@/components/data-table/data-table";

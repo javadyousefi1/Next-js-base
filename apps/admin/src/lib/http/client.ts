@@ -2,8 +2,8 @@ import axios, { type AxiosInstance } from "axios";
 
 import { API_ROUTES } from "@/config/routes";
 
-import { toApiError } from "./errors";
 import { emitUnauthorized } from "./auth-events";
+import { toApiError } from "./errors";
 
 /**
  * Browser HTTP clients. The browser never talks to the upstream API directly and never sees a

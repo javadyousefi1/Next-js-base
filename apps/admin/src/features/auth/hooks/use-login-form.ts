@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
+import type { FormEvent } from "react";
 import { useForm } from "react-hook-form";
 
 import { CALLBACK_URL_PARAM, sanitizeCallbackUrl } from "@/config/routes";
@@ -13,7 +14,8 @@ import type { ApiError } from "@/lib/http/errors";
 import { loginMutation, sessionQuery } from "../api/auth.queries";
 import { loginInputSchema, PASSWORD_MIN_LENGTH, type LoginInput } from "../schemas/auth.schema";
 
-type ValidationKey = "usernameRequired" | "passwordMin";
+/** zod messages in auth.schema.ts are i18n keys of `Auth.validation`. */
+const VALIDATION_KEYS = ["usernameRequired", "passwordMin"] as const;
 
 /**
  * Login form logic: react-hook-form + the same zod schema the BFF validates with, the login
@@ -40,11 +42,12 @@ export function useLoginForm() {
     },
   });
 
-  // Schema messages are i18n keys (see auth.schema.ts).
   const fieldError = (name: keyof LoginInput) => {
-    const key = form.formState.errors[name]?.message as ValidationKey | undefined;
+    const message = form.formState.errors[name]?.message;
+    const key = VALIDATION_KEYS.find((candidate) => candidate === message);
     return key ? t(`validation.${key}`, { min: PASSWORD_MIN_LENGTH }) : undefined;
   };
+  const submit = form.handleSubmit((values) => mutation.mutate(values));
 
   const formError = (error: ApiError | null) => {
     if (!error) return null;
@@ -59,7 +62,7 @@ export function useLoginForm() {
 
   return {
     register: form.register,
-    onSubmit: form.handleSubmit((values) => mutation.mutate(values)),
+    onSubmit: (event: FormEvent<HTMLFormElement>) => void submit(event),
     errors: { username: fieldError("username"), password: fieldError("password") },
     formError: formError(mutation.error),
     isSubmitting: mutation.isPending || mutation.isSuccess,

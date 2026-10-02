@@ -3,11 +3,11 @@
 import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table";
 
 import { dataTableFeatures, type DataTableFeatures } from "@/lib/table/features";
-
 import type { SortOrder } from "@/lib/table/search-params";
 
 type UseDataTableOptions<TData extends RowData> = {
   data: TData[];
+  // oxlint-disable-next-line typescript/no-explicit-any -- TanStack's type for mixed column value types
   columns: ColumnDef<DataTableFeatures, TData, any>[];
   /** Total rows on the server (for page count). */
   rowCount: number;

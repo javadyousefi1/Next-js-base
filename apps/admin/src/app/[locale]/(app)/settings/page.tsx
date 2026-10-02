@@ -8,7 +8,9 @@ import { InstallAppCard } from "@/features/pwa/components/install-app-card";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
 
-export async function generateMetadata({ params }: PageProps<"/[locale]/settings">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/settings">): Promise<Metadata> {
   return pageMetadata(await getLocaleParam(params), "Settings", ROUTES.settings);
 }
 

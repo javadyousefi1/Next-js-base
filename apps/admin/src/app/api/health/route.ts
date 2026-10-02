@@ -6,7 +6,12 @@ import { getRedis } from "@/server/redis/client";
 export async function GET() {
   await connection();
   const redis = getRedis();
-  const redisStatus = redis.isReady ? await redis.ping().then(() => "up").catch(() => "down") : "down";
+  const redisStatus = redis.isReady
+    ? await redis
+        .ping()
+        .then(() => "up")
+        .catch(() => "down")
+    : "down";
 
   return Response.json(
     { status: "ok", redis: redisStatus, timestamp: new Date().toISOString() },

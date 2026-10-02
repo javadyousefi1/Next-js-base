@@ -19,8 +19,14 @@ const RESPONSE_DELAY_MS = 250;
 function issueTokens(userId: number) {
   const accessToken = `at_${crypto.randomUUID()}`;
   const refreshToken = `rt_${crypto.randomUUID()}`;
-  db.accessTokens.set(accessToken, { userId, expiresAt: Date.now() + ACCESS_TOKEN_MINUTES * 60_000 });
-  db.refreshTokens.set(refreshToken, { userId, expiresAt: Date.now() + REFRESH_TOKEN_MINUTES * 60_000 });
+  db.accessTokens.set(accessToken, {
+    userId,
+    expiresAt: Date.now() + ACCESS_TOKEN_MINUTES * 60_000,
+  });
+  db.refreshTokens.set(refreshToken, {
+    userId,
+    expiresAt: Date.now() + REFRESH_TOKEN_MINUTES * 60_000,
+  });
   return { accessToken, refreshToken, expiresInMins: ACCESS_TOKEN_MINUTES };
 }
 
@@ -31,7 +37,8 @@ function currentUser(request: Request): MockUser | undefined {
   return db.users.find((user) => user.id === session.userId);
 }
 
-const unauthorized = () => HttpResponse.json({ message: "Invalid or expired token" }, { status: 401 });
+const unauthorized = () =>
+  HttpResponse.json({ message: "Invalid or expired token" }, { status: 401 });
 
 export const handlers = [
   http.post(url(API_ENDPOINTS.auth.login), async ({ request }) => {
@@ -75,14 +82,24 @@ export const handlers = [
 
     let users = db.users.filter(
       (user) =>
-        (!q || `${user.firstName} ${user.lastName} ${user.email} ${user.username}`.toLowerCase().includes(q)) &&
+        (!q ||
+          `${user.firstName} ${user.lastName} ${user.email} ${user.username}`
+            .toLowerCase()
+            .includes(q)) &&
         (!role || user.role === role),
     );
     if (sortBy && sortBy in db.users[0]!) {
-      users = users.toSorted((a, b) => (a[sortBy] > b[sortBy] ? order : a[sortBy] < b[sortBy] ? -order : 0));
+      users = users.toSorted((a, b) =>
+        a[sortBy] > b[sortBy] ? order : a[sortBy] < b[sortBy] ? -order : 0,
+      );
     }
 
-    return HttpResponse.json({ users: users.slice(skip, skip + limit), total: users.length, skip, limit });
+    return HttpResponse.json({
+      users: users.slice(skip, skip + limit),
+      total: users.length,
+      skip,
+      limit,
+    });
   }),
 
   http.get(url(API_ENDPOINTS.stats), async () => {
@@ -90,6 +107,10 @@ export const handlers = [
     const roles = Object.fromEntries(
       USER_ROLES.map((role) => [role, db.users.filter((user) => user.role === role).length]),
     );
-    return HttpResponse.json({ totalUsers: db.users.length, roles, generatedAt: new Date().toISOString() });
+    return HttpResponse.json({
+      totalUsers: db.users.length,
+      roles,
+      generatedAt: new Date().toISOString(),
+    });
   }),
 ];

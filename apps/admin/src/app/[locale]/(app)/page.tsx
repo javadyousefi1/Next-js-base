@@ -22,7 +22,11 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <PageHeader title={t("title")} description={t("description")} actions={<RefreshStatsButton />} />
+      <PageHeader
+        title={t("title")}
+        description={t("description")}
+        actions={<RefreshStatsButton />}
+      />
       <Suspense fallback={<DashboardStatsSkeleton />}>
         <DashboardStats />
       </Suspense>

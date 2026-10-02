@@ -11,7 +11,7 @@ import {
 import { MoonIcon, SunIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { THEMES, useThemePreference, type ThemePreference } from "../hooks/use-theme-preference";
+import { THEMES, useThemePreference } from "../hooks/use-theme-preference";
 
 export function ThemeToggle() {
   const t = useTranslations("Theme");
@@ -24,10 +24,7 @@ export function ThemeToggle() {
         <MoonIcon className="absolute scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuRadioGroup
-          value={theme}
-          onValueChange={(value) => setTheme(value as ThemePreference)}
-        >
+        <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
           {THEMES.map((value) => (
             <DropdownMenuRadioItem key={value} value={value}>
               {t(value)}

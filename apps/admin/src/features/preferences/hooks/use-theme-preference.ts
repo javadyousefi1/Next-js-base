@@ -13,7 +13,11 @@ export function useThemePreference() {
   const isClient = useIsClient();
 
   return {
-    theme: isClient ? (theme as ThemePreference | undefined) : undefined,
-    setTheme: (next: ThemePreference) => setTheme(next),
+    theme: isClient ? THEMES.find((value) => value === theme) : undefined,
+    /** Accepts raw UI values (select/radio callbacks); unknown values are ignored. */
+    setTheme: (next: unknown) => {
+      const value = THEMES.find((candidate) => candidate === next);
+      if (value) setTheme(value);
+    },
   };
 }

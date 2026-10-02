@@ -3,7 +3,11 @@ import { z } from "zod";
 import { MUTATION_KEYS, QUERY_KEYS } from "@/config/query-keys";
 import { makeMutation, makeQuery } from "@/lib/query";
 
-import { loginInputSchema, logoutResponseSchema, sessionResponseSchema } from "../schemas/auth.schema";
+import {
+  loginInputSchema,
+  logoutResponseSchema,
+  sessionResponseSchema,
+} from "../schemas/auth.schema";
 import { getSession, login, logout } from "./auth.service";
 
 /** The signed-in user (validated). A 401 here triggers the global "session expired" redirect. */

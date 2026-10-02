@@ -14,7 +14,9 @@ import { LoginForm } from "@/features/auth/components/login-form";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
 
-export async function generateMetadata({ params }: PageProps<"/[locale]/login">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/login">): Promise<Metadata> {
   return pageMetadata(await getLocaleParam(params), "Auth", ROUTES.login);
 }
 
@@ -22,7 +24,7 @@ export default async function LoginPage() {
   const t = await getTranslations("Auth");
 
   return (
-    <main className="bg-muted/40 flex min-h-svh items-center justify-center p-4">
+    <main className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">{t("title")}</CardTitle>

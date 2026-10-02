@@ -1,5 +1,4 @@
 import "@/styles/globals.css";
-
 import { cn } from "@repo/ui/lib/utils";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
@@ -44,7 +43,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       className={cn(roboto.variable, vazirmatn.variable)}
       suppressHydrationWarning
     >
-      <body className="bg-background text-foreground min-h-svh font-sans antialiased">
+      <body className="min-h-svh bg-background font-sans text-foreground antialiased">
         <NextIntlClientProvider>
           <AppProviders direction={dir}>{children}</AppProviders>
         </NextIntlClientProvider>

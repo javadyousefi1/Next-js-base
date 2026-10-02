@@ -13,8 +13,14 @@
     "check": "turbo run lint format:check typecheck test",
     "clean": "bash scripts/clean.sh",
     "dev": "turbo run dev",
+    "docker:build": "docker compose build",
+    "docker:down": "docker compose down",
+    "docker:redis": "docker compose up -d redis",
+    "docker:up": "docker compose up -d",
+    "doctor": "bash scripts/doctor.sh",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
+    "icons": "bun scripts/pwa/generate-icons.ts",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "prepare": "husky",
@@ -22,6 +28,7 @@
     "start": "turbo run start --filter=admin",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
+    "test:e2e:install": "cd apps/admin && bunx playwright install --with-deps chromium",
     "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
@@ -37,14 +44,21 @@
     "turbo": "2.11.6",
     "typescript": "7.0.2"
   },
-  "engines": {
-    "node": ">=24.0.0"
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "*.{json,jsonc,md,css,yml,yaml}": "oxfmt --no-error-on-unmatched-pattern"
   },
   "devEngines": {
     "packageManager": {
       "name": "bun",
       "version": "1.4.2"
     }
+  },
+  "engines": {
+    "node": ">=24.0.0"
   },
   "packageManager": "bun@1.4.2"
 }

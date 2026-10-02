@@ -59,6 +59,17 @@
     },
     "//#lint": {
       "description": "oxlint (type-aware + project rules) over the whole repo.",
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "apps/**",
+        "packages/**",
+        "scripts/**",
+        "!**/node_modules/**",
+        "!**/.next/**",
+        "!**/.turbo/**",
+        "!**/playwright-report/**",
+        "!**/test-results/**"
+      ],
       "outputs": []
     },
     "//#lint:fix": {
@@ -70,6 +81,17 @@
     },
     "//#format:check": {
       "description": "Verifies formatting with oxfmt (no writes).",
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "apps/**",
+        "packages/**",
+        "scripts/**",
+        "!**/node_modules/**",
+        "!**/.next/**",
+        "!**/.turbo/**",
+        "!**/playwright-report/**",
+        "!**/test-results/**"
+      ],
       "outputs": []
     }
   }

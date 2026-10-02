@@ -37,7 +37,7 @@ export function AppSidebar({ side }: AppSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<Link href={ROUTES.dashboard} />}>
-              <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md">
+              <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
                 <PanelsTopLeftIcon className="size-4" />
               </span>
               <span className="truncate font-semibold">{t("Common.appName")}</span>

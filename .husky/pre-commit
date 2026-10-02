@@ -1,0 +1,2 @@
+# Lint + format only the staged files (fast). Config: "lint-staged" in package.json.
+bunx --bun lint-staged

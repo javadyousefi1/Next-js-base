@@ -50,7 +50,7 @@ export function LoginForm() {
         {login.isSubmitting ? t("submitting") : t("submit")}
       </Button>
 
-      <p className="text-muted-foreground text-center text-xs">{t("demoHint")}</p>
+      <p className="text-center text-xs text-muted-foreground">{t("demoHint")}</p>
     </form>
   );
 }

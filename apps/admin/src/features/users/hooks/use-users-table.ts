@@ -21,6 +21,7 @@ function getStatus(query: { isPending: boolean; isError: boolean; data: unknown 
 }
 
 type UseUsersTableOptions = {
+  // oxlint-disable-next-line typescript/no-explicit-any -- TanStack's type for mixed column value types
   columns: ColumnDef<DataTableFeatures, User, any>[];
 };
 
@@ -60,12 +61,12 @@ export function useUsersTable({ columns }: UseUsersTableOptions) {
     role: filters.role,
     setRole: (role: UserRole | null) => {
       void setFilters({ role });
-      void url.resetPage();
+      url.resetPage();
     },
     hasFilters: url.search !== "" || filters.role !== null,
     resetFilters: () => {
       void setFilters(null);
-      void url.reset();
+      url.reset();
     },
     /** `loading` only before the first page; later pages keep the previous rows visible. */
     status: getStatus(query),

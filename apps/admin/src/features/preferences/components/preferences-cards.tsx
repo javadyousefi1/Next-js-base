@@ -11,10 +11,8 @@ import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { AppLocale } from "@/i18n/routing";
-
 import { useLocaleSwitcher } from "../hooks/use-locale-switcher";
-import { THEMES, useThemePreference, type ThemePreference } from "../hooks/use-theme-preference";
+import { THEMES, useThemePreference } from "../hooks/use-theme-preference";
 
 const THEME_ICONS = { light: SunIcon, dark: MoonIcon, system: MonitorIcon };
 
@@ -33,7 +31,7 @@ export function AppearanceCard() {
         <ToggleGroup
           variant="outline"
           value={theme ? [theme] : []}
-          onValueChange={([next]) => next && setTheme(next as ThemePreference)}
+          onValueChange={([next]) => setTheme(next)}
         >
           {THEMES.map((value) => {
             const Icon = THEME_ICONS[value];
@@ -61,11 +59,7 @@ export function LanguageCard() {
         <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ToggleGroup
-          variant="outline"
-          value={[locale]}
-          onValueChange={([next]) => next && switchTo(next as AppLocale)}
-        >
+        <ToggleGroup variant="outline" value={[locale]} onValueChange={([next]) => switchTo(next)}>
           {locales.map((item) => (
             <ToggleGroupItem key={item.value} value={item.value}>
               {item.label}

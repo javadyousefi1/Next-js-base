@@ -13,7 +13,9 @@ import { prefetchUsersPage } from "@/features/users/server/users.prefetch";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
 
-export async function generateMetadata({ params }: PageProps<"/[locale]/users">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/users">): Promise<Metadata> {
   return pageMetadata(await getLocaleParam(params), "Users", ROUTES.users);
 }
 

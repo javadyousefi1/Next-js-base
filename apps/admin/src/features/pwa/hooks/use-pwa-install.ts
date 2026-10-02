@@ -27,13 +27,15 @@ export function usePwaInstall() {
   });
   useEventListener("appinstalled", () => setPromptEvent(null));
 
+  const install = async () => {
+    if (!promptEvent) return;
+    await promptEvent.prompt();
+    await promptEvent.userChoice;
+    setPromptEvent(null);
+  };
+
   return {
     status: getStatus(isStandalone, promptEvent !== null, isIos),
-    install: async () => {
-      if (!promptEvent) return;
-      await promptEvent.prompt();
-      await promptEvent.userChoice;
-      setPromptEvent(null);
-    },
+    install: () => void install(),
   };
 }

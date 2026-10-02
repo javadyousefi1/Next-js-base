@@ -26,7 +26,9 @@ self.addEventListener("activate", (event) => {
       .keys()
       .then((keys) =>
         Promise.all(
-          keys.filter((key) => key.startsWith("admin-") && key !== CACHE).map((key) => caches.delete(key)),
+          keys
+            .filter((key) => key.startsWith("admin-") && key !== CACHE)
+            .map((key) => caches.delete(key)),
         ),
       )
       .then(() => self.clients.claim()),
@@ -34,7 +36,8 @@ self.addEventListener("activate", (event) => {
 });
 
 function offlinePageFor(url) {
-  const locale = LOCALES.find((candidate) => url.pathname.startsWith(`/${candidate}`)) ?? LOCALES[0];
+  const locale =
+    LOCALES.find((candidate) => url.pathname.startsWith(`/${candidate}`)) ?? LOCALES[0];
   return caches.match(`/${locale}/offline`);
 }
 

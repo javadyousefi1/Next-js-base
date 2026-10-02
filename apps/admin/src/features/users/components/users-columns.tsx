@@ -41,7 +41,7 @@ export const usersColumns = columnHelper.columns([
         <span className="font-medium">
           {row.original.firstName} {row.original.lastName}
         </span>
-        <span className="text-muted-foreground text-xs">@{row.original.username}</span>
+        <span className="text-xs text-muted-foreground">@{row.original.username}</span>
       </div>
     ),
   }),

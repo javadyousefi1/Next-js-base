@@ -11,7 +11,12 @@ import {
 import { useTranslations } from "next-intl";
 
 /** Route error boundary: unexpected render errors (expected API errors are handled by views). */
-export default function ErrorPage({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function ErrorPage({
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   const t = useTranslations("Common");
 
   return (

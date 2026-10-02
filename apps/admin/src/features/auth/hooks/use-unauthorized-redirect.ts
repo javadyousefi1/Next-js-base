@@ -26,10 +26,13 @@ export function useUnauthorizedRedirect() {
   useEffect(
     () =>
       onUnauthorized(() => {
-        const { router, pathname, message } = latest.current;
+        const current = latest.current;
         queryClient.clear();
-        toast.info(message, { id: "session-expired" });
-        router.replace({ pathname: ROUTES.login, query: { [CALLBACK_URL_PARAM]: pathname } });
+        toast.info(current.message, { id: "session-expired" });
+        current.router.replace({
+          pathname: ROUTES.login,
+          query: { [CALLBACK_URL_PARAM]: current.pathname },
+        });
       }),
     [latest, queryClient],
   );

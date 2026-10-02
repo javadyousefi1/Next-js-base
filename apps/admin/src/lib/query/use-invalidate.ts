@@ -8,5 +8,8 @@ import { invalidateKeys } from "./invalidate";
 /** Hook form of `invalidateKeys` (respects `relatedKeys`). */
 export function useInvalidate() {
   const queryClient = useQueryClient();
-  return useCallback((keys: readonly QueryKey[]) => invalidateKeys(queryClient, keys), [queryClient]);
+  return useCallback(
+    (keys: readonly QueryKey[]) => invalidateKeys(queryClient, keys),
+    [queryClient],
+  );
 }

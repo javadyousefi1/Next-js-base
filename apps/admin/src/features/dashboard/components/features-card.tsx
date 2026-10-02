@@ -16,7 +16,7 @@ export async function FeaturesCard() {
         <ul className="grid gap-3 text-sm md:grid-cols-2">
           {FEATURE_KEYS.map((key) => (
             <li key={key} className="flex items-start gap-2">
-              <CheckIcon className="text-primary mt-0.5 size-4 shrink-0" aria-hidden />
+              <CheckIcon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
               <span>{t(`items.${key}`)}</span>
             </li>
           ))}

@@ -26,11 +26,13 @@ export function useTableUrlState() {
     state,
     search: state.q,
     debouncedSearch,
-    setSearch: (q: string) => setState({ q, page: 1 }),
-    setPage: (page: number) => setState({ page }),
-    resetPage: () => setState({ page: 1 }),
-    setPageSize: (pageSize: number) => setState({ pageSize, page: 1 }),
-    setSorting: (sortBy: string | null, order: SortOrder) => setState({ sortBy, order, page: 1 }),
-    reset: () => setState(null),
+    // nuqs setters return a promise (URL flush); callers only need fire-and-forget.
+    setSearch: (q: string) => void setState({ q, page: 1 }),
+    setPage: (page: number) => void setState({ page }),
+    resetPage: () => void setState({ page: 1 }),
+    setPageSize: (pageSize: number) => void setState({ pageSize, page: 1 }),
+    setSorting: (sortBy: string | null, order: SortOrder) =>
+      void setState({ sortBy, order, page: 1 }),
+    reset: () => void setState(null),
   };
 }

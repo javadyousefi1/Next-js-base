@@ -36,7 +36,7 @@ export async function DashboardStats() {
           </Card>
         ))}
       </div>
-      <p className="text-muted-foreground text-xs">
+      <p className="text-xs text-muted-foreground">
         {t("generatedAt", {
           time: format.dateTime(new Date(stats.generatedAt), { timeStyle: "medium" }),
         })}

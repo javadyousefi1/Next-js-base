@@ -6,11 +6,11 @@ import { LOCALE_META } from "@/i18n/locales";
 import { routing } from "@/i18n/routing";
 import { localizedPath } from "@/lib/seo/metadata";
 
+const absolute = (path: string) => new URL(path, clientEnv.NEXT_PUBLIC_SITE_URL).toString();
+
 /** Only public pages belong in the sitemap (everything else requires a session). */
 export default function sitemap(): MetadataRoute.Sitemap {
   if (!clientEnv.NEXT_PUBLIC_SITE_INDEXABLE) return [];
-
-  const absolute = (path: string) => new URL(path, clientEnv.NEXT_PUBLIC_SITE_URL).toString();
 
   return PUBLIC_ROUTES.filter((route) => route !== ROUTES.offline).map((route) => ({
     url: absolute(localizedPath(routing.defaultLocale, route)),

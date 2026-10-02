@@ -1,0 +1,2 @@
+# Tests always run before a push; pushing to `main` also requires a passing production build.
+bash scripts/git/pre-push.sh

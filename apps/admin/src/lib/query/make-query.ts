@@ -42,7 +42,7 @@ type MakeQueryConfig<TParamsSchema extends z.ZodType, TResponseSchema extends z.
 
 type QueryOverrides<TData> = Partial<
   Pick<
-    UseQueryOptions<TData, ApiError, TData, QueryKey>,
+    UseQueryOptions<TData, ApiError, TData>,
     | "enabled"
     | "placeholderData"
     | "staleTime"
@@ -80,7 +80,7 @@ export function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema exten
   const resolveParams = (input: TParamsInput) => {
     const result = config.params.safeParse(input);
     return result.success
-      ? { params: result.data as TParams, valid: true as const }
+      ? { params: result.data, valid: true as const }
       : { params: input as unknown as TParams, valid: false as const };
   };
 
@@ -88,7 +88,7 @@ export function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema exten
     // The key is built from the parsed params so `{}` and `{ page: 1 }` share one cache entry.
     const { params, valid } = resolveParams(input);
 
-    return queryOptions<TData, ApiError, TData, QueryKey>({
+    return queryOptions<TData, ApiError, TData>({
       queryKey: config.key(params),
       queryFn: async ({ signal }) => {
         const parsedParams = valid ? params : parseInput(config.params, input, config.name);
@@ -130,7 +130,11 @@ export function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema exten
       return queryClient.getQueryData<TData>(options(params).queryKey);
     },
 
-    setData(queryClient: QueryClient, params: TParamsInput, updater: (old: TData | undefined) => TData) {
+    setData(
+      queryClient: QueryClient,
+      params: TParamsInput,
+      updater: (old: TData | undefined) => TData,
+    ) {
       return queryClient.setQueryData<TData>(options(params).queryKey, updater);
     },
 

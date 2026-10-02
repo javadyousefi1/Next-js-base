@@ -1,5 +1,4 @@
 import "server-only";
-
 import { cacheLife, cacheTag } from "next/cache";
 
 import { API_ENDPOINTS } from "@/config/api-endpoints";

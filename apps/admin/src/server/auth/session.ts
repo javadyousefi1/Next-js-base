@@ -1,5 +1,4 @@
 import "server-only";
-
 import type { NextRequest } from "next/server";
 
 import type { TokenPair } from "@/features/auth/schemas/auth.schema";

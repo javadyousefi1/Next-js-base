@@ -1,12 +1,11 @@
 import "server-only";
-
+import { API_ENDPOINTS } from "@/config/api-endpoints";
 import {
   sessionUserSchema,
   tokenPairSchema,
   upstreamLoginResponseSchema,
   type LoginInput,
 } from "@/features/auth/schemas/auth.schema";
-import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { bearer, upstream } from "@/server/http/upstream";
 
 /** Upstream auth endpoints. Every response is validated before use. */
@@ -21,6 +20,8 @@ export async function upstreamRefresh(refreshToken: string) {
 }
 
 export async function upstreamMe(accessToken: string) {
-  const { data } = await upstream.get<unknown>(API_ENDPOINTS.auth.me, { headers: bearer(accessToken) });
+  const { data } = await upstream.get<unknown>(API_ENDPOINTS.auth.me, {
+    headers: bearer(accessToken),
+  });
   return sessionUserSchema.parse(data);
 }

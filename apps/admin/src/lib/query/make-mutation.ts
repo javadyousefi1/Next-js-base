@@ -16,10 +16,7 @@ type Invalidates<TData, TVariables> =
   | readonly QueryKey[]
   | ((data: TData, variables: TVariables) => readonly QueryKey[]);
 
-type MakeMutationConfig<
-  TVariablesSchema extends z.ZodType,
-  TResponseSchema extends z.ZodType,
-> = {
+type MakeMutationConfig<TVariablesSchema extends z.ZodType, TResponseSchema extends z.ZodType> = {
   /** Debug label used in validation errors, e.g. "users.create". */
   name: string;
   /** Key from `MUTATION_KEYS`. */
@@ -49,10 +46,9 @@ type MutationOverrides<TData, TVariables> = Omit<
  * Variables are parsed before the request (`VALIDATION`), responses after it
  * (`INVALID_RESPONSE`), then `invalidates` (+ related keys) are invalidated.
  */
-export function makeMutation<
-  TVariablesSchema extends z.ZodType,
-  TResponseSchema extends z.ZodType,
->(config: MakeMutationConfig<TVariablesSchema, TResponseSchema>) {
+export function makeMutation<TVariablesSchema extends z.ZodType, TResponseSchema extends z.ZodType>(
+  config: MakeMutationConfig<TVariablesSchema, TResponseSchema>,
+) {
   type TVariablesInput = z.input<TVariablesSchema>;
   type TData = z.output<TResponseSchema>;
 
@@ -75,7 +71,7 @@ export function makeMutation<
         mutationFn: run,
         meta: { silent: config.silent },
         onSuccess: async (data, input, onMutateResult, context) => {
-          const variables = config.variables.parse(input) as z.output<TVariablesSchema>;
+          const variables = config.variables.parse(input);
           const keys =
             typeof config.invalidates === "function"
               ? config.invalidates(data, variables)
