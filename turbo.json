@@ -1,0 +1,76 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "stream",
+  "envMode": "strict",
+  "globalEnv": ["NODE_ENV"],
+  "tasks": {
+    "build": {
+      "description": "Production build of every app/package. Cached: inputs exclude tests and docs so they never bust the build cache.",
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*",
+        "!e2e/**",
+        "!playwright.config.ts",
+        "!**/*.test.ts",
+        "!**/*.test.tsx",
+        "!**/*.md"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", "dist/**"],
+      "env": ["API_BASE_URL", "API_MOCKING", "NEXT_PUBLIC_*"],
+      "passThroughEnv": [
+        "REDIS_URL",
+        "REDIS_KEY_PREFIX",
+        "AUTH_COOKIE_SECURE",
+        "AUTH_ACCESS_TOKEN_TTL_SECONDS",
+        "AUTH_REFRESH_TOKEN_TTL_SECONDS",
+        "SKIP_ENV_VALIDATION",
+        "NEXT_TELEMETRY_DISABLED"
+      ]
+    },
+    "dev": {
+      "description": "Development servers. Never cached.",
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "description": "Serve the production build locally.",
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {
+      "description": "Type-checks each workspace with tsc (TypeScript 7).",
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"],
+      "outputs": []
+    },
+    "test": {
+      "description": "Fast unit tests (bun test). Runs on every push.",
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"],
+      "outputs": []
+    },
+    "test:e2e": {
+      "description": "Playwright end-to-end tests against the production build (API mocked with MSW).",
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "!**/*.md"],
+      "outputs": ["playwright-report/**", "test-results/**"],
+      "env": ["API_BASE_URL", "API_MOCKING"],
+      "passThroughEnv": ["CI", "PLAYWRIGHT_*", "REDIS_URL", "SKIP_ENV_VALIDATION"]
+    },
+    "//#lint": {
+      "description": "oxlint (type-aware + project rules) over the whole repo.",
+      "outputs": []
+    },
+    "//#lint:fix": {
+      "cache": false
+    },
+    "//#format": {
+      "description": "Formats the whole repo with oxfmt.",
+      "cache": false
+    },
+    "//#format:check": {
+      "description": "Verifies formatting with oxfmt (no writes).",
+      "outputs": []
+    }
+  }
+}

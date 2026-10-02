@@ -1,0 +1,140 @@
+{
+  "Metadata": {
+    "title": "Admin Panel",
+    "description": "Production-ready Next.js admin panel base: BFF auth, React Query, i18n, PWA."
+  },
+  "Common": {
+    "appName": "Next.js Base",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "reset": "Reset",
+    "close": "Close",
+    "offline": "You are offline. Pending requests will retry once you are back online.",
+    "error": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. You can try again.",
+      "unauthorized": "Your session has expired. Please sign in again.",
+      "network": "Network error. Check your connection and try again."
+    }
+  },
+  "Nav": {
+    "main": "Main",
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "settings": "Settings",
+    "toggleSidebar": "Toggle sidebar",
+    "account": "Account",
+    "logout": "Log out",
+    "skipToContent": "Skip to content"
+  },
+  "Auth": {
+    "title": "Sign in",
+    "description": "Use your account to access the admin panel.",
+    "username": "Username",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "demoHint": "Demo account: admin / admin123",
+    "errors": {
+      "invalidCredentials": "Invalid username or password.",
+      "rateLimited": "Too many attempts. Try again in {seconds} seconds.",
+      "generic": "Sign in failed. Please try again."
+    },
+    "validation": {
+      "usernameRequired": "Username is required.",
+      "passwordMin": "Password must be at least {min} characters."
+    }
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "description": "Overview of the platform. Stats are cached on the server (`use cache: remote`, Redis).",
+    "stats": {
+      "totalUsers": "Total users",
+      "admins": "Admins",
+      "moderators": "Moderators",
+      "members": "Members",
+      "generatedAt": "Cached snapshot from {time}"
+    },
+    "welcome": "Welcome back, {name}",
+    "features": {
+      "title": "What this base includes",
+      "items": {
+        "bff": "BFF auth: tokens live only in httpOnly cookies, every request goes through /api/proxy",
+        "query": "React Query wrapped by makeQuery / makeMutation with related-key invalidation",
+        "table": "URL-synced search, filters, sorting and pagination (useDataTable)",
+        "i18n": "English + Persian with full RTL support",
+        "cache": "Next.js Cache Components + Redis remote cache handler",
+        "pwa": "Installable PWA with an offline fallback"
+      }
+    }
+  },
+  "Users": {
+    "title": "Users",
+    "description": "Search, filter, sort and paginate. Every change is kept in the URL.",
+    "searchPlaceholder": "Search name, email or username…",
+    "roleFilter": "Role",
+    "allRoles": "All roles",
+    "roles": {
+      "admin": "Admin",
+      "moderator": "Moderator",
+      "user": "Member"
+    },
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "age": "Age",
+      "company": "Company"
+    },
+    "sort": {
+      "asc": "Sort ascending",
+      "desc": "Sort descending"
+    },
+    "pagination": {
+      "summary": "Page {page} of {pageCount}",
+      "rowsPerPage": "Rows per page",
+      "first": "First page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "last": "Last page",
+      "total": "{total, plural, =0 {No users} one {# user} other {# users}}"
+    },
+    "empty": {
+      "title": "No users found",
+      "description": "Try a different search or clear the filters."
+    },
+    "resetFilters": "Clear filters"
+  },
+  "Settings": {
+    "title": "Settings",
+    "description": "Personal preferences are stored on this device.",
+    "appearance": {
+      "title": "Appearance",
+      "description": "Choose light, dark or follow the system.",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "title": "Language",
+      "description": "The interface language and reading direction."
+    },
+    "pwa": {
+      "title": "Install the app",
+      "description": "Install this panel as an app for quick access and offline fallback.",
+      "install": "Install app",
+      "installed": "The app is installed on this device.",
+      "unavailable": "Installation isn't available in this browser right now.",
+      "iosHint": "On iOS: tap Share, then “Add to Home Screen”."
+    }
+  },
+  "Errors": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for doesn't exist or was moved.",
+      "back": "Back to dashboard"
+    }
+  }
+}

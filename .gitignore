@@ -1,0 +1,46 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# turbo
+.turbo/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# production builds
+dist/
+build/
+
+# testing
+coverage/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# env files (only *.example files are committed)
+.env
+.env.*
+!.env.example
+!.env.test
+
+# logs
+*.log
+npm-debug.log*
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+.vercel/
+.cache/
+.eslintcache
+
+# local agent overrides (personal, never committed)
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/worktrees/
