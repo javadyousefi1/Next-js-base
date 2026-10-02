@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { ROUTES } from "@/config/routes";
 import { usersListQuery } from "@/features/users/api/users.queries";
 import { UsersTable } from "@/features/users/components/users-table";
-import { usersTable } from "@/features/users/users.table";
+import { loadUsersSearchParams } from "@/features/users/users.search-params";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { PrefetchBoundary } from "@/server/query/prefetch-boundary";
@@ -24,7 +24,7 @@ export default async function UsersPage({ searchParams }: PageProps<"/[locale]/u
     <>
       <PageHeader title={t("title")} description={t("description")} />
       <PrefetchBoundary
-        queries={[usersListQuery.with(usersTable.loadParams(searchParams))]}
+        queries={[usersListQuery.with(loadUsersSearchParams(searchParams))]}
         fallback={<DataTableSkeleton />}
       >
         <UsersTable />

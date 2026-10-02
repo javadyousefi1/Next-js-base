@@ -71,7 +71,7 @@ proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان +
 | 10  | `makeQuery` با کلیدهای مرتبط که با تغییرشان آپدیت شود           | ✅    | `relatedKeys` + invalidation زنجیره‌ای و امن در برابر حلقه (`lib/query/invalidate.ts` + تست)                                                |
 | 11  | ورودی/خروجی makeQuery و makeMutation با zod ولیدیت شود          | ✅    | `params`/`variables` قبل از درخواست و `response` قبل از رسیدن به کش parse می‌شوند؛ خطاها `VALIDATION` و `INVALID_RESPONSE`                  |
 | 12  | کلی هوک کاستوم مفید                                             | ✅    | ۱۵ هوک در `src/hooks` (بخش ۵)                                                                                                               |
-| 13  | هوک مدیریت سرچ/فیلتر/صفحه‌بندی جدول با separation of concerns   | ✅    | الگوی عمومی: `defineDataTable` + `useQueryTable` + `DataTableView`؛ هر صفحه فقط تعریف، ستون‌ها و لیبل‌ها را می‌نویسد                        |
+| 13  | هوک مدیریت سرچ/فیلتر/صفحه‌بندی جدول با separation of concerns   | ✅    | الگوی shadcn data-table: `useDataTable` کنترل‌شده + کامپوننت‌هایی که فقط `table` می‌گیرند + فیلتر روی `meta` ستون                           |
 | 14  | دیزاین سیستم shadcn                                             | ✅    | `packages/ui` با CLI رسمی shadcn، استایل base-nova، پشتیبانی RTL، ۳۳ کامپوننت                                                               |
 | 15  | فول TypeScript                                                  | ✅    | TypeScript 7 (کامپایلر native) با strict و `noUncheckedIndexedAccess`                                                                       |
 | 16  | Tailwind                                                        | ✅    | Tailwind CSS 4.3                                                                                                                            |
@@ -168,7 +168,7 @@ export const usersListQuery = makeQuery({
 
 ```tsx
 <PrefetchBoundary
-  queries={[usersListQuery.with(usersTable.loadParams(searchParams))]}
+  queries={[usersListQuery.with(loadUsersSearchParams(searchParams))]}
   fallback={<DataTableSkeleton />}
 >
   <UsersTable />
@@ -192,34 +192,46 @@ upstream اجرا می‌کند و کش را dehydrate می‌کند. برای �
 - `callbackUrl` در برابر open redirect محافظت شده است. ورود با Redis محدود می‌شود (۵ بار در
   دقیقه برای هر IP).
 
-### ۵.۴ جدول‌ها: یک الگو برای همه‌ی صفحه‌ها
+### ۵.۴ جدول‌ها: یک الگو برای همه‌ی صفحه‌ها (الگوی shadcn data-table)
 
-برای هر جدول جدید فقط این سه چیز نوشته می‌شود:
+منبع حقیقت فقط نمونه‌ی `table` در TanStack است و هر تکه‌ی UI فقط همان `table` (یا یک `column`) را
+می‌گیرد. هر تکه یک کار دارد و فقط به یک چیز وابسته است:
 
-1. تعریف جدول (مشترک بین سرور و کلاینت):
-   `defineDataTable({ sortFields: USER_SORT_FIELDS, filters: { role: USER_ROLES } })`.
-2. هوک فیچر که فقط سیم‌کشی و ترجمه است:
-   `useQueryTable({ definition, query, select, columns, getRowId, labels })`.
-3. ویو: `<DataTableView model={useUsersTable(usersColumns)} />`.
+| تکه                                                               | کارش                                                                 | وابسته به    |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------- | ------------ |
+| `users.search-params.ts`                                          | قرارداد URL (پارسرهای nuqs)؛ هم صفحه‌ی سرور و هم هوک از آن می‌خوانند | هیچ‌چیز      |
+| `useDataTable({ data, rowCount, columns, state, onStateChange })` | وضعیت URL ⇄ وضعیت جدول (کنترل‌شده، مثل یک input)                     | فقط TanStack |
+| `DataTableToolbar`، `DataTable`، `DataTablePagination`            | نمایش؛ فیلترها از `meta` ستون‌ها می‌آیند                             | فقط `table`  |
+| `useUsersTable`                                                   | سه خط سیم‌کشی: URL ⇐ کوئری ⇐ جدول                                    | سه مورد بالا |
 
-بقیه همه عمومی است و فقط یک‌بار نوشته شده:
+```ts
+// ۱) قرارداد URL
+export const usersSearchParams = { ...tableSearchParams, sortBy: parseAsStringLiteral(USER_SORT_FIELDS), role: parseAsStringLiteral(USER_ROLES) };
 
-- وضعیت URL: جستجو با debounce، فیلترها، مرتب‌سازی و صفحه‌بندی؛ هر تغییر غیر از صفحه، صفحه را
-  به ۱ برمی‌گرداند (`lib/table/use-data-table-state.ts`).
-- اتصال TanStack Table v9 (`lib/table/use-data-table.ts`).
-- تولبار جستجو، فیلترها و دکمه‌ی پاک کردن (`DataTableToolbar` و `DataTableSelectFilter`).
-- حالت‌های بارگذاری، خطا و خالی، و صفحه‌بندی (`DataTableView`).
+// ۲) ستونی که فیلتر دارد، خودش اعلام می‌کند (id ستون = کلید URL)
+columnHelper.accessor("role", { meta: { filter: { title: t("roleFilter"), options } } });
 
-یک فیلتر جدید یعنی یک خط در `filters` به‌علاوه‌ی لیبلش. نوع جدید فیلتر (بازه‌ی تاریخ،
-چندانتخابی) یک‌بار در `defineDataTable` و تولبار اضافه می‌شود، نه در هر صفحه.
+// ۳) هوک
+const [params, setParams] = useQueryStates(usersSearchParams, TABLE_URL_OPTIONS);
+const query = usersListQuery.useQuery({ ...params, q: useDebouncedValue(params.q, 300) }, { placeholderData: keepPreviousData });
+const table = useDataTable({ data, rowCount, columns, state: params, onStateChange: setParams });
+
+// ۴) ویو
+<DataTableToolbar table={table} searchPlaceholder={t("searchPlaceholder")} />
+<DataTable table={table} isLoading={isLoading} isFetching={isFetching} isError={isError} onRetry={retry} />
+<DataTablePagination table={table} />
+```
+
+- فیلتر جدید یعنی یک پارسر در `search-params` به‌علاوه‌ی `meta.filter` روی ستونی با همان id.
+- نوع جدید فیلتر (بازه‌ی تاریخ، چندانتخابی) فقط یک‌بار در `DataTableColumnMeta` و تولبار اضافه می‌شود.
 
 ### ۵.۴.۱ هوک‌های عمومی (`src/hooks`)
 
 `use-app-router` (روتر زبان‌دار + top loader)، `use-debounced-value`، `use-debounced-callback`،
 `use-local-storage` (با اعتبارسنجی zod و همگام بین تب‌ها)، `use-media-query`، `use-is-client`،
 `use-disclosure`، `use-copy-to-clipboard`، `use-interval`، `use-event-listener`، `use-latest`،
-`use-previous`، `use-isomorphic-layout-effect`، و در `packages/ui`: `use-mobile`. هوک‌های جدول در
-`lib/table` هستند (`useQueryTable`، `useDataTableState`، `useDataTable`).
+`use-previous`، `use-isomorphic-layout-effect`، و در `packages/ui`: `use-mobile`. هوک جدول در
+`lib/table/use-data-table.ts` است (`useDataTable`).
 
 ### ۵.۵ کشینگ
 
@@ -378,7 +390,7 @@ upstream اجرا می‌کند و کش را dehydrate می‌کند. برای �
 | خواسته                                   | قبل                                                                | بعد                                                                                                                                                                   |
 | ---------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | لیبل از ثابت + parse داخل upstream       | `upstream.get` + `parseResponse(schema, data, "dashboard.stats")`  | `upstreamGet(API_ENDPOINTS.stats, dashboardStatsSchema)`؛ لیبل از ثابت endpoint ساخته می‌شود. `name` از `makeQuery`/`makeMutation` حذف شد و لیبل از کلید ساخته می‌شود |
-| فیلتر جدول قابل استفاده در همه‌ی صفحه‌ها | `UsersToolbar` اختصاصی + هوک اختصاصی                               | `defineDataTable` + `useQueryTable` + `DataTableView`/`DataTableToolbar` عمومی                                                                                        |
+| فیلتر جدول قابل استفاده در همه‌ی صفحه‌ها | `UsersToolbar` اختصاصی + هوک اختصاصی                               | ابتدا یک لایه‌ی عمومی پیچیده بود؛ در بازبینی بعدی ساده شد (بخش ۱۰)                                                                                                    |
 | hydration بدون کد اضافه                  | فایل `users.prefetch.ts` با fetcher دوم سمت سرور، توکن و dehydrate | `<PrefetchBoundary queries={[xQuery.with(params)]}>`؛ همان fetcher با `http` تزریقی                                                                                   |
 
 دو مورد مرتبط هم در همین بازبینی پیدا و درست شد:
@@ -388,3 +400,24 @@ upstream اجرا می‌کند و کش را dehydrate می‌کند. برای �
   با حروف بزرگ و اسلش انتهایی).
 - **یکپارچگی:** کوئری کاربر جاری حالا هم از پروکسی (`/auth/me`) می‌آید، پس با همان الگو قابل prefetch
   است. روت جداگانه‌ی `/api/auth/session` حذف شد.
+
+---
+
+## ۱۰. ساده‌سازی جدول‌ها (بازبینی دوم)
+
+نسخه‌ی قبلی (`defineDataTable` ⇐ `useDataTableState` ⇐ `useQueryTable` ⇐ `DataTableView`) لایه‌های
+تودرتو داشت: لیبل‌ها، وضعیت URL و مدل جدول در یک زنجیره قاطی شده بودند. حق با شما بود. بعد از
+بررسی الگوهای مرجع (راهنمای data-table شادسی‌ان و پروژه‌ی tablecn که همین ترکیب shadcn + TanStack
+Table v9 + nuqs را دارد) دوباره نوشته شد:
+
+- حذف شد: `defineDataTable`، `useDataTableState`، `useQueryTable`، `DataTableView` و فایل
+  تایپ‌های مدل.
+- `useDataTable` حالا هوکی کنترل‌شده است (`state` + `onStateChange`) که چیزی از URL، کوئری یا ترجمه
+  نمی‌داند.
+- کامپوننت‌ها فقط `table` می‌گیرند و فیلترها روی `meta` ستون‌ها تعریف می‌شوند.
+- تایپ meta ستون‌ها با `metaHelper` رسمی TanStack v9 تعریف شد.
+
+یک باگ واقعی هم پیدا و رفع شد: در خروج از حساب، پاک کردن کش باعث درخواست دوباره‌ی `/auth/me` و
+خطای 401 می‌شد. همین گاهی ریدایرکت «سشن منقضی شد» را جلو می‌انداخت. حالا خروج با بارگذاری کامل
+صفحه انجام می‌شود، که هر داده‌ای از کاربر قبلی را هم از حافظه پاک می‌کند. تست‌های e2e هر کدام سه
+بار اجرا شدند (۴۵ از ۴۵ سبز).

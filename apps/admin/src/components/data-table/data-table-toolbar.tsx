@@ -2,38 +2,55 @@
 
 import { Button } from "@repo/ui/components/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@repo/ui/components/input-group";
+import type { RowData } from "@tanstack/react-table";
 import { SearchIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { DataTableToolbarModel } from "@/lib/table/types";
+import {
+  isTableFiltered,
+  resetTableFilters,
+  type DataTableInstance,
+} from "@/lib/table/use-data-table";
 
 import { DataTableSelectFilter } from "./data-table-select-filter";
 
-/** Search + filters + reset for any table — driven by the model from `useQueryTable`. */
-export function DataTableToolbar(props: DataTableToolbarModel) {
+type DataTableToolbarProps<TData extends RowData> = {
+  table: DataTableInstance<TData>;
+  searchPlaceholder: string;
+};
+
+/**
+ * Search box (table global filter) + one select per column that declares `meta.filter` + reset.
+ * Everything is read from and written to `table` — nothing feature-specific here.
+ */
+export function DataTableToolbar<TData extends RowData>({
+  table,
+  searchPlaceholder,
+}: DataTableToolbarProps<TData>) {
   const t = useTranslations("DataTable");
+  const filterColumns = table.getAllLeafColumns().filter((column) => column.columnDef.meta?.filter);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       <InputGroup className="w-full sm:max-w-xs">
         <InputGroupInput
           type="search"
-          value={props.search}
-          placeholder={props.searchPlaceholder}
-          aria-label={props.searchPlaceholder}
-          onChange={(event) => props.onSearchChange(event.target.value)}
+          value={String(table.state.globalFilter ?? "")}
+          placeholder={searchPlaceholder}
+          aria-label={searchPlaceholder}
+          onChange={(event) => table.setGlobalFilter(event.target.value)}
         />
         <InputGroupAddon>
           <SearchIcon />
         </InputGroupAddon>
       </InputGroup>
 
-      {props.filters.map((filter) => (
-        <DataTableSelectFilter key={filter.id} filter={filter} />
+      {filterColumns.map((column) => (
+        <DataTableSelectFilter key={column.id} column={column} />
       ))}
 
-      {props.hasFilters ? (
-        <Button variant="ghost" onClick={props.onReset}>
+      {isTableFiltered(table) ? (
+        <Button variant="ghost" onClick={() => resetTableFilters(table)}>
           <XIcon data-icon="inline-start" />
           {t("resetFilters")}
         </Button>

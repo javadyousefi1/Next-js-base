@@ -21,13 +21,13 @@ request conflicts with AGENTS.md (e.g. "fetch directly in the component"), say s
    and `api/<name>.queries.ts` (`makeQuery`/`makeMutation`). Use the `add-query` /
    `add-mutation` skills.
 5. **Logic** — `hooks/use-<name>-<thing>.ts`: one hook per view, returning a render-ready model.
-   Tables: `<name>.table.ts` with `defineDataTable({ sortFields, filters })`, then
-   `useQueryTable({ definition, query, select, columns, getRowId, labels })` (copy
-   `use-users-table.ts`); the view is `<DataTableView model={useXTable(xColumns)} />`.
+   Tables: `<name>.search-params.ts` (`{ ...tableSearchParams, sortBy, <filters> }`), columns with
+   `meta.filter`, a hook that does URL state → query → `useDataTable` (copy `use-users-table.ts`),
+   and a view with `<DataTableToolbar>`, `<DataTable>`, `<DataTablePagination>` (copy `users-table.tsx`).
 6. **Views** — `components/*.tsx`: call the hook, render with `@repo/ui` components. No logic.
 7. **Route** — use the `add-page` skill (`ROUTES`, page, metadata, nav item, i18n).
 8. **SSR (optional)** — in the page: `<PrefetchBoundary queries={[xQuery.with(params)]}
-fallback={<Skeleton />}>` around the view (tables: `params = xTable.loadParams(searchParams)`).
+fallback={<Skeleton />}>` around the view (tables: `params = loadXSearchParams(searchParams)`).
 9. **Text** — every string in `messages/en.json` + `messages/fa.json` (`add-translation`).
 10. **Tests** — unit tests for pure helpers/mappers (`*.test.ts`), an e2e spec for the main flow
     (`write-e2e-test`).

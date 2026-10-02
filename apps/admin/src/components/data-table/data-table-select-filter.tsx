@@ -7,21 +7,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
+import type { Column, RowData } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 
-import type { DataTableFilterModel } from "@/lib/table/types";
+import type { DataTableFeatures } from "@/lib/table/features";
 
-type DataTableSelectFilterProps = {
-  filter: DataTableFilterModel;
+type DataTableSelectFilterProps<TData extends RowData> = {
+  column: Column<DataTableFeatures, TData>;
 };
 
-/** One select filter of the toolbar; `null` = no filter ("Role: All"). */
-export function DataTableSelectFilter({ filter }: DataTableSelectFilterProps) {
+/** Single-choice filter for a column with `meta.filter` ("Role: All" = no filter). */
+export function DataTableSelectFilter<TData extends RowData>({
+  column,
+}: DataTableSelectFilterProps<TData>) {
   const t = useTranslations("DataTable");
+  const filter = column.columnDef.meta?.filter;
+  if (!filter) return null;
+
+  const value = column.getFilterValue();
   const items = [{ value: null, label: t("anyValue", { title: filter.title }) }, ...filter.options];
 
   return (
-    <Select items={items} value={filter.value} onValueChange={filter.onChange}>
+    <Select
+      items={items}
+      value={typeof value === "string" ? value : null}
+      onValueChange={(next) => column.setFilterValue(next ?? undefined)}
+    >
       <SelectTrigger className="w-44" aria-label={filter.title}>
         <SelectValue />
       </SelectTrigger>

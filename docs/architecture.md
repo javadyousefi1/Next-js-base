@@ -46,11 +46,12 @@ mutation success ──▶ invalidate `invalidates` keys ──▶ + every query
                                                       (transitively, cycle-safe)
 ```
 
-Tables are declared once with `defineDataTable({ sortFields, filters })`: it produces the nuqs
-parsers (`page`, `pageSize`, `q`, `sortBy`, `order` + filters) shared by `useQueryTable` in the
-browser and `loadParams(searchParams)` on the server, so `<PrefetchBoundary>` and the client build
-the same query key and the first render already has data. Token-issuing endpoints
-(`/auth/login`, `/auth/refresh`) are blocked in the proxy; the current user is `/auth/me`.
+Tables follow the shadcn data-table pattern: a feature's `<x>.search-params.ts` (nuqs parsers)
+is the URL contract, read by `useQueryStates` in the browser and by `createLoader` in
+`<PrefetchBoundary>` on the server, so both build the same query key. `useDataTable` is a
+controlled TanStack table (URL state in, partial updates out) and the toolbar, table and
+pagination components only receive `table`. Token-issuing endpoints (`/auth/login`,
+`/auth/refresh`) are blocked in the proxy; the current user is `/auth/me`.
 
 ## Caching layers
 

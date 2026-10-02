@@ -1,69 +1,108 @@
 "use client";
 
-import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table";
+import {
+  functionalUpdate,
+  useTable,
+  type ColumnDef,
+  type ReactTable,
+  type RowData,
+} from "@tanstack/react-table";
 
 import { dataTableFeatures, type DataTableFeatures } from "./features";
 import type { SortOrder } from "./search-params";
 
-type UseDataTableOptions<TData extends RowData> = {
+/** Table state as it lives in the URL (`tableSearchParams`) + one key per filter column. */
+export type DataTableState = {
+  page: number;
+  pageSize: number;
+  q: string;
+  sortBy: string | null;
+  order: SortOrder;
+  [filterColumnId: string]: string | number | null;
+};
+
+/** What `useDataTable` returns and every data-table component receives. */
+export type DataTableInstance<TData extends RowData> = ReactTable<DataTableFeatures, TData>;
+
+const BASE_KEYS = new Set(["page", "pageSize", "q", "sortBy", "order"]);
+
+type UseDataTableOptions<TData extends RowData, TState extends DataTableState> = {
   data: TData[];
   // oxlint-disable-next-line typescript/no-explicit-any -- TanStack's type for mixed column value types
   columns: ColumnDef<DataTableFeatures, TData, any>[];
-  /** Total rows on the server (for page count). */
+  /** Total rows on the server (for the page count). */
   rowCount: number;
-  page: number;
-  pageSize: number;
-  sortBy: string | null;
-  order: SortOrder;
-  onPageChange: (page: number) => void;
-  onPageSizeChange: (pageSize: number) => void;
-  onSortingChange: (sortBy: string | null, order: SortOrder) => void;
   getRowId?: (row: TData) => string;
+  /** Controlled state, usually from `useQueryStates(featureSearchParams)`. */
+  state: TState;
+  /** Receives partial updates, usually nuqs' setter. */
+  onStateChange: (patch: Partial<TState>) => unknown;
 };
 
 /**
- * Binds TanStack Table to externally controlled (URL) state. Pagination and sorting are
- * "manual": the table only renders what the server returned and reports user intents.
+ * TanStack Table for server-side data, controlled like an input (`state` + `onStateChange`):
+ *
+ *   page / pageSize ⇄ pagination      sortBy / order ⇄ sorting
+ *   q               ⇄ global filter   any other key  ⇄ the column filter with that id
+ *
+ * Every change except paging goes back to page 1. It knows nothing about URLs, queries or
+ * translations; the toolbar, table and pagination components read everything from `table`.
  */
-export function useDataTable<TData extends RowData>(options: UseDataTableOptions<TData>) {
-  const pagination = { pageIndex: options.page - 1, pageSize: options.pageSize };
-  const sorting = options.sortBy ? [{ id: options.sortBy, desc: options.order === "desc" }] : [];
+export function useDataTable<TData extends RowData, TState extends DataTableState>({
+  state,
+  onStateChange,
+  ...options
+}: UseDataTableOptions<TData, TState>) {
+  const update = (patch: Partial<DataTableState>) => void onStateChange(patch as Partial<TState>);
+  const filterIds = Object.keys(state).filter((key) => !BASE_KEYS.has(key));
 
-  const table = useTable({
+  const pagination = { pageIndex: state.page - 1, pageSize: state.pageSize };
+  const sorting = state.sortBy ? [{ id: state.sortBy, desc: state.order === "desc" }] : [];
+  const columnFilters = filterIds
+    .filter((id) => state[id] !== null)
+    .map((id) => ({ id, value: state[id] }));
+
+  return useTable({
+    ...options,
     features: dataTableFeatures,
-    data: options.data,
-    columns: options.columns,
-    getRowId: options.getRowId,
-    rowCount: options.rowCount,
     manualPagination: true,
     manualSorting: true,
-    state: { pagination, sorting },
+    manualFiltering: true,
+    state: { pagination, sorting, columnFilters, globalFilter: state.q },
     onPaginationChange: (updater) => {
-      const next = typeof updater === "function" ? updater(pagination) : updater;
-      if (next.pageSize !== pagination.pageSize) options.onPageSizeChange(next.pageSize);
-      else options.onPageChange(next.pageIndex + 1);
+      const next = functionalUpdate(updater, pagination);
+      update(
+        next.pageSize === pagination.pageSize
+          ? { page: next.pageIndex + 1 }
+          : { pageSize: next.pageSize, page: 1 },
+      );
     },
     onSortingChange: (updater) => {
-      const [first] = typeof updater === "function" ? updater(sorting) : updater;
-      options.onSortingChange(first?.id ?? null, first?.desc ? "desc" : "asc");
+      const [first] = functionalUpdate(updater, sorting);
+      update({ sortBy: first?.id ?? null, order: first?.desc ? "desc" : "asc", page: 1 });
+    },
+    onColumnFiltersChange: (updater) => {
+      const next = functionalUpdate(updater, columnFilters);
+      const value = (id: string) => next.find((filter) => filter.id === id)?.value;
+      const filters = Object.fromEntries(
+        filterIds.map((id) => [id, typeof value(id) === "string" ? String(value(id)) : null]),
+      );
+      update({ ...filters, page: 1 });
+    },
+    onGlobalFilterChange: (updater) => {
+      const next = functionalUpdate(updater, state.q);
+      update({ q: typeof next === "string" ? next : "", page: 1 });
     },
   });
-
-  const pageCount = Math.max(1, Math.ceil(options.rowCount / options.pageSize));
-
-  return {
-    table,
-    pagination: {
-      page: options.page,
-      pageSize: options.pageSize,
-      pageCount,
-      rowCount: options.rowCount,
-      canPrevious: options.page > 1,
-      canNext: options.page < pageCount,
-      goTo: (page: number) => options.onPageChange(Math.min(Math.max(page, 1), pageCount)),
-      setPageSize: options.onPageSizeChange,
-    },
-  };
 }
 
-export type DataTablePagination = ReturnType<typeof useDataTable>["pagination"];
+/** True when a search or any column filter is active. */
+export function isTableFiltered<TData extends RowData>(table: DataTableInstance<TData>) {
+  return table.state.globalFilter !== "" || table.state.columnFilters.length > 0;
+}
+
+/** Clears the search and every column filter (one URL update). */
+export function resetTableFilters<TData extends RowData>(table: DataTableInstance<TData>) {
+  table.resetGlobalFilter(true);
+  table.resetColumnFilters(true);
+}

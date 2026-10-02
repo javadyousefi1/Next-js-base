@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
+import type { RowData } from "@tanstack/react-table";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -17,26 +18,26 @@ import {
 import { useTranslations } from "next-intl";
 
 import { PAGE_SIZES } from "@/lib/table/search-params";
-import type { DataTablePagination as PaginationModel } from "@/lib/table/use-data-table";
+import type { DataTableInstance } from "@/lib/table/use-data-table";
 
-type DataTablePaginationProps = {
-  pagination: PaginationModel;
+type DataTablePaginationProps<TData extends RowData> = {
+  table: DataTableInstance<TData>;
 };
 
-export function DataTablePagination({ pagination }: DataTablePaginationProps) {
+export function DataTablePagination<TData extends RowData>({
+  table,
+}: DataTablePaginationProps<TData>) {
   const t = useTranslations("DataTable");
+  const { pageIndex, pageSize } = table.state.pagination;
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
-      <p className="text-muted-foreground">{t("total", { total: pagination.rowCount })}</p>
+      <p className="text-muted-foreground">{t("total", { total: table.getRowCount() })}</p>
 
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
           <span className="text-muted-foreground">{t("rowsPerPage")}</span>
-          <Select
-            value={pagination.pageSize}
-            onValueChange={(pageSize) => pagination.setPageSize(Number(pageSize))}
-          >
+          <Select value={pageSize} onValueChange={(size) => table.setPageSize(Number(size))}>
             <SelectTrigger size="sm" aria-label={t("rowsPerPage")}>
               <SelectValue />
             </SelectTrigger>
@@ -51,7 +52,7 @@ export function DataTablePagination({ pagination }: DataTablePaginationProps) {
         </div>
 
         <span className="tabular-nums">
-          {t("summary", { page: pagination.page, pageCount: pagination.pageCount })}
+          {t("summary", { page: pageIndex + 1, pageCount: Math.max(table.getPageCount(), 1) })}
         </span>
 
         <div className="flex items-center gap-1">
@@ -59,8 +60,8 @@ export function DataTablePagination({ pagination }: DataTablePaginationProps) {
             variant="outline"
             size="icon-sm"
             aria-label={t("first")}
-            disabled={!pagination.canPrevious}
-            onClick={() => pagination.goTo(1)}
+            disabled={!table.getCanPreviousPage()}
+            onClick={() => table.firstPage()}
           >
             <ChevronsLeftIcon className="rtl:rotate-180" />
           </Button>
@@ -68,8 +69,8 @@ export function DataTablePagination({ pagination }: DataTablePaginationProps) {
             variant="outline"
             size="icon-sm"
             aria-label={t("previous")}
-            disabled={!pagination.canPrevious}
-            onClick={() => pagination.goTo(pagination.page - 1)}
+            disabled={!table.getCanPreviousPage()}
+            onClick={() => table.previousPage()}
           >
             <ChevronLeftIcon className="rtl:rotate-180" />
           </Button>
@@ -77,8 +78,8 @@ export function DataTablePagination({ pagination }: DataTablePaginationProps) {
             variant="outline"
             size="icon-sm"
             aria-label={t("next")}
-            disabled={!pagination.canNext}
-            onClick={() => pagination.goTo(pagination.page + 1)}
+            disabled={!table.getCanNextPage()}
+            onClick={() => table.nextPage()}
           >
             <ChevronRightIcon className="rtl:rotate-180" />
           </Button>
@@ -86,8 +87,8 @@ export function DataTablePagination({ pagination }: DataTablePaginationProps) {
             variant="outline"
             size="icon-sm"
             aria-label={t("last")}
-            disabled={!pagination.canNext}
-            onClick={() => pagination.goTo(pagination.pageCount)}
+            disabled={!table.getCanNextPage()}
+            onClick={() => table.lastPage()}
           >
             <ChevronsRightIcon className="rtl:rotate-180" />
           </Button>

@@ -36,10 +36,10 @@ features/users/
   schemas/user.schema.ts       zod: entity + params (input contract) + response (output contract)
   api/users.service.ts         fetcher: (params, { http, signal }) → raw data; maps params → upstream query
   api/users.queries.ts         makeQuery / makeMutation definitions (key + schemas + fetcher)
-  users.table.ts               defineDataTable({ sortFields, filters }) — shared by page and hook
-  hooks/use-users-table.ts     useQueryTable({ definition, query, select, columns, labels })
-  components/users-table.tsx   <DataTableView model={useUsersTable(usersColumns)} />
-  components/users-columns.tsx static column definitions (presentation only)
+  users.search-params.ts       nuqs parsers = the table's URL contract (page prefetch + hook)
+  hooks/use-users-table.ts     URL state → query → useDataTable (3 steps)
+  components/users-table.tsx   <DataTableToolbar> + <DataTable> + <DataTablePagination>
+  components/users-columns.tsx useUsersColumns(): headers, cells, filter `meta`
 ```
 
 Dependency direction: `schemas` ← `api` ← `hooks` ← `components` ← `app`. `server/` may use `api`
@@ -109,44 +109,48 @@ export const usersListQuery = makeQuery({
 
 ## Tables (search + filters + sorting + pagination)
 
-One definition, one hook, one view — the whole pattern for any server-driven table:
+Same pattern as the shadcn data-table guide / tablecn: the TanStack `table` instance is the single
+source of truth and every UI piece only receives `table` (or a `column`).
 
 ```ts
-// features/<x>/<x>.table.ts — shared by the page (server) and the hook (client)
-export const usersTable = defineDataTable({ sortFields: USER_SORT_FIELDS, filters: { role: USER_ROLES } });
+// 1. URL contract — features/<x>/<x>.search-params.ts (nuqs/server: shared with the server)
+export const usersSearchParams = {
+  ...tableSearchParams, // page, pageSize, q, sortBy, order
+  sortBy: parseAsStringLiteral(USER_SORT_FIELDS),
+  role: parseAsStringLiteral(USER_ROLES), // a filter: key = column id
+};
+export const loadUsersSearchParams = createLoader(usersSearchParams);
 
-// features/<x>/hooks/use-<x>-table.ts — wiring + labels only
-export function useUsersTable(columns: UsersColumns) {
-  const t = useTranslations("Users");
-  return useQueryTable({
-    definition: usersTable,
-    query: usersListQuery, // params = page, pageSize, q, sortBy, order + filter values
-    select: (data) => ({ rows: data.users, total: data.total }),
-    columns,
-    getRowId: (user) => String(user.id),
-    labels: {
-      searchPlaceholder: t("searchPlaceholder"),
-      filters: { role: { title: t("roleFilter"), option: (role) => t(`roles.${role}`) } },
-    },
-  });
-}
+// 2. Columns declare their filter — components/<x>-columns.tsx
+columnHelper.accessor("role", {
+  header: ({ column }) => <DataTableColumnHeader column={column} title={t("columns.role")} />,
+  meta: { filter: { title: t("roleFilter"), options: USER_ROLES.map((r) => ({ value: r, label: t(`roles.${r}`) })) } },
+});
 
-// features/<x>/components/<x>-table.tsx
-export function UsersTable() {
-  return <DataTableView model={useUsersTable(usersColumns)} />;
-}
+// 3. Hook = URL state → query → table — hooks/use-<x>-table.ts
+const [params, setParams] = useQueryStates(usersSearchParams, TABLE_URL_OPTIONS);
+const query = usersListQuery.useQuery({ ...params, q: useDebouncedValue(params.q, 300) }, { placeholderData: keepPreviousData });
+const table = useDataTable({ data, rowCount, columns, state: params, onStateChange: setParams });
+
+// 4. View
+<DataTableToolbar table={table} searchPlaceholder={t("searchPlaceholder")} />
+<DataTable table={table} isLoading={…} isFetching={…} isError={…} onRetry={…} />
+<DataTablePagination table={table} />
 ```
 
-URL state (debounced search, page reset on change, `?role=admin`), toolbar, loading/error/empty
-states and pagination are generic (`lib/table`, `components/data-table`). A new filter = one entry
-in `filters` + its labels. Need another filter kind (date range, multi-select)? Extend
-`defineDataTable` + `DataTableToolbar` once, never per page.
+- `useDataTable` (`lib/table`) is a controlled hook (`state` + `onStateChange`, like an input): it maps
+  `page`/`pageSize` ⇄ pagination, `sortBy`/`order` ⇄ sorting, `q` ⇄ global filter and every other key
+  ⇄ the column filter with that id, and resets to page 1 on any change except paging. It knows
+  nothing about URLs, queries or translations.
+- `DataTableToolbar` renders the search box + a select for every column with `meta.filter` + reset.
+- New filter = one parser in `<x>.search-params.ts` + `meta.filter` on the column with the same id.
+  New filter kind (date range, multi-select) = extend `DataTableColumnMeta` and the toolbar once.
 
 ## Server prefetch (hydration)
 
 ```tsx
 <PrefetchBoundary
-  queries={[usersListQuery.with(usersTable.loadParams(searchParams))]}
+  queries={[usersListQuery.with(loadUsersSearchParams(searchParams))]}
   fallback={<DataTableSkeleton />}
 >
   <UsersTable />

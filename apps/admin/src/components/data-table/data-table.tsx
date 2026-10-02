@@ -9,25 +9,40 @@ import {
   TableRow,
 } from "@repo/ui/components/table";
 import { cn } from "@repo/ui/lib/utils";
-import { FlexRender, type RowData, type Table as TableModel } from "@tanstack/react-table";
-import type { ReactNode } from "react";
+import { FlexRender, type RowData } from "@tanstack/react-table";
 
-import type { DataTableFeatures } from "@/lib/table/features";
+import { QueryError } from "@/components/feedback/query-error";
+import type { DataTableInstance } from "@/lib/table/use-data-table";
+
+import { DataTableEmpty } from "./data-table-empty";
+import { DataTableSkeleton } from "./data-table-skeleton";
 
 type DataTableProps<TData extends RowData> = {
-  table: TableModel<DataTableFeatures, TData>;
-  /** Rendered in place of the rows when the current page is empty. */
-  empty: ReactNode;
-  /** Dims the rows while the next page loads (the previous page stays visible). */
+  table: DataTableInstance<TData>;
+  /** First load (no data yet) → skeleton. */
+  isLoading?: boolean;
+  /** Refetching with the previous page still visible → rows are dimmed. */
   isFetching?: boolean;
+  /** Failed with no data to show → error with a retry button. */
+  isError?: boolean;
+  onRetry?: () => void;
 };
 
-/** Presentational table: renders the model built by `useDataTable`. No state, no fetching. */
+/** Renders the rows of a `useDataTable` table, plus its loading / error / empty states. */
 export function DataTable<TData extends RowData>({
   table,
-  empty,
+  isLoading = false,
   isFetching = false,
+  isError = false,
+  onRetry,
 }: DataTableProps<TData>) {
+  const columnCount = table.getVisibleLeafColumns().length;
+
+  if (isLoading) {
+    return <DataTableSkeleton columns={columnCount} rows={table.state.pagination.pageSize} />;
+  }
+  if (isError) return <QueryError onRetry={() => onRetry?.()} />;
+
   const rows = table.getRowModel().rows;
 
   return (
@@ -50,7 +65,9 @@ export function DataTable<TData extends RowData>({
         >
           {rows.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={table.getVisibleLeafColumns().length}>{empty}</TableCell>
+              <TableCell colSpan={columnCount}>
+                <DataTableEmpty table={table} />
+              </TableCell>
             </TableRow>
           ) : (
             rows.map((row) => (
