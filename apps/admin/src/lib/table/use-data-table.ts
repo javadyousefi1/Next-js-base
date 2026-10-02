@@ -2,8 +2,8 @@
 
 import { useTable, type ColumnDef, type RowData } from "@tanstack/react-table";
 
-import { dataTableFeatures, type DataTableFeatures } from "@/lib/table/features";
-import type { SortOrder } from "@/lib/table/search-params";
+import { dataTableFeatures, type DataTableFeatures } from "./features";
+import type { SortOrder } from "./search-params";
 
 type UseDataTableOptions<TData extends RowData> = {
   data: TData[];

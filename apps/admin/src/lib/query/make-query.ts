@@ -8,23 +8,38 @@ import {
 } from "@tanstack/react-query";
 import type { z } from "zod";
 
+import { apiClient, type HttpClient } from "@/lib/http/client";
 import type { ApiError } from "@/lib/http/errors";
 
 import { invalidateKeys } from "./invalidate";
-import { parseInput, parseResponse } from "./validation";
+import { labelFromKey, parseInput, parseResponse } from "./validation";
 
-type FetcherContext = { signal: AbortSignal };
+export type QueryFetcherContext = {
+  signal: AbortSignal;
+  /**
+   * Where the request goes. Browser: `apiClient` (→ `/api/proxy`, the BFF adds the token).
+   * Server prefetch: the upstream client with the user's token. Use paths from `API_ENDPOINTS`
+   * — the BFF proxy maps them 1:1, so one fetcher works on both sides.
+   */
+  http: HttpClient;
+};
 
 /**
  * Performs the request. Receives the PARSED params and returns raw (`unknown`) data —
  * the response schema turns it into the typed result.
  */
-export type QueryFetcher<TParams> = (params: TParams, context: FetcherContext) => Promise<unknown>;
+export type QueryFetcher<TParams> = (
+  params: TParams,
+  context: QueryFetcherContext,
+) => Promise<unknown>;
+
+/** Server prefetch unit, created by `xQuery.with(params)`; run by `<PrefetchBoundary>`. */
+export type PrefetchItem = {
+  prefetch: (queryClient: QueryClient, http: HttpClient) => Promise<void>;
+};
 
 type MakeQueryConfig<TParamsSchema extends z.ZodType, TResponseSchema extends z.ZodType> = {
-  /** Debug label used in validation errors, e.g. "users.list". */
-  name: string;
-  /** Key factory from `QUERY_KEYS` (never an inline array). Receives the parsed params. */
+  /** Key factory from `QUERY_KEYS` (never an inline array). Also names validation errors. */
   key: (params: z.output<TParamsSchema>) => QueryKey;
   /** Input contract. Use `z.void()` for queries without params. */
   params: TParamsSchema;
@@ -59,16 +74,15 @@ type QueryOverrides<TData> = Partial<
  * - params are parsed with `params` before the request (invalid → `ApiError("VALIDATION")`)
  * - responses are parsed with `response` (unexpected shape → `ApiError("INVALID_RESPONSE")`)
  * - `relatedKeys` make the query refetch whenever a related key is invalidated
+ * - `xQuery.with(params)` prefetches it on the server (`<PrefetchBoundary>`) with zero extra code
  *
  * @example
  * export const usersListQuery = makeQuery({
- *   name: "users.list",
  *   key: QUERY_KEYS.users.list,
  *   params: usersListParamsSchema,
  *   response: usersListResponseSchema,
- *   fetcher: (params, { signal }) => usersService.list(params, { signal }),
+ *   fetcher: fetchUsersList, // (params, { http, signal }) => http.get(API_ENDPOINTS.users.list, …)
  * });
- * const query = usersListQuery.useQuery(params); // inside a feature hook
  */
 export function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema extends z.ZodType>(
   config: MakeQueryConfig<TParamsSchema, TResponseSchema>,
@@ -84,16 +98,18 @@ export function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema exten
       : { params: input as unknown as TParams, valid: false as const };
   };
 
-  const options = (input: TParamsInput, fetcher: QueryFetcher<TParams> = config.fetcher) => {
+  const options = (input: TParamsInput, http: HttpClient = apiClient) => {
     // The key is built from the parsed params so `{}` and `{ page: 1 }` share one cache entry.
     const { params, valid } = resolveParams(input);
+    const queryKey = config.key(params);
+    const label = labelFromKey(queryKey);
 
     return queryOptions<TData, ApiError, TData>({
-      queryKey: config.key(params),
+      queryKey,
       queryFn: async ({ signal }) => {
-        const parsedParams = valid ? params : parseInput(config.params, input, config.name);
-        const raw = await fetcher(parsedParams, { signal });
-        return parseResponse(config.response, raw, config.name);
+        const parsedParams = valid ? params : parseInput(config.params, input, label);
+        const raw = await config.fetcher(parsedParams, { signal, http });
+        return parseResponse(config.response, raw, label);
       },
       meta: { relatedKeys: config.relatedKeys },
       staleTime: config.staleTime,
@@ -102,7 +118,6 @@ export function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema exten
   };
 
   return {
-    name: config.name,
     key: config.key,
     options,
 
@@ -115,15 +130,15 @@ export function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema exten
     },
 
     /**
-     * SSR prefetch. On the server pass a server-side `fetcher` (relative BFF URLs only resolve
-     * in the browser). Never throws — a failed prefetch simply falls back to a client fetch.
+     * Server prefetch: `<PrefetchBoundary queries={[usersListQuery.with(params)]}>`. Params may
+     * be a promise (e.g. parsed `searchParams`). Never throws — a failed prefetch simply falls
+     * back to a client fetch.
      */
-    prefetch(
-      queryClient: QueryClient,
-      params: TParamsInput,
-      { fetcher }: { fetcher?: QueryFetcher<TParams> } = {},
-    ) {
-      return queryClient.prefetchQuery(options(params, fetcher));
+    with(params: TParamsInput | Promise<TParamsInput>): PrefetchItem {
+      return {
+        prefetch: async (queryClient, http) =>
+          queryClient.prefetchQuery(options(await params, http)),
+      };
     },
 
     getData(queryClient: QueryClient, params: TParamsInput) {

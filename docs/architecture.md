@@ -22,7 +22,7 @@ Browser ──page request──▶ proxy.ts ── i18n (next-intl): "/" → "/
         ──/api/auth/*────▶ BFF route handlers ── upstream /auth/* ── Set-Cookie (httpOnly)
         ──/api/proxy/*───▶ BFF catch-all ── Bearer <access_token cookie> ──▶ upstream API
                               └── 401 → refresh once → retry → rotate cookies │ fail → clear cookies → 401
-Server Components ── (prefetch) ── upstream API with the cookie token ── dehydrate → HydrationBoundary
+<PrefetchBoundary> ── same query fetchers, http = upstream + cookie token ── dehydrate → HydrationBoundary
 MSW (API_MOCKING=enabled) intercepts every upstream call inside the Node process (instrumentation.ts)
 ```
 
@@ -38,7 +38,7 @@ MSW (API_MOCKING=enabled) intercepts every upstream call inside the Node process
 ```
 view ──calls──▶ feature hook ──▶ xQuery.useQuery(params)
                                    │ params ── zod parse (VALIDATION on failure)
-                                   │ fetcher ── apiClient (/api/proxy) ── BFF ── upstream
+                                   │ fetcher(params, { http }) ── http = apiClient (/api/proxy) ── BFF ── upstream
                                    │ response ── zod parse (INVALID_RESPONSE on failure)
                                    ▼
                               React Query cache (key from QUERY_KEYS)
@@ -46,9 +46,11 @@ mutation success ──▶ invalidate `invalidates` keys ──▶ + every query
                                                       (transitively, cycle-safe)
 ```
 
-Tables keep `page`, `pageSize`, `q`, `sortBy`, `order` and feature filters in the URL (nuqs).
-The same parsers (`nuqs/server`) feed the server-side prefetch, so the first render already has
-data and the query key matches on both sides.
+Tables are declared once with `defineDataTable({ sortFields, filters })`: it produces the nuqs
+parsers (`page`, `pageSize`, `q`, `sortBy`, `order` + filters) shared by `useQueryTable` in the
+browser and `loadParams(searchParams)` on the server, so `<PrefetchBoundary>` and the client build
+the same query key and the first render already has data. Token-issuing endpoints
+(`/auth/login`, `/auth/refresh`) are blocked in the proxy; the current user is `/auth/me`.
 
 ## Caching layers
 

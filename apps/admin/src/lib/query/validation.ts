@@ -3,6 +3,14 @@ import { z } from "zod";
 import { ApiError } from "@/lib/http/errors";
 
 /**
+ * Error label derived from a key constant: `["users", "list", {…}]` → `"users.list"`.
+ * Queries and mutations never carry a hand-written name.
+ */
+export function labelFromKey(key: readonly unknown[]): string {
+  return key.filter((part): part is string => typeof part === "string").join(".");
+}
+
+/**
  * Boundary validation for every query/mutation (enforced by `makeQuery` / `makeMutation`):
  * - `input`    → params/variables are parsed BEFORE any request is sent  → `VALIDATION`
  * - `response` → server data is parsed BEFORE it reaches the cache/UI    → `INVALID_RESPONSE`

@@ -5,7 +5,7 @@ import { sessionQuery } from "../api/auth.queries";
 /** The signed-in user (`undefined` while loading). */
 export function useCurrentUser() {
   const query = sessionQuery.useQuery();
-  const user = query.data?.user;
+  const user = query.data;
 
   return {
     user,

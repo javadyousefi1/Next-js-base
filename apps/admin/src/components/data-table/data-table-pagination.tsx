@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import type { DataTablePagination as PaginationModel } from "@/hooks/use-data-table";
 import { PAGE_SIZES } from "@/lib/table/search-params";
+import type { DataTablePagination as PaginationModel } from "@/lib/table/use-data-table";
 
 type DataTablePaginationProps = {
   pagination: PaginationModel;

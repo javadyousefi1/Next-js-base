@@ -71,7 +71,7 @@ proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان +
 | 10  | `makeQuery` با کلیدهای مرتبط که با تغییرشان آپدیت شود           | ✅    | `relatedKeys` + invalidation زنجیره‌ای و امن در برابر حلقه (`lib/query/invalidate.ts` + تست)                                                |
 | 11  | ورودی/خروجی makeQuery و makeMutation با zod ولیدیت شود          | ✅    | `params`/`variables` قبل از درخواست و `response` قبل از رسیدن به کش parse می‌شوند؛ خطاها `VALIDATION` و `INVALID_RESPONSE`                  |
 | 12  | کلی هوک کاستوم مفید                                             | ✅    | ۱۵ هوک در `src/hooks` (بخش ۵)                                                                                                               |
-| 13  | هوک مدیریت سرچ/فیلتر/صفحه‌بندی جدول با separation of concerns   | ✅    | `useTableUrlState` (وضعیت URL) + `useDataTable` (مدل جدول) + `useUsersTable` (منطق فیچر) + ویوهای بی‌منطق                                   |
+| 13  | هوک مدیریت سرچ/فیلتر/صفحه‌بندی جدول با separation of concerns   | ✅    | الگوی عمومی: `defineDataTable` + `useQueryTable` + `DataTableView`؛ هر صفحه فقط تعریف، ستون‌ها و لیبل‌ها را می‌نویسد                        |
 | 14  | دیزاین سیستم shadcn                                             | ✅    | `packages/ui` با CLI رسمی shadcn، استایل base-nova، پشتیبانی RTL، ۳۳ کامپوننت                                                               |
 | 15  | فول TypeScript                                                  | ✅    | TypeScript 7 (کامپایلر native) با strict و `noUncheckedIndexedAccess`                                                                       |
 | 16  | Tailwind                                                        | ✅    | Tailwind CSS 4.3                                                                                                                            |
@@ -131,9 +131,17 @@ proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان +
 ### ۵.۱ لایه‌ی دیتا: `makeQuery` و `makeMutation`
 
 ```ts
+// fetcher فقط یک‌بار نوشته می‌شود و هم در مرورگر و هم روی سرور کار می‌کند
+export const fetchUsersList: QueryFetcher<UsersListParams> = async (params, { http, signal }) => {
+  const { data } = await http.get<unknown>(API_ENDPOINTS.users.list, {
+    params: toQuery(params),
+    signal,
+  });
+  return data;
+};
+
 export const usersListQuery = makeQuery({
-  name: "users.list",
-  key: QUERY_KEYS.users.list, // فقط از ثابت‌ها
+  key: QUERY_KEYS.users.list, // فقط از ثابت‌ها؛ لیبل خطاها هم از همین کلید ساخته می‌شود
   params: usersListParamsSchema, // ورودی قبل از درخواست parse می‌شود
   response: usersListResponseSchema, // خروجی قبل از ورود به کش parse می‌شود
   fetcher: fetchUsersList,
@@ -144,40 +152,74 @@ export const usersListQuery = makeQuery({
 
 - ورودی نامعتبر ⇐ `ApiError` با کد `VALIDATION` (درخواست اصلاً ارسال نمی‌شود).
 - پاسخ با شکل غیرمنتظره ⇐ `INVALID_RESPONSE` (در حالت توسعه درخت خطای zod لاگ می‌شود).
+- هیچ لیبل متنی دستی وجود ندارد: لیبل خطا از ثابت کلید ساخته می‌شود (`users.list`، `auth.login`).
+- `http` تزریق می‌شود: در مرورگر `apiClient` است (⇐ `/api/proxy`) و در prefetch سرور، کلاینت
+  upstream با توکن همان کاربر. چون پروکسی مسیرها را یک‌به‌یک منتقل می‌کند، یک fetcher برای هر
+  دو طرف کافی است.
 - `makeMutation` با `variables` (همان اسکیمای فرم)، `response` و `invalidates`؛ بعد از موفقیت،
   کلیدهای `invalidates` و هر کوئری‌ای که آن‌ها را در `relatedKeys` دارد (به‌صورت زنجیره‌ای) رفرش
   می‌شوند و میوتیشن تا پایان این کار pending می‌ماند.
 - خطاها همیشه `ApiError` با `code` هستند؛ خطاهای 4xx دوباره تلاش نمی‌شوند؛ خطای رفرش‌های
   پس‌زمینه toast می‌شود و خطای بار اول داخل خود ویو نمایش داده می‌شود.
-- پیش‌بارگذاری سمت سرور: صفحه‌ی کاربران با کوکی کاربر روی سرور prefetch می‌شود و با
-  `HydrationBoundary` به کلاینت می‌رسد؛ پارسرهای URL بین سرور و کلاینت مشترک‌اند تا کلید کوئری
-  یکی باشد.
+- فراخوانی‌های فقط-سرور (مثل آمار داشبورد): `upstreamGet(API_ENDPOINTS.stats, dashboardStatsSchema)`
+  که پاسخ را خودش با zod چک می‌کند و لیبل خطا را از ثابت endpoint می‌سازد (`GET /stats`).
 
-### ۵.۲ احراز هویت (BFF)
+### ۵.۲ پیش‌بارگذاری سمت سرور (hydration) در یک خط
+
+```tsx
+<PrefetchBoundary
+  queries={[usersListQuery.with(usersTable.loadParams(searchParams))]}
+  fallback={<DataTableSkeleton />}
+>
+  <UsersTable />
+</PrefetchBoundary>
+```
+
+`PrefetchBoundary` خودش Suspense دارد، کوکی را می‌خواند، همان fetcher کوئری را با توکن کاربر روی
+upstream اجرا می‌کند و کش را dehydrate می‌کند. برای هر `makeQuery` فقط `xQuery.with(params)` لازم
+است. اگر سشن نباشد یا توکن منقضی شده باشد، prefetch انجام نمی‌شود و کلاینت از طریق BFF می‌گیرد.
+
+### ۵.۳ احراز هویت (BFF)
 
 - ورود: مرورگر ⇐ `POST /api/auth/login` ⇐ API اصلی ⇐ کوکی‌های `access_token` و `refresh_token`
   (httpOnly، Secure در production، SameSite=Lax).
-- هر درخواست: مرورگر ⇐ `/api/proxy/<path>` ⇐ BFF توکن را از کوکی برمی‌دارد و Bearer می‌فرستد. اگر
-  401 شد، یک‌بار با refresh token تمدید می‌کند، دوباره تلاش می‌کند و کوکی‌های جدید را ست می‌کند.
-  اگر تمدید هم شکست بخورد، کوکی‌ها پاک می‌شوند و کاربر با `callbackUrl` به صفحه‌ی ورود می‌رود.
+- هر درخواست (از جمله کاربر جاری از `/auth/me`): مرورگر ⇐ `/api/proxy/<path>` ⇐ BFF توکن را از
+  کوکی برمی‌دارد و Bearer می‌فرستد. اگر 401 شد، یک‌بار با refresh token تمدید می‌کند، دوباره تلاش
+  می‌کند و کوکی‌های جدید را ست می‌کند. اگر تمدید هم شکست بخورد، کوکی‌ها پاک می‌شوند و کاربر با
+  `callbackUrl` به صفحه‌ی ورود می‌رود.
+- endpointهای صادرکننده‌ی توکن (`/auth/login` و `/auth/refresh`) در پروکسی مسدودند (404)، تا توکن
+  خام هیچ‌وقت به جاوااسکریپت مرورگر نرسد.
 - `callbackUrl` در برابر open redirect محافظت شده است. ورود با Redis محدود می‌شود (۵ بار در
   دقیقه برای هر IP).
 
-### ۵.۳ جدول با جستجو، فیلتر، مرتب‌سازی و صفحه‌بندی
+### ۵.۴ جدول‌ها: یک الگو برای همه‌ی صفحه‌ها
 
-- `useTableUrlState`: وضعیت page/pageSize/q/sortBy/order در URL (قابل اشتراک، با back/forward
-  کار می‌کند)، جستجو با debounce، و هر تغییری به‌جز صفحه، صفحه را به ۱ برمی‌گرداند.
-- `useDataTable`: اتصال TanStack Table v9 به این وضعیت (صفحه‌بندی و مرتب‌سازی سمت سرور).
-- `useUsersTable`: ترکیب این دو با کوئری و فیلتر نقش؛ خروجی آن مدل آماده‌ی رندر است.
-- ویوها (`DataTable`، `DataTablePagination`، `UsersToolbar`) هیچ منطقی ندارند.
+برای هر جدول جدید فقط این سه چیز نوشته می‌شود:
 
-### ۵.۴ هوک‌های عمومی (`src/hooks`)
+1. تعریف جدول (مشترک بین سرور و کلاینت):
+   `defineDataTable({ sortFields: USER_SORT_FIELDS, filters: { role: USER_ROLES } })`.
+2. هوک فیچر که فقط سیم‌کشی و ترجمه است:
+   `useQueryTable({ definition, query, select, columns, getRowId, labels })`.
+3. ویو: `<DataTableView model={useUsersTable(usersColumns)} />`.
 
-`use-app-router` (روتر زبان‌دار + top loader)، `use-table-url-state`، `use-data-table`،
-`use-debounced-value`، `use-debounced-callback`، `use-local-storage` (با اعتبارسنجی zod و همگام بین
-تب‌ها)، `use-media-query`، `use-is-client`، `use-disclosure`، `use-copy-to-clipboard`، `use-interval`،
-`use-event-listener`، `use-latest`، `use-previous`، `use-isomorphic-layout-effect`، و در
-`packages/ui`: `use-mobile`.
+بقیه همه عمومی است و فقط یک‌بار نوشته شده:
+
+- وضعیت URL: جستجو با debounce، فیلترها، مرتب‌سازی و صفحه‌بندی؛ هر تغییر غیر از صفحه، صفحه را
+  به ۱ برمی‌گرداند (`lib/table/use-data-table-state.ts`).
+- اتصال TanStack Table v9 (`lib/table/use-data-table.ts`).
+- تولبار جستجو، فیلترها و دکمه‌ی پاک کردن (`DataTableToolbar` و `DataTableSelectFilter`).
+- حالت‌های بارگذاری، خطا و خالی، و صفحه‌بندی (`DataTableView`).
+
+یک فیلتر جدید یعنی یک خط در `filters` به‌علاوه‌ی لیبلش. نوع جدید فیلتر (بازه‌ی تاریخ،
+چندانتخابی) یک‌بار در `defineDataTable` و تولبار اضافه می‌شود، نه در هر صفحه.
+
+### ۵.۴.۱ هوک‌های عمومی (`src/hooks`)
+
+`use-app-router` (روتر زبان‌دار + top loader)، `use-debounced-value`، `use-debounced-callback`،
+`use-local-storage` (با اعتبارسنجی zod و همگام بین تب‌ها)، `use-media-query`، `use-is-client`،
+`use-disclosure`، `use-copy-to-clipboard`، `use-interval`، `use-event-listener`، `use-latest`،
+`use-previous`، `use-isomorphic-layout-effect`، و در `packages/ui`: `use-mobile`. هوک‌های جدول در
+`lib/table` هستند (`useQueryTable`، `useDataTableState`، `useDataTable`).
 
 ### ۵.۵ کشینگ
 
@@ -328,3 +370,21 @@ export const usersListQuery = makeQuery({
 - **قبل از کامیت:** `bun run check`. پیام کامیت به شکل `feat(admin): ...` باشد.
 - **بک‌اند واقعی:** `API_MOCKING=disabled` و `API_BASE_URL` را تنظیم کنید و اسکیماهای پاسخ را با
   API واقعی تطبیق دهید. خطاهای `INVALID_RESPONSE` دقیقاً نشان می‌دهند کجا قرارداد فرق دارد.
+
+---
+
+## ۹. اصلاحات بعد از بازبینی شما
+
+| خواسته                                   | قبل                                                                | بعد                                                                                                                                                                   |
+| ---------------------------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| لیبل از ثابت + parse داخل upstream       | `upstream.get` + `parseResponse(schema, data, "dashboard.stats")`  | `upstreamGet(API_ENDPOINTS.stats, dashboardStatsSchema)`؛ لیبل از ثابت endpoint ساخته می‌شود. `name` از `makeQuery`/`makeMutation` حذف شد و لیبل از کلید ساخته می‌شود |
+| فیلتر جدول قابل استفاده در همه‌ی صفحه‌ها | `UsersToolbar` اختصاصی + هوک اختصاصی                               | `defineDataTable` + `useQueryTable` + `DataTableView`/`DataTableToolbar` عمومی                                                                                        |
+| hydration بدون کد اضافه                  | فایل `users.prefetch.ts` با fetcher دوم سمت سرور، توکن و dehydrate | `<PrefetchBoundary queries={[xQuery.with(params)]}>`؛ همان fetcher با `http` تزریقی                                                                                   |
+
+دو مورد مرتبط هم در همین بازبینی پیدا و درست شد:
+
+- **امنیت:** پروکسی عمومی، `auth/login` و `auth/refresh` را هم منتقل می‌کرد. یعنی کاربر لاگین‌شده
+  می‌توانست توکن خام را در بدنه‌ی JSON بگیرد. حالا این مسیرها مسدودند (با تست دستی تأیید شد، حتی
+  با حروف بزرگ و اسلش انتهایی).
+- **یکپارچگی:** کوئری کاربر جاری حالا هم از پروکسی (`/auth/me`) می‌آید، پس با همان الگو قابل prefetch
+  است. روت جداگانه‌ی `/api/auth/session` حذف شد.

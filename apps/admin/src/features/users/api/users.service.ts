@@ -1,5 +1,4 @@
 import { API_ENDPOINTS } from "@/config/api-endpoints";
-import { apiClient } from "@/lib/http/client";
 import type { QueryFetcher } from "@/lib/query";
 
 import type { UsersListParams } from "../schemas/user.schema";
@@ -16,9 +15,9 @@ export function toUpstreamListQuery(params: UsersListParams) {
   };
 }
 
-/** Browser → BFF (`/api/proxy/users`). Returns raw data: the query validates it. */
-export const fetchUsersList: QueryFetcher<UsersListParams> = async (params, { signal }) => {
-  const { data } = await apiClient.get<unknown>(API_ENDPOINTS.users.list, {
+/** Works in the browser (BFF proxy) and on the server (prefetch): `http` is injected. */
+export const fetchUsersList: QueryFetcher<UsersListParams> = async (params, { http, signal }) => {
+  const { data } = await http.get<unknown>(API_ENDPOINTS.users.list, {
     params: toUpstreamListQuery(params),
     signal,
   });

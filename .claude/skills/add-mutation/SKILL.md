@@ -13,7 +13,6 @@ description: Add a validated write operation in apps/admin — zod variables/res
 
    ```ts
    export const create<X>Mutation = makeMutation({
-     name: "<f>.create",
      mutationKey: MUTATION_KEYS.<f>.create,
      variables: create<X>Schema,
      response: <x>Schema,

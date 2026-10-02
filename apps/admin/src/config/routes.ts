@@ -30,7 +30,6 @@ export const API_ROUTES = {
   auth: {
     login: "/api/auth/login",
     logout: "/api/auth/logout",
-    session: "/api/auth/session",
   },
   /** Catch-all proxy to the upstream API: `/api/proxy/<upstream path>`. */
   proxy: "/api/proxy",

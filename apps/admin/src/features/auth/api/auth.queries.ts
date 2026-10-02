@@ -7,21 +7,20 @@ import {
   loginInputSchema,
   logoutResponseSchema,
   sessionResponseSchema,
+  sessionUserSchema,
 } from "../schemas/auth.schema";
-import { getSession, login, logout } from "./auth.service";
+import { fetchCurrentUser, login, logout } from "./auth.service";
 
 /** The signed-in user (validated). A 401 here triggers the global "session expired" redirect. */
 export const sessionQuery = makeQuery({
-  name: "auth.session",
   key: QUERY_KEYS.auth.session,
   params: z.void(),
-  response: sessionResponseSchema,
-  fetcher: (_params, context) => getSession(context),
+  response: sessionUserSchema,
+  fetcher: fetchCurrentUser,
   staleTime: 5 * 60_000,
 });
 
 export const loginMutation = makeMutation({
-  name: "auth.login",
   mutationKey: MUTATION_KEYS.auth.login,
   variables: loginInputSchema,
   response: sessionResponseSchema,
@@ -31,7 +30,6 @@ export const loginMutation = makeMutation({
 });
 
 export const logoutMutation = makeMutation({
-  name: "auth.logout",
   mutationKey: MUTATION_KEYS.auth.logout,
   variables: z.void(),
   response: logoutResponseSchema,

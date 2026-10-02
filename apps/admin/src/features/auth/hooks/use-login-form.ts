@@ -36,8 +36,8 @@ export function useLoginForm() {
   });
 
   const mutation = loginMutation.useMutation({
-    onSuccess: (session) => {
-      sessionQuery.setData(queryClient, undefined, () => session);
+    onSuccess: ({ user }) => {
+      sessionQuery.setData(queryClient, undefined, () => user);
       router.replace(sanitizeCallbackUrl(callbackUrl));
     },
   });

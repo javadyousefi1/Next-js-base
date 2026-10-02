@@ -5,7 +5,6 @@ import { usersListParamsSchema, usersListResponseSchema } from "../schemas/user.
 import { fetchUsersList } from "./users.service";
 
 export const usersListQuery = makeQuery({
-  name: "users.list",
   key: QUERY_KEYS.users.list,
   params: usersListParamsSchema,
   response: usersListResponseSchema,

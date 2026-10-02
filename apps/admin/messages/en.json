@@ -79,7 +79,6 @@
     "description": "Search, filter, sort and paginate. Every change is kept in the URL.",
     "searchPlaceholder": "Search name, email or username…",
     "roleFilter": "Role",
-    "allRoles": "All roles",
     "roles": {
       "admin": "Admin",
       "moderator": "Moderator",
@@ -91,12 +90,7 @@
       "role": "Role",
       "age": "Age",
       "company": "Company"
-    },
-    "empty": {
-      "title": "No users found",
-      "description": "Try a different search or clear the filters."
-    },
-    "resetFilters": "Clear filters"
+    }
   },
   "Settings": {
     "title": "Settings",
@@ -138,7 +132,13 @@
     "first": "First page",
     "previous": "Previous page",
     "next": "Next page",
-    "last": "Last page"
+    "last": "Last page",
+    "anyValue": "{title}: All",
+    "resetFilters": "Clear filters",
+    "empty": {
+      "title": "No results",
+      "description": "Try a different search or clear the filters."
+    }
   },
   "Offline": {
     "title": "You are offline",

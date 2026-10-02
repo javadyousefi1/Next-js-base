@@ -1,5 +1,8 @@
 import axios, { type AxiosInstance } from "axios";
 
+/** The transport a query fetcher receives: `apiClient` in the browser, upstream on the server. */
+export type HttpClient = AxiosInstance;
+
 import { API_ROUTES } from "@/config/routes";
 
 import { emitUnauthorized } from "./auth-events";

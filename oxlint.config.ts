@@ -139,8 +139,8 @@ export default defineConfig({
       rules: { "no-restricted-imports": "off" },
     },
     {
-      // The query layer wraps the raw React Query APIs.
-      files: ["apps/*/src/lib/query/**"],
+      // The query and table layers wrap the raw React Query / TanStack Table APIs.
+      files: ["apps/*/src/lib/query/**", "apps/*/src/lib/table/**"],
       rules: {
         "no-restricted-imports": "off",
         "project/no-inline-query-keys": "off",

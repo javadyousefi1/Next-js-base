@@ -10,16 +10,14 @@ import type { z } from "zod";
 import type { ApiError } from "@/lib/http/errors";
 
 import { invalidateKeys } from "./invalidate";
-import { parseInput, parseResponse } from "./validation";
+import { labelFromKey, parseInput, parseResponse } from "./validation";
 
 type Invalidates<TData, TVariables> =
   | readonly QueryKey[]
   | ((data: TData, variables: TVariables) => readonly QueryKey[]);
 
 type MakeMutationConfig<TVariablesSchema extends z.ZodType, TResponseSchema extends z.ZodType> = {
-  /** Debug label used in validation errors, e.g. "users.create". */
-  name: string;
-  /** Key from `MUTATION_KEYS`. */
+  /** Key from `MUTATION_KEYS`. Also names validation errors (`["users", "create"]` → `users.create`). */
   mutationKey: MutationKey;
   /** Input contract (the same schema the form uses). `z.void()` when there is no input. */
   variables: TVariablesSchema;
@@ -52,14 +50,15 @@ export function makeMutation<TVariablesSchema extends z.ZodType, TResponseSchema
   type TVariablesInput = z.input<TVariablesSchema>;
   type TData = z.output<TResponseSchema>;
 
+  const label = labelFromKey(config.mutationKey);
+
   const run = async (input: TVariablesInput): Promise<TData> => {
-    const variables = parseInput(config.variables, input, config.name);
+    const variables = parseInput(config.variables, input, label);
     const raw = await config.mutationFn(variables);
-    return parseResponse(config.response, raw, config.name);
+    return parseResponse(config.response, raw, label);
   };
 
   return {
-    name: config.name,
     mutationKey: config.mutationKey,
 
     useMutation(overrides?: MutationOverrides<TData, TVariablesInput>) {

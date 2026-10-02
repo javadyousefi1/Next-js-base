@@ -25,7 +25,7 @@ export const sessionUserSchema = z.object({
 });
 export type SessionUser = z.infer<typeof sessionUserSchema>;
 
-/** Response of our BFF `/api/auth/login` and `/api/auth/session`. */
+/** Response of our BFF `/api/auth/login`. */
 export const sessionResponseSchema = z.object({ user: sessionUserSchema });
 export type SessionResponse = z.infer<typeof sessionResponseSchema>;
 

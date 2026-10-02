@@ -17,11 +17,12 @@ description: Add a validated read endpoint in apps/admin — zod params/response
 2. **Endpoint** — `src/config/api-endpoints.ts` (path relative to the upstream API).
 3. **Key** — `src/config/query-keys.ts`, under the feature's root key:
    `detail: (id: number) => [...usersRoot, "detail", id] as const`.
-4. **Service** (`api/<f>.service.ts`) — HTTP only, returns `unknown`:
+4. **Service** (`api/<f>.service.ts`) — HTTP only, returns `unknown`. Use the injected `http`
+   (browser: BFF proxy; server prefetch: upstream with the user's token), never import a client:
 
    ```ts
-   export const fetch<X>: QueryFetcher<<X>Params> = async (params, { signal }) => {
-     const { data } = await apiClient.get<unknown>(`${API_ENDPOINTS.users.list}/${params.id}`, { signal });
+   export const fetch<X>: QueryFetcher<<X>Params> = async (params, { http, signal }) => {
+     const { data } = await http.get<unknown>(`${API_ENDPOINTS.users.list}/${params.id}`, { signal });
      return data;
    };
    ```
@@ -30,7 +31,6 @@ description: Add a validated read endpoint in apps/admin — zod params/response
 
    ```ts
    export const <x>Query = makeQuery({
-     name: "<f>.<x>",
      key: QUERY_KEYS.<f>.<x>,
      params: <x>ParamsSchema,
      response: <x>ResponseSchema,
@@ -42,6 +42,8 @@ description: Add a validated read endpoint in apps/admin — zod params/response
 
 6. **Use it in a hook** — `const query = <x>Query.useQuery(params)`; map `query.data`,
    `query.isPending`, `query.isError` to a view model. Never in a component.
-7. **Mock** — handler in `src/mocks/handlers.ts` returning the same shape as `ResponseSchema`.
-8. **Verify** — a malformed mock response must surface `INVALID_RESPONSE` (dev logs show the zod
+7. **SSR (optional)** — in the page: `<PrefetchBoundary queries={[<x>Query.with(params)]}
+fallback={<Skeleton />}>`. Nothing else to write (same fetcher, server transport).
+8. **Mock** — handler in `src/mocks/handlers.ts` returning the same shape as `ResponseSchema`.
+9. **Verify** — a malformed mock response must surface `INVALID_RESPONSE` (dev logs show the zod
    tree); `bun run check`.

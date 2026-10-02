@@ -1,27 +1,17 @@
 import "server-only";
 import { API_ENDPOINTS } from "@/config/api-endpoints";
 import {
-  sessionUserSchema,
   tokenPairSchema,
   upstreamLoginResponseSchema,
   type LoginInput,
 } from "@/features/auth/schemas/auth.schema";
-import { bearer, upstream } from "@/server/http/upstream";
+import { upstreamPost } from "@/server/http/upstream";
 
-/** Upstream auth endpoints. Every response is validated before use. */
-export async function upstreamLogin(credentials: LoginInput) {
-  const { data } = await upstream.post<unknown>(API_ENDPOINTS.auth.login, credentials);
-  return upstreamLoginResponseSchema.parse(data);
+/** Token-issuing upstream endpoints (only reachable through /api/auth/*, which sets cookies). */
+export function upstreamLogin(credentials: LoginInput) {
+  return upstreamPost(API_ENDPOINTS.auth.login, credentials, upstreamLoginResponseSchema);
 }
 
-export async function upstreamRefresh(refreshToken: string) {
-  const { data } = await upstream.post<unknown>(API_ENDPOINTS.auth.refresh, { refreshToken });
-  return tokenPairSchema.parse(data);
-}
-
-export async function upstreamMe(accessToken: string) {
-  const { data } = await upstream.get<unknown>(API_ENDPOINTS.auth.me, {
-    headers: bearer(accessToken),
-  });
-  return sessionUserSchema.parse(data);
+export function upstreamRefresh(refreshToken: string) {
+  return upstreamPost(API_ENDPOINTS.auth.refresh, { refreshToken }, tokenPairSchema);
 }
