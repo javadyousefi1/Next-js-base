@@ -1,12 +1,12 @@
 import "server-only";
 import { createClient } from "redis";
 
-import { serverEnv } from "@/env/server";
+import { env } from "@/env";
 
 function createRedisClient() {
   const client = createClient({
-    url: serverEnv.REDIS_URL,
-    keyPrefix: serverEnv.REDIS_KEY_PREFIX,
+    url: env.REDIS_URL,
+    keyPrefix: env.REDIS_KEY_PREFIX,
     disableOfflineQueue: true,
     socket: {
       connectTimeout: 2_000,

@@ -4,7 +4,7 @@ import { hasDirective } from "./utils.ts";
 
 /** Server-only module specifiers. `*.actions` (Server Actions) are callable from the client. */
 function isServerModule(specifier: string): boolean {
-  if (specifier === "server-only" || specifier === "@/env/server") return true;
+  if (specifier === "server-only") return true;
   if (specifier.endsWith(".actions") || specifier.endsWith(".actions.ts")) return false;
   return specifier.startsWith("@/server/") || /(^|\/)server\//.test(specifier);
 }

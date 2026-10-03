@@ -18,13 +18,13 @@ app/                    Routing only — thin pages/layouts, BFF route handlers,
   manifest.ts · robots.ts · sitemap.ts
 components/             Shared, feature-agnostic VIEWS: data-table, feedback, layout, providers
 config/                 Constants: routes, query-keys, api-endpoints, cache-tags, navigation, site, auth
-env/                    server.ts / client.ts — zod-validated env (@t3-oss/env-nextjs)
 features/<name>/        Vertical slices (anatomy below)
 hooks/                  Generic hooks with no feature knowledge (debounce, media query, router…)
 i18n/                   next-intl routing, navigation (Link, useRouter…), request config, locale meta
 lib/                    Building blocks: http (axios + ApiError), query (makeQuery…), table (generic tables), seo
 mocks/                  MSW handlers + Faker database (fake upstream API)
 server/                 Server-only: auth (cookies, refresh), bff responses, upstream http, redis, PrefetchBoundary
+env.ts                  All env vars, zod-validated: `server` + `client` objects (@t3-oss/env-nextjs)
 instrumentation.ts      Boot: validates env, starts MSW when API_MOCKING=enabled
 proxy.ts                Next 16 proxy (formerly middleware): i18n routing + optimistic auth guard
 ```
@@ -192,9 +192,11 @@ Login is rate limited in Redis (5/min/IP); if Redis is down it fails open (logge
 
 ## Env
 
-Declare every variable in `src/env/server.ts` (server) or `src/env/client.ts` (`NEXT_PUBLIC_*`), add
-it to `.env.example`, to `turbo.json` (`env`/`passThroughEnv`) and to `docker-compose.yml` when
-the container needs it. Skill: `add-env-var`.
+One file, `src/env.ts`: secrets and server settings in the `server` object, `NEXT_PUBLIC_*` in the
+`client` object (also listed in `experimental__runtimeEnv`). Code reads `env.X` from `@/env`; a
+server value read in the browser throws. Add every new key to `.env.example`, to `turbo.json`
+(`env`/`passThroughEnv`) and to `docker-compose.yml` when the container needs it. Skill:
+`add-env-var`.
 
 ## Testing
 

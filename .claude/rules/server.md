@@ -26,4 +26,4 @@ paths:
 - Redis via `getRedis()`; features must keep working when Redis is down (fail open, log).
 - Cache Components: `'use cache'` + `cacheLife` + `cacheTag(CACHE_TAGS.x)` only for non-personal
   data; request-time APIs (`cookies()`, `headers()`, `connection()`) only inside `<Suspense>`.
-- Env: import `serverEnv` from `@/env/server`; never `process.env` (lint: `project/no-process-env`).
+- Env: `import { env } from "@/env"`; never `process.env` (lint: `project/no-process-env`).

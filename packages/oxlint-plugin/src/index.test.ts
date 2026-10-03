@@ -68,7 +68,7 @@ tester.run("no-server-import-in-client", rules["no-server-import-in-client"]!, {
     '"use client";\nimport type { TokenPair } from "@/server/auth/types";',
   ],
   invalid: [
-    { code: '"use client";\nimport { serverEnv } from "@/env/server";', errors: 1 },
+    { code: '"use client";\nimport { redis } from "@/server/redis/client";', errors: 1 },
     { code: '"use client";\nimport { upstream } from "@/server/http/upstream";', errors: 1 },
   ],
 });
@@ -82,7 +82,7 @@ tester.run("require-server-only", rules["require-server-only"]!, {
 });
 
 tester.run("no-process-env", rules["no-process-env"]!, {
-  valid: ["process.env.NODE_ENV", "process.env.NEXT_RUNTIME", "serverEnv.API_BASE_URL"],
+  valid: ["process.env.NODE_ENV", "process.env.NEXT_RUNTIME", "env.API_BASE_URL"],
   invalid: [
     { code: "process.env.API_BASE_URL", errors: 1 },
     { code: "const { SECRET } = process.env;", errors: 1 },

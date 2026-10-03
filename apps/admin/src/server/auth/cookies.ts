@@ -3,13 +3,16 @@ import { cookies } from "next/headers";
 import type { NextRequest, NextResponse } from "next/server";
 
 import { AUTH_COOKIES } from "@/config/auth";
-import { isSecureCookie, serverEnv } from "@/env/server";
+import { env } from "@/env";
 import type { TokenPair } from "@/features/auth/schemas/auth.schema";
 
 type ResponseCookies = NextResponse["cookies"];
 
+/** Secure cookies everywhere except plain-http local development. */
+const secure = env.AUTH_COOKIE_SECURE ?? env.NODE_ENV === "production";
+
 /** Tokens are only ever stored in httpOnly cookies: JavaScript in the browser can't read them. */
-const baseCookie = { httpOnly: true, secure: isSecureCookie, sameSite: "lax", path: "/" } as const;
+const baseCookie = { httpOnly: true, secure, sameSite: "lax", path: "/" } as const;
 
 /** Expire the cookie a bit before the token so we never send an already-expired token. */
 const EXPIRY_MARGIN_SECONDS = 30;
@@ -17,7 +20,7 @@ const EXPIRY_MARGIN_SECONDS = 30;
 export function setAuthCookies(responseCookies: ResponseCookies, tokens: TokenPair): void {
   const accessTtl = tokens.expiresInMins
     ? tokens.expiresInMins * 60
-    : serverEnv.AUTH_ACCESS_TOKEN_TTL_SECONDS;
+    : env.AUTH_ACCESS_TOKEN_TTL_SECONDS;
 
   responseCookies.set(AUTH_COOKIES.accessToken, tokens.accessToken, {
     ...baseCookie,
@@ -25,7 +28,7 @@ export function setAuthCookies(responseCookies: ResponseCookies, tokens: TokenPa
   });
   responseCookies.set(AUTH_COOKIES.refreshToken, tokens.refreshToken, {
     ...baseCookie,
-    maxAge: serverEnv.AUTH_REFRESH_TOKEN_TTL_SECONDS,
+    maxAge: env.AUTH_REFRESH_TOKEN_TTL_SECONDS,
   });
 }
 

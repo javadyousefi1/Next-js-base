@@ -38,8 +38,8 @@ COPY --from=prune /app/out/full/ .
 # NEXT_PUBLIC_* values are inlined into the browser bundle at BUILD time.
 ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ARG NEXT_PUBLIC_SITE_INDEXABLE=false
-# Server secrets are not needed to build; they are validated when the container starts
-# (src/instrumentation.ts) — a missing variable stops the container immediately.
+# Secrets are not needed to build, so validation is skipped here; src/instrumentation.ts validates
+# every variable (NEXT_PUBLIC_* included) when the container starts — a bad value stops it at once.
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL} \
     NEXT_PUBLIC_SITE_INDEXABLE=${NEXT_PUBLIC_SITE_INDEXABLE} \
     SKIP_ENV_VALIDATION=1

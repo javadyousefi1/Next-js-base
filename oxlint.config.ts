@@ -156,7 +156,7 @@ export default defineConfig({
     {
       // Env modules, config files, scripts and tests may read process.env / log freely.
       files: [
-        "apps/*/src/env/**",
+        "apps/*/src/env.ts",
         "apps/*/src/instrumentation.ts",
         "**/*.config.ts",
         "**/*.config.mjs",

@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { ROUTES, type AppRoute } from "@/config/routes";
 import { SITE } from "@/config/site";
-import { clientEnv } from "@/env/client";
+import { env } from "@/env";
 import { LOCALE_META } from "@/i18n/locales";
 import { routing, type AppLocale } from "@/i18n/routing";
 
@@ -26,7 +26,7 @@ function languageAlternates(route: AppRoute) {
  * Indexing is opt-in: `NEXT_PUBLIC_SITE_INDEXABLE=true` (production only). Admin panels and
  * preview deployments stay `noindex` by default — see also `app/robots.ts`.
  */
-const robots: Metadata["robots"] = clientEnv.NEXT_PUBLIC_SITE_INDEXABLE
+const robots: Metadata["robots"] = env.NEXT_PUBLIC_SITE_INDEXABLE
   ? { index: true, follow: true }
   : { index: false, follow: false, googleBot: { index: false, follow: false } };
 
@@ -35,7 +35,7 @@ export async function rootMetadata(locale: AppLocale): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: "Metadata" });
 
   return {
-    metadataBase: new URL(clientEnv.NEXT_PUBLIC_SITE_URL),
+    metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
     title: { default: t("title"), template: `%s · ${t("title")}` },
     description: t("description"),
     applicationName: SITE.name,

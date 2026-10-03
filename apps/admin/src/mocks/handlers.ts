@@ -2,7 +2,7 @@ import { http, HttpResponse } from "msw/http";
 import { delay } from "msw/utils/delay";
 
 import { API_ENDPOINTS } from "@/config/api-endpoints";
-import { serverEnv } from "@/env/server";
+import { env } from "@/env";
 
 import { db, DEMO_CREDENTIALS, USER_ROLES, type MockUser } from "./db";
 
@@ -10,7 +10,7 @@ import { db, DEMO_CREDENTIALS, USER_ROLES, type MockUser } from "./db";
  * MSW handlers that imitate the upstream REST API (DummyJSON-compatible contract).
  * They answer the server-side requests our BFF makes to `API_BASE_URL`.
  */
-const url = (path: string) => `${serverEnv.API_BASE_URL.replace(/\/$/, "")}${path}`;
+const url = (path: string) => `${env.API_BASE_URL.replace(/\/$/, "")}${path}`;
 
 const ACCESS_TOKEN_MINUTES = 15;
 const REFRESH_TOKEN_MINUTES = 60 * 24 * 7;

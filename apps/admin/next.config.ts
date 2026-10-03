@@ -4,8 +4,7 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 // Validate env vars at build time: a missing/invalid key fails `next build`.
-import "./src/env/client.ts";
-import "./src/env/server.ts";
+import "./src/env.ts";
 
 const isProduction = process.env.NODE_ENV === "production";
 

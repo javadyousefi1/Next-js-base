@@ -2,7 +2,7 @@ import "server-only";
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import type { z } from "zod";
 
-import { serverEnv } from "@/env/server";
+import { env } from "@/env";
 import { toApiError } from "@/lib/http/errors";
 import { parseResponse } from "@/lib/query/validation";
 
@@ -12,12 +12,12 @@ export function bearer(accessToken: string) {
 
 function createUpstreamClient(headers: Record<string, string> = {}): AxiosInstance {
   const client = axios.create({
-    baseURL: serverEnv.API_BASE_URL,
+    baseURL: env.API_BASE_URL,
     timeout: 10_000,
     headers: { Accept: "application/json", ...headers },
     // MSW intercepts requests inside this process: a mocked upstream must never go through an
     // HTTP(S)_PROXY from the environment (the proxy would receive — and reject — the call).
-    ...(serverEnv.API_MOCKING === "enabled" && { proxy: false as const }),
+    ...(env.API_MOCKING === "enabled" && { proxy: false as const }),
   });
 
   client.interceptors.response.use(

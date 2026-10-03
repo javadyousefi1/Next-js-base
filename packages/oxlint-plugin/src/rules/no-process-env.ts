@@ -3,14 +3,14 @@ import { defineRule } from "@oxlint/plugins";
 /** Read by Next.js/Node itself and safe everywhere. */
 const ALLOWED = new Set(["NODE_ENV", "NEXT_RUNTIME"]);
 
-/** Env vars are read only through the validated `serverEnv` / `clientEnv` (src/env). */
+/** Env vars are read only through the validated `env` (src/env.ts). */
 export const noProcessEnv = defineRule({
   meta: {
     type: "problem",
     docs: { description: "Disallow process.env outside the validated env modules." },
     messages: {
       direct:
-        "Direct process.env access. Declare the variable in src/env/server.ts or src/env/client.ts (validated with zod) and import serverEnv/clientEnv.",
+        'Direct process.env access. Declare the variable in src/env.ts (server or client object, validated with zod) and import { env } from "@/env".',
     },
     schema: [],
   },

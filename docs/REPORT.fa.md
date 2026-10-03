@@ -43,13 +43,13 @@ AGENTS.md / CLAUDE.md       قوانین مشترک برای انسان و هو�
 app/            فقط روتینگ: صفحه‌ها و layoutهای نازک، روت‌هندلرهای BFF، manifest/robots/sitemap
 components/     ویوهای عمومی (data-table، feedback، layout، providers)
 config/         ثابت‌ها: routes، query-keys، api-endpoints، cache-tags، navigation، site
-env/            اعتبارسنجی env با zod (سرور/کلاینت جدا)
 features/<x>/   هر فیچر: schemas → api (service + queries) → hooks (منطق) → components (ویو) → server
 hooks/          هوک‌های عمومی
 i18n/           next-intl: روتینگ، ناوبری (Link/useRouter)، پیکربندی درخواست
 lib/            http (axios + ApiError)، query (makeQuery/makeMutation)، table، seo
 mocks/          API ساختگی با MSW + Faker
 server/         فقط سرور: کوکی/سشن، پاسخ‌های BFF، کلاینت upstream، Redis
+env.ts          همه‌ی envها در یک فایل با اعتبارسنجی zod (آبجکت‌های server و client)
 proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان + گارد ورود
 ```
 
@@ -368,7 +368,7 @@ const filters = useUsersFilters();
 
   (skill `add-query`)
 
-- **متغیر env جدید:** `src/env` ⇐ `.env.example` ⇐ `turbo.json` ⇐ docker-compose (skill
+- **متغیر env جدید:** `src/env.ts` ⇐ `.env.example` ⇐ `turbo.json` ⇐ docker-compose (skill
   `add-env-var`).
 - **قبل از کامیت:** `bun run check`. پیام کامیت به شکل `feat(admin): ...` باشد.
 - **بک‌اند واقعی:** `API_MOCKING=disabled` و `API_BASE_URL` را تنظیم کنید و اسکیماهای پاسخ را با
@@ -433,3 +433,20 @@ Table v9 + nuqs را دارد) دوباره نوشته شد:
 شد، باید خودمان بسازیم یا آن موقع کتابخانه را برگردانیم.
 
 تست‌های e2e هر کدام سه بار اجرا شدند (۴۵ از ۴۵ سبز).
+
+---
+
+## ۱۲. یک فایل برای env
+
+طبق خواسته‌ی شما `src/env/server.ts` و `src/env/client.ts` در یک فایل ادغام شدند: `src/env.ts`. این
+همان الگوی مستند `@t3-oss/env-nextjs` است: یک `createEnv` با آبجکت `server` (سکرت‌ها و تنظیمات سرور)،
+آبجکت `client` (`NEXT_PUBLIC_*`) و `shared` (`NODE_ENV`). همه‌جا فقط `import { env } from "@/env"`
+نوشته می‌شود.
+
+- **امنیت:** Next.js فقط `NEXT_PUBLIC_*` را داخل باندل می‌گذارد. اگر کد مرورگر متغیر سرور را بخواند،
+  t3-env خطا می‌دهد. برای همین مسیر `@/env/server` از قانون lint مرز سرور/کلاینت حذف شد.
+- `isSecureCookie` به `src/server/auth/cookies.ts` منتقل شد. فایل env نباید در سطح ماژول متغیر سرور
+  بخواند، وگرنه import آن در مرورگر خطا می‌دهد.
+- **بده‌بستان:** در بیلد Docker (`SKIP_ENV_VALIDATION=1`) حالا چک `NEXT_PUBLIC_*` هم رد می‌شود و به
+  شروع کانتینر منتقل می‌شود (مقدار این متغیرها در Dockerfile پیش‌فرض دارد). `bun run build` معمولی
+  همچنان همه را چک می‌کند.

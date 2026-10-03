@@ -17,7 +17,7 @@ Process:
      React Query keys or missing invalidation, promise misuse.
    - Conventions: ROUTES/QUERY_KEYS constants, makeQuery/makeMutation with zod params+response,
      `cn()` for conditional classes, no logic in views, server/client boundary, env via
-     `serverEnv`/`clientEnv`, kebab-case files.
+     `env` from `@/env`, kebab-case files.
    - Security: tokens only in httpOnly cookies, nothing secret in client bundles or logs, input
      validated on the server, no open redirects (`sanitizeCallbackUrl`).
    - i18n/RTL: strings in both `messages/en.json` and `fa.json`, logical CSS classes.

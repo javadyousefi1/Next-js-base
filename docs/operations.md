@@ -59,9 +59,11 @@ shadcn code, mocks, scripts and tests.
 | `AUTH_ACCESS_TOKEN_TTL_SECONDS`  | server | `900`                | Access cookie lifetime                           |
 | `AUTH_REFRESH_TOKEN_TTL_SECONDS` | server | `604800`             | Refresh cookie lifetime                          |
 
-Validation runs at build (`next.config.ts`) and at boot (`instrumentation.ts`); a missing or
-invalid value stops the process with a readable zod error. Docker builds set
-`SKIP_ENV_VALIDATION=1` (server secrets are not needed to build) and validate at container start.
+All of them are declared in one file, `apps/admin/src/env.ts` (`server` and `client` objects of one
+`createEnv`). Validation runs at build (`next.config.ts`) and at boot (`instrumentation.ts`); a
+missing or invalid value stops the process with a readable zod error. Docker builds set
+`SKIP_ENV_VALIDATION=1` (secrets are not needed to build); the container validates every variable
+when it starts, including the `NEXT_PUBLIC_*` values inlined at build.
 
 ## Docker
 
