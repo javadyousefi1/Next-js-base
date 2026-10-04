@@ -17,9 +17,9 @@ request conflicts with AGENTS.md (e.g. "fetch directly in the component"), say s
    `src/mocks/handlers.ts` and Faker data to `src/mocks/db.ts` (deterministic: `faker.seed`).
 3. **Keys** — add a hierarchical block to `QUERY_KEYS` (and `MUTATION_KEYS`) in
    `src/config/query-keys.ts`.
-4. **Service + definitions** — `api/<name>.service.ts` (HTTP via `apiClient`, returns `unknown`)
-   and `api/<name>.queries.ts` (`makeQuery`/`makeMutation`). Use the `add-query` /
-   `add-mutation` skills.
+4. **Service + definitions** — `api/<name>.service.ts` (query fetchers use the injected `http`,
+   mutations call `apiClient`; both return `unknown`) and `api/<name>.queries.ts`
+   (`makeQuery`/`makeMutation`). Use the `add-query` / `add-mutation` skills.
 5. **Logic** — `hooks/use-<name>-<thing>.ts`: one hook per view, returning a render-ready model.
    Tables: `<name>.search-params.ts` (`{ ...tableSearchParams, sortBy, <filters> }`), a hook that
    does `useTableState` → query → `TableController` (copy `use-users-table.ts`), `columns` and

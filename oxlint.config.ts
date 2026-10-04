@@ -107,6 +107,13 @@ export default defineConfig({
               "HTTP goes through src/lib/http (browser → BFF) or src/server/http (upstream).",
           },
           {
+            name: "@/lib/http/http-client",
+            importNames: ["HttpClient"],
+            allowTypeImports: true,
+            message:
+              "Use apiClient/bffClient (src/lib/http/client.ts) or upstream/upstreamFor (src/server/http/upstream.ts).",
+          },
+          {
             name: "@tanstack/react-query",
             importNames: [
               "useQuery",

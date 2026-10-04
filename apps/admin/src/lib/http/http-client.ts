@@ -16,24 +16,25 @@ type HttpClientConfig = {
   onError?: (error: ApiError) => void;
 };
 
-export type RequestOptions<TSchema extends z.ZodType | undefined = undefined> = {
-  /** Response contract: `data` is parsed with it before it is returned (`INVALID_RESPONSE`). */
-  schema?: TSchema;
+export type RequestOptions = {
   params?: Record<string, unknown>;
   headers?: Record<string, string>;
   signal?: AbortSignal;
 };
 
-/** Parsed data when the request has a schema; `unknown` otherwise (e.g. `makeQuery` parses it). */
-export type ResponseData<TSchema> = TSchema extends z.ZodType ? z.output<TSchema> : unknown;
+/** Response contract: `data` is parsed with `schema` (`INVALID_RESPONSE` on mismatch) and typed. */
+export type ValidatedOptions<TSchema extends z.ZodType> = RequestOptions & { schema: TSchema };
 
 /** Status + data: the only response shape that leaves the client (no axios types). */
 export type HttpResponse<TData> = { status: number; data: TData };
 
+type SendOptions = RequestOptions & { schema?: z.ZodType; body?: unknown };
+
 /**
  * The app's HTTP client. Every request, response and error goes through an instance, and only
  * two things come out:
- * - the response `data`, parsed with `schema` when the request has one
+ * - the response data: typed and validated with `{ schema }`, `unknown` without one (then e.g.
+ *   `makeQuery` parses it with its `response` schema)
  * - an `ApiError` (network, timeout, 4xx/5xx, invalid response) — never an AxiosError
  *
  *   const stats = await upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsSchema });
@@ -50,57 +51,68 @@ export class HttpClient {
     this.#onError = onError;
   }
 
-  async get<TSchema extends z.ZodType | undefined = undefined>(
-    url: string,
-    options?: RequestOptions<TSchema>,
-  ) {
-    return (await this.request("GET", url, options)).data;
+  get(url: string, options?: RequestOptions): Promise<unknown>;
+  get<S extends z.ZodType>(url: string, options: ValidatedOptions<S>): Promise<z.output<S>>;
+  async get(url: string, options?: SendOptions) {
+    return (await this.#send("GET", url, options)).data;
   }
 
-  async post<TSchema extends z.ZodType | undefined = undefined>(
+  post(url: string, body?: unknown, options?: RequestOptions): Promise<unknown>;
+  post<S extends z.ZodType>(
     url: string,
-    body?: unknown,
-    options?: RequestOptions<TSchema>,
-  ) {
-    return (await this.request("POST", url, { ...options, body })).data;
+    body: unknown,
+    options: ValidatedOptions<S>,
+  ): Promise<z.output<S>>;
+  async post(url: string, body?: unknown, options?: SendOptions) {
+    return (await this.#send("POST", url, { ...options, body })).data;
   }
 
-  async put<TSchema extends z.ZodType | undefined = undefined>(
+  put(url: string, body?: unknown, options?: RequestOptions): Promise<unknown>;
+  put<S extends z.ZodType>(
     url: string,
-    body?: unknown,
-    options?: RequestOptions<TSchema>,
-  ) {
-    return (await this.request("PUT", url, { ...options, body })).data;
+    body: unknown,
+    options: ValidatedOptions<S>,
+  ): Promise<z.output<S>>;
+  async put(url: string, body?: unknown, options?: SendOptions) {
+    return (await this.#send("PUT", url, { ...options, body })).data;
   }
 
-  async patch<TSchema extends z.ZodType | undefined = undefined>(
+  patch(url: string, body?: unknown, options?: RequestOptions): Promise<unknown>;
+  patch<S extends z.ZodType>(
     url: string,
-    body?: unknown,
-    options?: RequestOptions<TSchema>,
-  ) {
-    return (await this.request("PATCH", url, { ...options, body })).data;
+    body: unknown,
+    options: ValidatedOptions<S>,
+  ): Promise<z.output<S>>;
+  async patch(url: string, body?: unknown, options?: SendOptions) {
+    return (await this.#send("PATCH", url, { ...options, body })).data;
   }
 
-  async delete<TSchema extends z.ZodType | undefined = undefined>(
-    url: string,
-    options?: RequestOptions<TSchema>,
-  ) {
-    return (await this.request("DELETE", url, options)).data;
+  delete(url: string, options?: RequestOptions): Promise<unknown>;
+  delete<S extends z.ZodType>(url: string, options: ValidatedOptions<S>): Promise<z.output<S>>;
+  async delete(url: string, options?: SendOptions) {
+    return (await this.#send("DELETE", url, options)).data;
   }
 
-  /** Any method, resolving to status + data (the BFF proxy forwards both). */
-  async request<TSchema extends z.ZodType | undefined = undefined>(
+  /** Any method, resolving to status + raw data (the BFF proxy forwards both). */
+  request(
     method: string,
     url: string,
-    { schema, body, ...options }: RequestOptions<TSchema> & { body?: unknown } = {},
-  ): Promise<HttpResponse<ResponseData<TSchema>>> {
+    options?: RequestOptions & { body?: unknown },
+  ): Promise<HttpResponse<unknown>> {
+    return this.#send(method, url, options);
+  }
+
+  async #send(
+    method: string,
+    url: string,
+    { schema, body, ...options }: SendOptions = {},
+  ): Promise<HttpResponse<unknown>> {
     try {
       const response = await this.#axios.request<unknown>({ method, url, data: body, ...options });
       const data = schema
         ? parseResponse(schema, response.data, `${method} ${url}`)
         : response.data;
-      // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- `schema` produced this type (`unknown` without one)
-      return { status: response.status, data: data as ResponseData<TSchema> };
+      return { status: response.status, data };
     } catch (error) {
       const apiError = toApiError(error);
       this.#onError?.(apiError);

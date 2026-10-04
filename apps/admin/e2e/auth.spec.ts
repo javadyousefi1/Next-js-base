@@ -38,4 +38,14 @@ test.describe("authentication (BFF + httpOnly cookies)", () => {
     await page.getByRole("menuitem", { name: "Log out" }).click();
     await expect(page).toHaveURL(/\/en\/login$/);
   });
+
+  test("a request without a session sends the user back to login", async ({ page, context }) => {
+    await signIn(page, "/en/users");
+    await expect(page).toHaveURL(/\/en\/users$/);
+
+    // No cookies → the BFF answers 401 → HttpClient onError → "session expired" redirect.
+    await context.clearCookies();
+    await page.getByRole("searchbox").fill("admin");
+    await expect(page).toHaveURL(/\/en\/login\?callbackUrl=%2Fusers$/);
+  });
 });

@@ -388,6 +388,8 @@ const filters = useUsersFilters();
 - **یکپارچگی:** کوئری کاربر جاری حالا هم از پروکسی (`/auth/me`) می‌آید، پس با همان الگو قابل prefetch
   است. روت جداگانه‌ی `/api/auth/session` حذف شد.
 
+> `upstreamGet` این بخش بعداً با کلاس `HttpClient` جایگزین شد: `upstream.get(url, { schema })` (بخش ۱۳).
+
 ---
 
 ## ۱۰. ساده‌سازی جدول‌ها (بازبینی دوم)
@@ -483,5 +485,12 @@ export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, si
 - پروکسی BFF با `upstream.request(method, url, …)` وضعیت و دیتا را با هم می‌گیرد و منتقل می‌کند.
 - `makeQuery` و `makeMutation` مثل قبل ورودی و خروجی را با zod چک می‌کنند (خواسته‌ی قبلی شما). برای
   همین fetcherها اسکیما را دوباره به `http` نمی‌دهند تا اسکیما دو جا نوشته نشود.
+- تایپ‌ها با overload: بدون `schema` نتیجه `unknown` است و با `schema` همان خروجی اسکیما. پس هیچ
+  دیتایی بدون parse شدن، «معتبر» تایپ نمی‌شود و داخل کلاس هیچ cast‌ی نیست.
+- قانون lint: `new HttpClient(...)` فقط در `lib/http` و `server/http` مجاز است (import تایپ آزاد است).
+  پس کسی نمی‌تواند کلاینتی بسازد که مستقیم و بدون BFF به API اصلی برود.
 - تست واحد جدید (`http-client.test.ts`) کلاس را با یک سرور HTTP واقعی محلی امتحان می‌کند: parse با
-  اسکیما، دیتای خام، status، `INVALID_RESPONSE` و تبدیل خطای HTTP به `ApiError`.
+  اسکیما، دیتای خام، status، `INVALID_RESPONSE`، تبدیل خطای HTTP به `ApiError`، رسیدن خطای 401 به
+  `onError`، و timeout و قطعی شبکه.
+- تست e2e جدید: اگر وسط کار کوکی‌ها از بین بروند، اولین درخواست بعدی 401 می‌گیرد و کاربر به صفحه‌ی
+  ورود (با `callbackUrl`) برمی‌گردد.
