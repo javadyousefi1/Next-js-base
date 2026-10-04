@@ -8,9 +8,10 @@ import {
 import type { z } from "zod";
 
 import type { ApiError } from "@/lib/http/errors";
+import { parseResponse } from "@/lib/http/parse-response";
 
 import { invalidateKeys } from "./invalidate";
-import { labelFromKey, parseInput, parseResponse } from "./validation";
+import { labelFromKey, parseInput } from "./validation";
 
 type Invalidates<TData, TVariables> =
   | readonly QueryKey[]

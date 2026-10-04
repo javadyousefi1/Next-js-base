@@ -5,13 +5,15 @@ import {
   upstreamLoginResponseSchema,
   type LoginInput,
 } from "@/features/auth/schemas/auth.schema";
-import { upstreamPost } from "@/server/http/upstream";
+import { upstream } from "@/server/http/upstream";
 
 /** Token-issuing upstream endpoints (only reachable through /api/auth/*, which sets cookies). */
 export function upstreamLogin(credentials: LoginInput) {
-  return upstreamPost(API_ENDPOINTS.auth.login, credentials, upstreamLoginResponseSchema);
+  return upstream.post(API_ENDPOINTS.auth.login, credentials, {
+    schema: upstreamLoginResponseSchema,
+  });
 }
 
 export function upstreamRefresh(refreshToken: string) {
-  return upstreamPost(API_ENDPOINTS.auth.refresh, { refreshToken }, tokenPairSchema);
+  return upstream.post(API_ENDPOINTS.auth.refresh, { refreshToken }, { schema: tokenPairSchema });
 }

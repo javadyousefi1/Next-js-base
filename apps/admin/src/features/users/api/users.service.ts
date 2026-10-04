@@ -16,10 +16,5 @@ export function toUpstreamListQuery(params: UsersListParams) {
 }
 
 /** Works in the browser (BFF proxy) and on the server (prefetch): `http` is injected. */
-export const fetchUsersList: QueryFetcher<UsersListParams> = async (params, { http, signal }) => {
-  const { data } = await http.get<unknown>(API_ENDPOINTS.users.list, {
-    params: toUpstreamListQuery(params),
-    signal,
-  });
-  return data;
-};
+export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, signal }) =>
+  http.get(API_ENDPOINTS.users.list, { params: toUpstreamListQuery(params), signal });

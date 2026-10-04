@@ -21,7 +21,7 @@ config/                 Constants: routes, query-keys, api-endpoints, cache-tags
 features/<name>/        Vertical slices (anatomy below)
 hooks/                  Generic hooks with no feature knowledge (debounce, media query, router…)
 i18n/                   next-intl routing, navigation (Link, useRouter…), request config, locale meta
-lib/                    Building blocks: http (axios + ApiError), query (makeQuery…), table (generic tables), seo
+lib/                    Building blocks: http (HttpClient + ApiError), query (makeQuery…), table (generic tables), seo
 mocks/                  MSW handlers + Faker database (fake upstream API)
 server/                 Server-only: auth (cookies, refresh), bff responses, upstream http, redis, PrefetchBoundary
 env.ts                  All env vars, zod-validated: `server` + `client` objects (@t3-oss/env-nextjs)
@@ -76,13 +76,9 @@ Features import other features only through `schemas` or a deliberately shared c
 
 ```ts
 // features/<x>/api/<x>.service.ts — one fetcher for browser AND server
-export const fetchUsersList: QueryFetcher<UsersListParams> = async (params, { http, signal }) => {
-  const { data } = await http.get<unknown>(API_ENDPOINTS.users.list, {
-    params: toQuery(params),
-    signal,
-  });
-  return data; // `http` = apiClient (→ /api/proxy) in the browser, upstream + user token on the server
-};
+// `http` = apiClient (→ /api/proxy) in the browser, upstream + user token on the server
+export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, signal }) =>
+  http.get(API_ENDPOINTS.users.list, { params: toQuery(params), signal });
 
 // features/<x>/api/<x>.queries.ts
 export const usersListQuery = makeQuery({
@@ -105,8 +101,12 @@ export const usersListQuery = makeQuery({
 - Fetchers use `http` from their context with `API_ENDPOINTS` paths (the proxy maps them 1:1).
   `bffClient` (→ `/api/auth/*`) is only for login/logout. A 401 in the browser emits
   `unauthorized` → `useUnauthorizedRedirect` sends the user to login.
-- Server-only calls (Server Components, `'use cache'`, route handlers): `upstreamGet(url, schema)` /
-  `upstreamPost(url, body, schema)` — validated, errors labelled with the endpoint (`GET /stats`).
+- Every request goes through an `HttpClient` instance (`lib/http/http-client.ts`). Only the
+  response data comes out, or an `ApiError` is thrown — axios types never leave it. Instances:
+  `apiClient` / `bffClient` (browser) and `upstream` / `upstreamFor(token)` (server).
+- Server-only calls (Server Components, `'use cache'`, route handlers) pass the response schema to
+  the client: `upstream.get(url, { schema })` / `upstream.post(url, body, { schema })` → typed,
+  validated data; errors labelled with the endpoint (`GET /stats`).
 
 ## Tables (search + filters + sorting + pagination)
 

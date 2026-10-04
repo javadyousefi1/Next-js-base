@@ -25,15 +25,14 @@ async function forward(request: NextRequest, context: RouteContext<"/api/proxy/[
     return bffJson({ message: "Not found" }, { status: 404 });
   }
 
+  const url = `/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`;
   const hasBody = request.method !== "GET" && request.method !== "DELETE";
   const body = hasBody ? await request.text() : undefined;
 
   try {
     const { result, refreshedTokens } = await withSession(request, (accessToken) =>
-      upstream.request<unknown>({
-        method: request.method,
-        url: `/${path.map(encodeURIComponent).join("/")}${request.nextUrl.search}`,
-        data: body,
+      upstream.request(request.method, url, {
+        body,
         headers: { ...bearer(accessToken), "Content-Type": "application/json" },
       }),
     );

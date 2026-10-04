@@ -26,21 +26,21 @@ this repository. Read this file completely before changing anything. App-specifi
 
 ## 1. Stack
 
-| Area         | Choice                                                                                    |
-| ------------ | ----------------------------------------------------------------------------------------- |
-| Monorepo     | Turborepo 2 (strict env mode, cached tasks) + Bun 1.4 workspaces (isolated installs)      |
-| App          | Next.js 16 App Router, React 19.3 + React Compiler, Cache Components, `proxy.ts`          |
-| Language     | TypeScript 7 (native compiler), strict + `noUncheckedIndexedAccess`                       |
-| UI           | shadcn/ui (`base-nova` style, Base UI primitives, RTL) in `packages/ui`, Tailwind CSS 4   |
-| Data         | axios → BFF route handlers → upstream API; TanStack Query via `makeQuery`/`makeMutation`  |
-| Validation   | zod 4 everywhere (env, forms, query params, API responses)                                |
-| State in URL | nuqs (tables: search, filters, sort, pagination)                                          |
-| i18n         | next-intl (`en`, `fa` + RTL), prefix routing `/en/...`, `/fa/...`                         |
-| Server infra | Redis (node-redis): rate limiting + cache-aside; httpOnly cookie sessions                 |
-| Mock API     | MSW 3 + Faker (`API_MOCKING=enabled`) — no backend needed                                 |
-| Quality      | Oxlint (type-aware + project rules), Oxfmt, Husky, commitlint, lint-staged                |
-| Tests        | `bun test` (unit), `node --test` (lint rules), Playwright (e2e, against production build) |
-| Delivery     | Docker multi-stage (turbo prune → standalone Next.js on Node), docker compose + Redis     |
+| Area         | Choice                                                                                                         |
+| ------------ | -------------------------------------------------------------------------------------------------------------- |
+| Monorepo     | Turborepo 2 (strict env mode, cached tasks) + Bun 1.4 workspaces (isolated installs)                           |
+| App          | Next.js 16 App Router, React 19.3 + React Compiler, Cache Components, `proxy.ts`                               |
+| Language     | TypeScript 7 (native compiler), strict + `noUncheckedIndexedAccess`                                            |
+| UI           | shadcn/ui (`base-nova` style, Base UI primitives, RTL) in `packages/ui`, Tailwind CSS 4                        |
+| Data         | `HttpClient` (axios inside) → BFF route handlers → upstream API; TanStack Query via `makeQuery`/`makeMutation` |
+| Validation   | zod 4 everywhere (env, forms, query params, API responses)                                                     |
+| State in URL | nuqs (tables: search, filters, sort, pagination)                                                               |
+| i18n         | next-intl (`en`, `fa` + RTL), prefix routing `/en/...`, `/fa/...`                                              |
+| Server infra | Redis (node-redis): rate limiting + cache-aside; httpOnly cookie sessions                                      |
+| Mock API     | MSW 3 + Faker (`API_MOCKING=enabled`) — no backend needed                                                      |
+| Quality      | Oxlint (type-aware + project rules), Oxfmt, Husky, commitlint, lint-staged                                     |
+| Tests        | `bun test` (unit), `node --test` (lint rules), Playwright (e2e, against production build)                      |
+| Delivery     | Docker multi-stage (turbo prune → standalone Next.js on Node), docker compose + Redis                          |
 
 ## 2. Commands (repo root)
 
@@ -85,7 +85,7 @@ nuisance: fix the code, don't disable the rule. Disabling needs a comment with a
 | 6   | Server code stays on the server: `src/server/**` and `features/*/server/**` start with `import "server-only"`; client files never import them (Server Actions in `*.actions.ts` are the exception) | `project/require-server-only`, `project/no-server-import-in-client` |
 | 7   | Env vars only via `env` from `src/env.ts` (`server`/`client` objects), validated by zod — a missing key fails the build/boot                                                                       | `project/no-process-env`                                            |
 | 8   | Tokens never reach the browser: httpOnly cookies, browser calls only the BFF (`/api/auth/*`, `/api/proxy/*`)                                                                                       | architecture + review                                               |
-| 9   | HTTP clients only in `src/lib/http` (browser → BFF) and `src/server/http` (server → upstream)                                                                                                      | `no-restricted-imports` (axios)                                     |
+| 9   | HTTP only through `HttpClient` instances (data or `ApiError` out): `src/lib/http` (browser → BFF) and `src/server/http` (server → upstream)                                                        | `no-restricted-imports` (axios)                                     |
 | 10  | Every user-facing string in `messages/en.json` **and** `messages/fa.json` (same keys); layouts must work in RTL (logical classes `ms-*`, `ps-*`, `start-*`)                                        | review                                                              |
 | 11  | File names kebab-case; one component/hook per file; named exports (default only where Next requires it)                                                                                            | `unicorn/filename-case`                                             |
 | 12  | Conventional Commits: `type(scope): subject`                                                                                                                                                       | commitlint (commit-msg hook)                                        |

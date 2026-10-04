@@ -1,12 +1,7 @@
-import axios, { type AxiosInstance } from "axios";
-
-/** The transport a query fetcher receives: `apiClient` in the browser, upstream on the server. */
-export type HttpClient = AxiosInstance;
-
 import { API_ROUTES } from "@/config/routes";
 
 import { emitUnauthorized } from "./auth-events";
-import { toApiError } from "./errors";
+import { HttpClient } from "./http-client";
 
 /**
  * Browser HTTP clients. The browser never talks to the upstream API directly and never sees a
@@ -15,27 +10,18 @@ import { toApiError } from "./errors";
  * - `apiClient` → `/api/proxy/*` (forwarded to the upstream API with the access token)
  * - `bffClient` → `/api/*`       (our own endpoints, e.g. auth)
  *
- * Only `features/<feature>/api/*.service.ts` files may import these (lint: no-restricted-imports).
+ * Only `features/<feature>/api/*.service.ts` files and `src/lib/query` use these.
  */
-function createHttpClient(baseURL: string): AxiosInstance {
-  const client = axios.create({
+function createBrowserClient(baseURL: string): HttpClient {
+  return new HttpClient({
     baseURL,
     timeout: 15_000,
     withCredentials: true,
-    headers: { Accept: "application/json" },
-  });
-
-  client.interceptors.response.use(
-    (response) => response,
-    (error: unknown) => {
-      const apiError = toApiError(error);
-      if (apiError.code === "UNAUTHORIZED") emitUnauthorized();
-      return Promise.reject(apiError);
+    onError: (error) => {
+      if (error.code === "UNAUTHORIZED") emitUnauthorized();
     },
-  );
-
-  return client;
+  });
 }
 
-export const apiClient = createHttpClient(API_ROUTES.proxy);
-export const bffClient = createHttpClient("/");
+export const apiClient = createBrowserClient(API_ROUTES.proxy);
+export const bffClient = createBrowserClient("/");

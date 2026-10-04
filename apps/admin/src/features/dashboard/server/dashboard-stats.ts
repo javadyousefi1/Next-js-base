@@ -3,7 +3,7 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { CACHE_TAGS } from "@/config/cache-tags";
-import { upstreamGet } from "@/server/http/upstream";
+import { upstream } from "@/server/http/upstream";
 
 import { dashboardStatsSchema } from "../schemas/dashboard.schema";
 
@@ -17,5 +17,5 @@ export async function getDashboardStats() {
   cacheLife("minutes");
   cacheTag(CACHE_TAGS.dashboardStats);
 
-  return upstreamGet(API_ENDPOINTS.stats, dashboardStatsSchema);
+  return upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsSchema });
 }

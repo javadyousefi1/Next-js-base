@@ -46,7 +46,7 @@ config/         ثابت‌ها: routes، query-keys، api-endpoints، cache-tag
 features/<x>/   هر فیچر: schemas → api (service + queries) → hooks (منطق) → components (ویو) → server
 hooks/          هوک‌های عمومی
 i18n/           next-intl: روتینگ، ناوبری (Link/useRouter)، پیکربندی درخواست
-lib/            http (axios + ApiError)، query (makeQuery/makeMutation)، table، seo
+lib/            http (کلاس HttpClient + ApiError)، query (makeQuery/makeMutation)، table، seo
 mocks/          API ساختگی با MSW + Faker
 server/         فقط سرور: کوکی/سشن، پاسخ‌های BFF، کلاینت upstream، Redis
 env.ts          همه‌ی envها در یک فایل با اعتبارسنجی zod (آبجکت‌های server و client)
@@ -66,7 +66,7 @@ proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان +
 | 5   | متن کامیت ولیدیت شود و فرمت داشته باشد                          | ✅    | commitlint + Conventional Commits + لیست scopeها (`commitlint.config.ts`)                                                                   |
 | 6   | روی main قبل از push بیلد چک شود                                | ✅    | `scripts/git/pre-push.sh`: برای main بیلد production + تست e2e                                                                              |
 | 7   | قبل از push تست‌ها اجرا شوند                                    | ✅    | همان هوک: همیشه `bun run check` (lint + format + typecheck + تست‌ها)                                                                        |
-| 8   | axios + React Query                                             | ✅    | `lib/http` (کلاینت مرورگر → BFF) و `server/http` (سرور → API اصلی)                                                                          |
+| 8   | axios + React Query                                             | ✅    | `lib/http` (کلاینت مرورگر → BFF) و `server/http` (سرور → API اصلی)، هر دو نمونه‌ای از یک کلاس `HttpClient`                                  |
 | 9   | کوئری‌ها و میوتیشن‌ها wrap شده باشند                            | ✅    | `makeQuery` و `makeMutation` در `lib/query`؛ استفاده‌ی مستقیم از `useQuery` با لینت ممنوع است                                               |
 | 10  | `makeQuery` با کلیدهای مرتبط که با تغییرشان آپدیت شود           | ✅    | `relatedKeys` + invalidation زنجیره‌ای و امن در برابر حلقه (`lib/query/invalidate.ts` + تست)                                                |
 | 11  | ورودی/خروجی makeQuery و makeMutation با zod ولیدیت شود          | ✅    | `params`/`variables` قبل از درخواست و `response` قبل از رسیدن به کش parse می‌شوند؛ خطاها `VALIDATION` و `INVALID_RESPONSE`                  |
@@ -132,13 +132,8 @@ proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان +
 
 ```ts
 // fetcher فقط یک‌بار نوشته می‌شود و هم در مرورگر و هم روی سرور کار می‌کند
-export const fetchUsersList: QueryFetcher<UsersListParams> = async (params, { http, signal }) => {
-  const { data } = await http.get<unknown>(API_ENDPOINTS.users.list, {
-    params: toQuery(params),
-    signal,
-  });
-  return data;
-};
+export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, signal }) =>
+  http.get(API_ENDPOINTS.users.list, { params: toQuery(params), signal });
 
 export const usersListQuery = makeQuery({
   key: QUERY_KEYS.users.list, // فقط از ثابت‌ها؛ لیبل خطاها هم از همین کلید ساخته می‌شود
@@ -161,8 +156,9 @@ export const usersListQuery = makeQuery({
   می‌شوند و میوتیشن تا پایان این کار pending می‌ماند.
 - خطاها همیشه `ApiError` با `code` هستند؛ خطاهای 4xx دوباره تلاش نمی‌شوند؛ خطای رفرش‌های
   پس‌زمینه toast می‌شود و خطای بار اول داخل خود ویو نمایش داده می‌شود.
-- فراخوانی‌های فقط-سرور (مثل آمار داشبورد): `upstreamGet(API_ENDPOINTS.stats, dashboardStatsSchema)`
-  که پاسخ را خودش با zod چک می‌کند و لیبل خطا را از ثابت endpoint می‌سازد (`GET /stats`).
+- فراخوانی‌های فقط-سرور (مثل آمار داشبورد) اسکیما را به خود کلاینت می‌دهند:
+  `upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsSchema })`. پاسخ داخل کلاینت با zod چک
+  می‌شود و لیبل خطا از ثابت endpoint ساخته می‌شود (`GET /stats`). جزئیات در بخش ۱۳.
 
 ### ۵.۲ پیش‌بارگذاری سمت سرور (hydration) در یک خط
 
@@ -455,3 +451,37 @@ Table v9 + nuqs را دارد) دوباره نوشته شد:
 سرور روشن می‌ماند و به همه‌ی درخواست‌ها 500 می‌داد، در حالی که مستندات می‌گفت کانتینر متوقف می‌شود.
 حالا `instrumentation.ts` در این حالت با کد 1 خارج می‌شود (تست شد: بدون `REDIS_URL` خطای zod چاپ
 می‌شود و پروسه با کد 1 بسته می‌شود). تست‌های e2e هر کدام دو بار اجرا شدند (۳۰ از ۳۰ سبز).
+
+---
+
+## ۱۳. کلاس `HttpClient`: همه‌ی درخواست‌ها از یک نمونه‌ی خودمان رد می‌شوند
+
+طبق خواسته‌ی شما، axios حالا داخل یک کلاس است (`src/lib/http/http-client.ts`). هر درخواست، پاسخ و
+خطا از یک نمونه‌ی همین کلاس رد می‌شود و بعد از برگشتن درخواست فقط ساختار خود برنامه بیرون می‌آید:
+
+- **موفق:** خود `data`. اگر درخواست `schema` داشته باشد، همان‌جا با zod parse می‌شود و تایپش از
+  اسکیما می‌آید.
+- **ناموفق:** همیشه `ApiError` (شبکه، timeout، 4xx/5xx، پاسخ نامعتبر). هیچ‌وقت `AxiosError` یا
+  `AxiosResponse` بیرون نمی‌آید.
+
+```ts
+// سرور: اسکیما به خود upstream پاس داده می‌شود، یک خط
+return upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsSchema });
+
+// fetcher (مرورگر و سرور): یک خط، makeQuery پاسخ را با `response` خودش چک می‌کند
+export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, signal }) =>
+  http.get(API_ENDPOINTS.users.list, { params: toQuery(params), signal });
+```
+
+| نمونه                        | کجا                       | مقصد                                      |
+| ---------------------------- | ------------------------- | ----------------------------------------- |
+| `apiClient` / `bffClient`    | `lib/http/client.ts`      | مرورگر → BFF (401 ⇐ رویداد «سشن تمام شد») |
+| `upstream` / `upstreamFor()` | `server/http/upstream.ts` | سرور → API اصلی                           |
+
+- `upstreamGet` / `upstreamPost` (بخش ۹) حذف شدند. حالا `upstream.get/post/put/patch/delete` اسکیما
+  را در `options` می‌گیرند و پاسخ داخل خود کلاس parse می‌شود، نه با یک خط جدا بعد از درخواست.
+- پروکسی BFF با `upstream.request(method, url, …)` وضعیت و دیتا را با هم می‌گیرد و منتقل می‌کند.
+- `makeQuery` و `makeMutation` مثل قبل ورودی و خروجی را با zod چک می‌کنند (خواسته‌ی قبلی شما). برای
+  همین fetcherها اسکیما را دوباره به `http` نمی‌دهند تا اسکیما دو جا نوشته نشود.
+- تست واحد جدید (`http-client.test.ts`) کلاس را با یک سرور HTTP واقعی محلی امتحان می‌کند: parse با
+  اسکیما، دیتای خام، status، `INVALID_RESPONSE` و تبدیل خطای HTTP به `ApiError`.

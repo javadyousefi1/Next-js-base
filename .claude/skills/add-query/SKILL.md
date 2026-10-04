@@ -21,10 +21,8 @@ description: Add a validated read endpoint in apps/admin — zod params/response
    (browser: BFF proxy; server prefetch: upstream with the user's token), never import a client:
 
    ```ts
-   export const fetch<X>: QueryFetcher<<X>Params> = async (params, { http, signal }) => {
-     const { data } = await http.get<unknown>(`${API_ENDPOINTS.users.list}/${params.id}`, { signal });
-     return data;
-   };
+   export const fetch<X>: QueryFetcher<<X>Params> = (params, { http, signal }) =>
+     http.get(`${API_ENDPOINTS.users.list}/${params.id}`, { signal });
    ```
 
 5. **Definition** (`api/<f>.queries.ts`):

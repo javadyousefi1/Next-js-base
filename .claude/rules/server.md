@@ -17,9 +17,9 @@ paths:
 - Route handlers: validate input with zod (`safeParse`), call upstream through `withSession()`,
   answer with `bffJson()` / `bffError()` (they handle rotated cookies, `no-store`, safe messages and
   `unstable_rethrow`). Never catch-and-swallow Next.js errors.
-- Upstream calls: `upstreamGet(url, schema)` / `upstreamPost(url, body, schema)` — the response is
-  validated and errors are labelled with the endpoint constant. Raw `upstream` only for
-  pass-through (the BFF proxy).
+- Upstream calls: `upstream.get(url, { schema })` / `upstream.post(url, body, { schema })` — the
+  client validates the response and labels errors with the endpoint constant (`GET /stats`).
+  `upstream.request(method, url, …)` (status + raw data) only for pass-through (the BFF proxy).
 - Hydration: `<PrefetchBoundary queries={[xQuery.with(params)]} fallback={…}>` in the page. Never
   hand-write prefetch/dehydrate code or a second (server) fetcher.
 - `proxy.ts` is an optimistic guard (cookie presence) + next-intl routing. No data fetching there.

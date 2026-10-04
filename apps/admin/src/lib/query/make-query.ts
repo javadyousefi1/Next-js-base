@@ -8,11 +8,13 @@ import {
 } from "@tanstack/react-query";
 import type { z } from "zod";
 
-import { apiClient, type HttpClient } from "@/lib/http/client";
+import { apiClient } from "@/lib/http/client";
 import type { ApiError } from "@/lib/http/errors";
+import type { HttpClient } from "@/lib/http/http-client";
+import { parseResponse } from "@/lib/http/parse-response";
 
 import { invalidateKeys } from "./invalidate";
-import { labelFromKey, parseInput, parseResponse } from "./validation";
+import { labelFromKey, parseInput } from "./validation";
 
 export type QueryFetcherContext = {
   signal: AbortSignal;
@@ -25,8 +27,9 @@ export type QueryFetcherContext = {
 };
 
 /**
- * Performs the request. Receives the PARSED params and returns raw (`unknown`) data —
- * the response schema turns it into the typed result.
+ * Performs the request. Receives the PARSED params and returns the raw (`unknown`) data —
+ * the `response` schema turns it into the typed result:
+ * `(params, { http, signal }) => http.get(API_ENDPOINTS.users.list, { params, signal })`.
  */
 export type QueryFetcher<TParams> = (
   params: TParams,
