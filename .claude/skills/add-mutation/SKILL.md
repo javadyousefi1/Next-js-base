@@ -6,7 +6,8 @@ description: Add a validated write operation in apps/admin — zod variables/res
 # Add a mutation
 
 1. **Schemas** — `variables` schema (the same one the form uses; messages are i18n keys:
-   `z.string().min(1, { error: "nameRequired" })`) and a `response` schema.
+   `z.string().min(1, { error: "nameRequired" })`) and a `response` schema (`z.unknown()` when the
+   endpoint answers 204 No Content — the body is empty).
 2. **Keys** — add to `MUTATION_KEYS` in `src/config/query-keys.ts`.
 3. **Service** — `api/<f>.service.ts`: `return apiClient.post/put/patch/delete(…)` (resolves to the
    raw data; `makeMutation` validates it with `response`).

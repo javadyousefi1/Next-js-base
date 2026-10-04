@@ -8,12 +8,17 @@ import { clearAuthCookies, setAuthCookies } from "@/server/auth/cookies";
 
 const NO_STORE = { "Cache-Control": "no-store" };
 
+/** Statuses that must not have a body (`Response.json` throws for them, e.g. a forwarded 204). */
+const NULL_BODY_STATUSES = new Set([204, 205, 304]);
+
 /** JSON response from a BFF route. Persists rotated tokens when the session was refreshed. */
 export function bffJson(
   body: unknown,
   { status = 200, refreshedTokens }: { status?: number; refreshedTokens?: TokenPair } = {},
 ): NextResponse {
-  const response = NextResponse.json(body, { status, headers: NO_STORE });
+  const response = NULL_BODY_STATUSES.has(status)
+    ? new NextResponse(null, { status, headers: NO_STORE })
+    : NextResponse.json(body, { status, headers: NO_STORE });
   if (refreshedTokens) setAuthCookies(response.cookies, refreshedTokens);
   return response;
 }
