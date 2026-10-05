@@ -5,6 +5,7 @@ paths:
   - "apps/*/src/app/api/**"
   - "apps/*/src/proxy.ts"
   - "apps/*/src/instrumentation.ts"
+  - "packages/redis/**"
 ---
 
 # Server code
@@ -23,7 +24,8 @@ paths:
 - Hydration: `<PrefetchBoundary queries={[xQuery.with(params)]} fallback={…}>` in the page. Never
   hand-write prefetch/dehydrate code or a second (server) fetcher.
 - `proxy.ts` is an optimistic guard (cookie presence) + next-intl routing. No data fetching there.
-- Redis via `getRedis()`; features must keep working when Redis is down (fail open, log).
+- Redis via `getRedis()` + the `@repo/redis` helpers (`rateLimit(getRedis(), …)`,
+  `remember(getRedis(), …)`); features must keep working when Redis is down (fail open, log).
 - Cache Components: `'use cache'` + `cacheLife` + `cacheTag(CACHE_TAGS.x)` only for non-personal
   data; request-time APIs (`cookies()`, `headers()`, `connection()`) only inside `<Suspense>`.
 - Env: `import { env } from "@/env"`; never `process.env` (lint: `project/no-process-env`).

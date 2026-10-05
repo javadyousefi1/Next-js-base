@@ -1,5 +1,6 @@
 "use client";
 
+import type { DataTableColumn, TableController } from "@repo/table/types";
 import {
   Table,
   TableBody,
@@ -11,7 +12,6 @@ import {
 import { cn } from "@repo/ui/lib/utils";
 
 import { QueryError } from "@/components/feedback/query-error";
-import type { DataTableColumn, TableController } from "@/lib/table/types";
 
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { DataTableEmpty } from "./data-table-empty";

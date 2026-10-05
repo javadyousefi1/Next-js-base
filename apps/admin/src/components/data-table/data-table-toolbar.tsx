@@ -1,11 +1,10 @@
 "use client";
 
+import type { DataTableFilter, TableControls } from "@repo/table/types";
 import { Button } from "@repo/ui/components/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@repo/ui/components/input-group";
 import { SearchIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-
-import type { DataTableFilter, TableControls } from "@/lib/table/types";
 
 import { DataTableSelectFilter } from "./data-table-select-filter";
 

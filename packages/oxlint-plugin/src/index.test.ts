@@ -69,6 +69,7 @@ tester.run("no-server-import-in-client", rules["no-server-import-in-client"]!, {
   ],
   invalid: [
     { code: '"use client";\nimport { redis } from "@/server/redis/client";', errors: 1 },
+    { code: '"use client";\nimport { rateLimit } from "@repo/redis";', errors: 1 },
     { code: '"use client";\nimport { upstream } from "@/server/http/upstream";', errors: 1 },
   ],
 });

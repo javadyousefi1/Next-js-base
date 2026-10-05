@@ -1,9 +1,8 @@
 "use client";
 
+import type { SortOrder } from "@repo/table/search-params";
 import { Button } from "@repo/ui/components/button";
 import { ArrowDownIcon, ArrowUpIcon, ChevronsUpDownIcon } from "lucide-react";
-
-import type { SortOrder } from "@/lib/table/search-params";
 
 const SORT_ICONS = { asc: ArrowUpIcon, desc: ArrowDownIcon, none: ChevronsUpDownIcon };
 

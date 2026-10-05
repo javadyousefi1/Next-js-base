@@ -104,10 +104,10 @@ export default defineConfig({
           {
             name: "axios",
             message:
-              "HTTP goes through src/lib/http (browser → BFF) or src/server/http (upstream).",
+              "HTTP goes through an HttpClient (@repo/http) from src/lib/http (browser → BFF) or src/server/http (upstream).",
           },
           {
-            name: "@/lib/http/http-client",
+            name: "@repo/http",
             importNames: ["HttpClient"],
             allowTypeImports: true,
             message:
@@ -122,7 +122,7 @@ export default defineConfig({
               "useMutation",
               "queryOptions",
             ],
-            message: "Declare queries/mutations with makeQuery / makeMutation (src/lib/query).",
+            message: "Declare queries/mutations with makeQuery / makeMutation (@/lib/query).",
           },
         ],
       },
@@ -136,18 +136,22 @@ export default defineConfig({
     },
     {
       // Server modules must be guarded against client imports.
-      files: ["apps/*/src/server/**/*.ts", "apps/*/src/features/*/server/**/*.ts"],
+      files: [
+        "apps/*/src/server/**/*.ts",
+        "apps/*/src/features/*/server/**/*.ts",
+        "packages/redis/src/**/*.ts",
+      ],
       excludeFiles: ["**/*.test.ts"],
       rules: { "project/require-server-only": "error" },
     },
     {
       // The only places allowed to create HTTP clients.
-      files: ["apps/*/src/lib/http/**", "apps/*/src/server/http/**"],
+      files: ["apps/*/src/lib/http/**", "apps/*/src/server/http/**", "packages/http/**"],
       rules: { "no-restricted-imports": "off" },
     },
     {
-      // The query and table layers wrap the raw React Query / TanStack Table APIs.
-      files: ["apps/*/src/lib/query/**", "apps/*/src/lib/table/**"],
+      // The query and table packages wrap the raw React Query / nuqs APIs.
+      files: ["packages/query/**", "packages/table/**"],
       rules: {
         "no-restricted-imports": "off",
         "project/no-inline-query-keys": "off",

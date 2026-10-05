@@ -1,6 +1,5 @@
+import type { ApiError } from "@repo/http";
 import type { QueryKey } from "@tanstack/react-query";
-
-import type { ApiError } from "@/lib/http/errors";
 
 /** Metadata stored on every query created by `makeQuery`. */
 export type AppQueryMeta = {

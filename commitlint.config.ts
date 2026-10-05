@@ -12,6 +12,11 @@ const config: UserConfig = {
       "always",
       [
         "admin",
+        "http",
+        "query",
+        "table",
+        "hooks",
+        "redis",
         "ui",
         "oxlint-plugin",
         "typescript-config",

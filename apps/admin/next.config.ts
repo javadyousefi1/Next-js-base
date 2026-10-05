@@ -52,7 +52,16 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
 
   // Workspace packages ship TypeScript source; t3-env must be transpiled for standalone output.
-  transpilePackages: ["@repo/ui", "@t3-oss/env-nextjs", "@t3-oss/env-core"],
+  transpilePackages: [
+    "@repo/hooks",
+    "@repo/http",
+    "@repo/query",
+    "@repo/redis",
+    "@repo/table",
+    "@repo/ui",
+    "@t3-oss/env-nextjs",
+    "@t3-oss/env-core",
+  ],
   // Loaded from node_modules at runtime instead of being bundled (patches Node's http stack).
   serverExternalPackages: ["msw"],
 

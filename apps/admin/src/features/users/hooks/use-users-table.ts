@@ -1,10 +1,9 @@
 "use client";
 
+import { useDebouncedValue } from "@repo/hooks/use-debounced-value";
+import type { TableController } from "@repo/table/types";
+import { useTableState } from "@repo/table/use-table-state";
 import { keepPreviousData } from "@tanstack/react-query";
-
-import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import type { TableController } from "@/lib/table/types";
-import { useTableState } from "@/lib/table/use-table-state";
 
 import { usersListQuery } from "../api/users.queries";
 import type { User } from "../schemas/user.schema";

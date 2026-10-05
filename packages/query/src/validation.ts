@@ -1,6 +1,5 @@
+import { ApiError } from "@repo/http";
 import { z } from "zod";
-
-import { ApiError } from "@/lib/http/errors";
 
 /**
  * Error label derived from a key constant: `["users", "list", {…}]` → `"users.list"`.
@@ -13,7 +12,7 @@ export function labelFromKey(key: readonly unknown[]): string {
 /**
  * Input validation for every query/mutation (enforced by `makeQuery` / `makeMutation`):
  * params/variables are parsed BEFORE any request is sent → `VALIDATION`. Responses are parsed
- * with `parseResponse` (`src/lib/http/parse-response.ts`).
+ * with `parseResponse` (`@repo/http`).
  * Parsing (not just checking) means defaults/coercions/transforms from the schema are applied.
  */
 export function parseInput<TSchema extends z.ZodType>(

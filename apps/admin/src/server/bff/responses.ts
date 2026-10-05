@@ -1,9 +1,9 @@
 import "server-only";
+import { toApiError } from "@repo/http";
 import { unstable_rethrow } from "next/navigation";
 import { NextResponse } from "next/server";
 
 import type { TokenPair } from "@/features/auth/schemas/auth.schema";
-import { toApiError } from "@/lib/http/errors";
 import { clearAuthCookies, setAuthCookies } from "@/server/auth/cookies";
 
 const NO_STORE = { "Cache-Control": "no-store" };

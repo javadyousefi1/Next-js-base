@@ -1,6 +1,7 @@
 ---
 paths:
   - "apps/*/src/hooks/**/*.ts"
+  - "packages/hooks/**/*.ts"
   - "apps/*/src/features/*/hooks/**/*.ts"
 ---
 
@@ -16,5 +17,6 @@ isError, retry }` (a `TableController`) for the data-table components.
 - Other URL state: nuqs parsers from a shared module importing `nuqs/server`.
 - Navigation: `useAppRouter()` with `ROUTES`. Forms: react-hook-form + `zodResolver(schema)`
   with the same schema the BFF validates; zod messages are i18n keys.
-- Generic hooks in `src/hooks/` know nothing about features (no feature imports).
+- Generic hooks live in `@repo/hooks` (`packages/hooks`) and know nothing about any app;
+  `src/hooks/` keeps app hooks (`useAppRouter`). Neither imports features.
 - Promises handed to the view are wrapped: `() => void doAsync()` (lint: `no-misused-promises`).

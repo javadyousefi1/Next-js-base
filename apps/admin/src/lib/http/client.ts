@@ -1,7 +1,8 @@
+import { HttpClient } from "@repo/http";
+
 import { API_ROUTES } from "@/config/routes";
 
 import { emitUnauthorized } from "./auth-events";
-import { HttpClient } from "./http-client";
 
 /**
  * Browser HTTP clients. The browser never talks to the upstream API directly and never sees a

@@ -1,9 +1,8 @@
 "use client";
 
+import type { DataTableColumn } from "@repo/table/types";
 import { Badge } from "@repo/ui/components/badge";
 import { useTranslations } from "next-intl";
-
-import type { DataTableColumn } from "@/lib/table/types";
 
 import type { User, UserRole } from "../schemas/user.schema";
 

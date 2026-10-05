@@ -1,6 +1,7 @@
 import "server-only";
+import { HttpClient } from "@repo/http";
+
 import { env } from "@/env";
-import { HttpClient } from "@/lib/http/http-client";
 
 export function bearer(accessToken: string) {
   return { Authorization: `Bearer ${accessToken}` };

@@ -1,0 +1,26 @@
+{
+  "name": "@repo/redis",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Server-only Redis helpers (node-redis): a resilient client, validated cache-aside (remember) and a rate limiter that fails open.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "redis": "6.3.0",
+    "server-only": "0.0.1"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "24.19.1",
+    "typescript": "7.0.2",
+    "zod": "4.6.5"
+  },
+  "peerDependencies": {
+    "zod": "^4.6.5"
+  }
+}

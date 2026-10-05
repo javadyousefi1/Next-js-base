@@ -4,6 +4,11 @@
 
 ```
 apps/admin                Next.js 16 app (App Router, Cache Components, React Compiler)
+packages/http             HttpClient (axios inside): data or ApiError out
+packages/query            makeQuery / makeMutation, related-key invalidation, QueryClient
+packages/table            headless tables: nuqs URL contract + useTableState
+packages/hooks            generic React hooks
+packages/redis            server-only Redis: client, remember, rateLimit
 packages/ui               shadcn/ui (base-nova, Base UI) + Tailwind 4 tokens + cn()
 packages/oxlint-plugin    project lint rules (project/*)
 packages/typescript-config  tsconfig presets

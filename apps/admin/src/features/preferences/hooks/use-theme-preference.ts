@@ -1,8 +1,7 @@
 "use client";
 
+import { useIsClient } from "@repo/hooks/use-is-client";
 import { useTheme } from "next-themes";
-
-import { useIsClient } from "@/hooks/use-is-client";
 
 export const THEMES = ["light", "dark", "system"] as const;
 export type ThemePreference = (typeof THEMES)[number];

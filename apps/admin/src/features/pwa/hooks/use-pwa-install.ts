@@ -1,10 +1,9 @@
 "use client";
 
+import { useEventListener } from "@repo/hooks/use-event-listener";
+import { useIsClient } from "@repo/hooks/use-is-client";
+import { useMediaQuery } from "@repo/hooks/use-media-query";
 import { useState } from "react";
-
-import { useEventListener } from "@/hooks/use-event-listener";
-import { useIsClient } from "@/hooks/use-is-client";
-import { useMediaQuery } from "@/hooks/use-media-query";
 
 export type PwaInstallStatus = "installed" | "available" | "ios" | "unavailable";
 

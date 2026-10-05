@@ -1,5 +1,5 @@
 import "server-only";
-import { getRedis } from "./client";
+import type { RedisClient } from "./client";
 
 export type RateLimitResult = { allowed: boolean; remaining: number; retryAfterSeconds: number };
 
@@ -9,10 +9,10 @@ export type RateLimitResult = { allowed: boolean; remaining: number; retryAfterS
  * already reported by the Redis client.
  */
 export async function rateLimit(
+  redis: RedisClient,
   key: string,
   { limit, windowSeconds }: { limit: number; windowSeconds: number },
 ): Promise<RateLimitResult> {
-  const redis = getRedis();
   if (!redis.isReady) return { allowed: true, remaining: limit, retryAfterSeconds: 0 };
 
   const redisKey = `rate-limit:${key}`;

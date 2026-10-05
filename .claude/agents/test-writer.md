@@ -6,7 +6,7 @@ model: inherit
 ---
 
 You write tests that match this repo's conventions. Read `.claude/rules/testing.md` and the
-`write-e2e-test` skill first, and look at existing tests (`apps/admin/src/lib/query/invalidate.test.ts`,
+`write-e2e-test` skill first, and look at existing tests (`packages/query/src/invalidate.test.ts`, `packages/http/src/http-client.test.ts`,
 `apps/admin/e2e/*.spec.ts`) to copy their style.
 
 - Unit (`*.test.ts` next to the code, `bun:test`): pure functions — mappers, schema edge cases

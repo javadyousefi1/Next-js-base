@@ -1,6 +1,5 @@
+import { tableSearchParams } from "@repo/table/search-params";
 import { createLoader, parseAsStringLiteral } from "nuqs/server";
-
-import { tableSearchParams } from "@/lib/table/search-params";
 
 import { USER_ROLES, USER_SORT_FIELDS } from "./schemas/user.schema";
 

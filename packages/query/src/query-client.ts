@@ -1,3 +1,4 @@
+import type { ApiError } from "@repo/http";
 import {
   defaultShouldDehydrateQuery,
   isServer,
@@ -5,8 +6,6 @@ import {
   QueryCache,
   QueryClient,
 } from "@tanstack/react-query";
-
-import type { ApiError } from "@/lib/http/errors";
 
 import "./register";
 
@@ -29,7 +28,7 @@ function shouldRetry(failureCount: number, error: ApiError): boolean {
 let reportError: ErrorReporter | undefined;
 
 /**
- * Registers the global error UI (toasts). Called once by `useQueryErrorToasts`; returns the
+ * Registers the global error UI. Called once by the app (e.g. a toast hook); returns the
  * unregister function so it can be used as an effect cleanup.
  */
 export function setErrorReporter(reporter: ErrorReporter): () => void {

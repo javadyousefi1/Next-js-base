@@ -1,12 +1,10 @@
 "use client";
 
+import type { ApiError } from "@repo/http";
+import { setErrorReporter } from "@repo/query";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { toast } from "sonner";
-
-import type { ApiError } from "@/lib/http/errors";
-
-import { setErrorReporter } from "./query-client";
 
 const NETWORK_CODES = new Set<ApiError["code"]>(["NETWORK", "TIMEOUT"]);
 

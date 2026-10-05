@@ -1,7 +1,7 @@
 import "server-only";
 import type { z } from "zod";
 
-import { getRedis } from "./client";
+import type { RedisClient } from "./client";
 
 /**
  * Cache-aside helper shared by every server instance (unlike Next's in-memory `use cache`).
@@ -9,15 +9,15 @@ import { getRedis } from "./client";
  * a wrong shape. Falls back to `load()` when Redis is down.
  *
  * @example
- * const stats = await remember("stats", 60, statsSchema, () => fetchStats());
+ * const stats = await remember(redis, "stats", 60, statsSchema, () => fetchStats());
  */
 export async function remember<TSchema extends z.ZodType>(
+  redis: RedisClient,
   key: string,
   ttlSeconds: number,
   schema: TSchema,
   load: () => Promise<z.output<TSchema>>,
 ): Promise<z.output<TSchema>> {
-  const redis = getRedis();
   const redisKey = `cache:${key}`;
 
   if (redis.isReady) {

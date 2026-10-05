@@ -1,0 +1,24 @@
+{
+  "name": "@repo/hooks",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generic React hooks with no app knowledge (debounce, interval, local storage, media query, clipboard…).",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/react": "19.3.0",
+    "react": "19.3.0",
+    "typescript": "7.0.2",
+    "zod": "4.6.5"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0",
+    "zod": "^4.6.5"
+  }
+}

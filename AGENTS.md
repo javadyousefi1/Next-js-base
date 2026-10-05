@@ -62,13 +62,26 @@ use npm/yarn/pnpm here (the root `devEngines` pins Bun).
 
 ```
 apps/admin/              Next.js admin panel (reference app) — see apps/admin/AGENTS.md
-packages/ui/             Design system: shadcn components, Tailwind tokens, cn(), shared hooks
+packages/http/           HttpClient (axios inside): data or ApiError out, zod-validated responses
+packages/query/          React Query layer: createMakeQuery / makeMutation, invalidation, QueryClient
+packages/table/          Headless server-side tables: nuqs URL contract, useTableState, types
+packages/hooks/          Generic React hooks (debounce, interval, local storage, media query…)
+packages/redis/          Server-only Redis helpers: client, remember (cache-aside), rateLimit
+packages/ui/             Design system: shadcn components, Tailwind tokens, cn(), UI hooks
 packages/oxlint-plugin/  Project lint rules (`project/*`) + their tests
 packages/typescript-config/  Shared tsconfig presets
 scripts/                 setup, doctor, clean, git hooks, Claude hooks, PWA icon generator
 docs/                    Architecture & decisions (start at docs/README.md)
 .claude/                 Claude Code: settings + hooks, path rules, skills, subagents
 ```
+
+**Packages are app-agnostic.** They never import from `apps/*` and never read env, routes or
+i18n; the app binds them (HTTP instances in `src/lib/http` + `src/server/http`,
+`makeQuery = createMakeQuery(apiClient)` in `src/lib/query`, `getRedis()` in `src/server/redis`).
+They are Just-in-Time packages: `exports` point at the TypeScript source and the app transpiles
+them (`transpilePackages` in `next.config.ts`). New shared code → `packages/<name>/` with
+`package.json` (`exports`, `typecheck`/`test` scripts), `tsconfig.json`, `AGENTS.md`; add it to the
+app's dependencies (`workspace:*`), to `transpilePackages` and as a commit scope.
 
 ## 4. Golden rules
 
@@ -94,7 +107,8 @@ nuisance: fix the code, don't disable the rule. Disabling needs a comment with a
 
 - Hooks (Husky): **pre-commit** lint-staged (oxlint --fix + oxfmt on staged files) · **commit-msg**
   commitlint · **pre-push** `bun run check`, plus `bun run build` and e2e when pushing to `main`.
-- Scopes: `admin`, `ui`, `oxlint-plugin`, `typescript-config`, `deps`, `docker`, `ci`, `docs`,
+- Scopes: `admin`, `http`, `query`, `table`, `hooks`, `redis`, `ui`, `oxlint-plugin`,
+  `typescript-config`, `deps`, `docker`, `ci`, `docs`,
   `tooling`, `ai`. Example: `feat(admin): add user details page`.
 - Never bypass hooks (`--no-verify`) or force-push shared branches.
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { PAGE_SIZES } from "@repo/table/search-params";
+import type { TableController } from "@repo/table/types";
 import { Button } from "@repo/ui/components/button";
 import {
   Select,
@@ -15,9 +17,6 @@ import {
   ChevronsRightIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-
-import { PAGE_SIZES } from "@/lib/table/search-params";
-import type { TableController } from "@/lib/table/types";
 
 type DataTablePaginationProps = {
   table: TableController<unknown>;

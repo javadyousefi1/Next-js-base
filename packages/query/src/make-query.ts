@@ -1,3 +1,4 @@
+import { parseResponse, type ApiError, type HttpClient } from "@repo/http";
 import {
   queryOptions,
   useQuery,
@@ -8,20 +9,15 @@ import {
 } from "@tanstack/react-query";
 import type { z } from "zod";
 
-import { apiClient } from "@/lib/http/client";
-import type { ApiError } from "@/lib/http/errors";
-import type { HttpClient } from "@/lib/http/http-client";
-import { parseResponse } from "@/lib/http/parse-response";
-
 import { invalidateKeys } from "./invalidate";
 import { labelFromKey, parseInput } from "./validation";
 
 export type QueryFetcherContext = {
   signal: AbortSignal;
   /**
-   * Where the request goes. Browser: `apiClient` (→ `/api/proxy`, the BFF adds the token).
-   * Server prefetch: the upstream client with the user's token. Use paths from `API_ENDPOINTS`
-   * — the BFF proxy maps them 1:1, so one fetcher works on both sides.
+   * Where the request goes. Browser: the client bound with `createMakeQuery` (the app's BFF
+   * client). Server prefetch: the client `<PrefetchBoundary>` passes (upstream + user token).
+   * Use endpoint paths the BFF maps 1:1, so one fetcher works on both sides.
    */
   http: HttpClient;
 };
@@ -71,8 +67,22 @@ type QueryOverrides<TData> = Partial<
 >;
 
 /**
+ * Binds `makeQuery` to the client queries use by default (the app's browser client). Each app
+ * does this once:
+ *
+ *   export const makeQuery = createMakeQuery(apiClient); // apps/<app>/src/lib/query/index.ts
+ *
+ * Server prefetch (`xQuery.with(params)`) gets its client from `<PrefetchBoundary>` instead.
+ */
+export function createMakeQuery(defaultHttp: HttpClient) {
+  return <TParamsSchema extends z.ZodType, TResponseSchema extends z.ZodType>(
+    config: MakeQueryConfig<TParamsSchema, TResponseSchema>,
+  ) => makeQuery(config, defaultHttp);
+}
+
+/**
  * Builds a typed, validated, reusable query definition. This is the ONLY way to declare a query
- * (raw `useQuery` is lint-banned outside `src/lib/query`).
+ * (raw `useQuery` is lint-banned outside `@repo/query`).
  *
  * - params are parsed with `params` before the request (invalid → `ApiError("VALIDATION")`)
  * - responses are parsed with `response` (unexpected shape → `ApiError("INVALID_RESPONSE")`)
@@ -87,8 +97,9 @@ type QueryOverrides<TData> = Partial<
  *   fetcher: fetchUsersList, // (params, { http, signal }) => http.get(API_ENDPOINTS.users.list, …)
  * });
  */
-export function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema extends z.ZodType>(
+function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema extends z.ZodType>(
   config: MakeQueryConfig<TParamsSchema, TResponseSchema>,
+  defaultHttp: HttpClient,
 ) {
   type TParamsInput = z.input<TParamsSchema>;
   type TParams = z.output<TParamsSchema>;
@@ -101,7 +112,7 @@ export function makeQuery<TParamsSchema extends z.ZodType, TResponseSchema exten
       : { params: input as unknown as TParams, valid: false as const };
   };
 
-  const options = (input: TParamsInput, http: HttpClient = apiClient) => {
+  const options = (input: TParamsInput, http: HttpClient = defaultHttp) => {
     // The key is built from the parsed params so `{}` and `{ page: 1 }` share one cache entry.
     const { params, valid } = resolveParams(input);
     const queryKey = config.key(params);

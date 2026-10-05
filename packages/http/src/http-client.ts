@@ -39,8 +39,8 @@ type SendOptions = RequestOptions & { schema?: z.ZodType; body?: unknown };
  *
  *   const stats = await upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsSchema });
  *
- * Instances: `apiClient` / `bffClient` (browser → BFF, `src/lib/http/client.ts`) and
- * `upstream` / `upstreamFor(token)` (server → upstream API, `src/server/http/upstream.ts`).
+ * Apps create the instances, one per base URL (e.g. a browser client for their BFF and a
+ * server client for the upstream API).
  */
 export class HttpClient {
   readonly #axios: AxiosInstance;

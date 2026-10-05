@@ -19,15 +19,18 @@ app/                    Routing only — thin pages/layouts, BFF route handlers,
 components/             Shared, feature-agnostic VIEWS: data-table, feedback, layout, providers
 config/                 Constants: routes, query-keys, api-endpoints, cache-tags, navigation, site, auth
 features/<name>/        Vertical slices (anatomy below)
-hooks/                  Generic hooks with no feature knowledge (debounce, media query, router…)
+hooks/                  App hooks (useAppRouter: i18n router + top loader); generic ones: @repo/hooks
 i18n/                   next-intl routing, navigation (Link, useRouter…), request config, locale meta
-lib/                    Building blocks: http (HttpClient + ApiError), query (makeQuery…), table (generic tables), seo
+lib/                    App bindings: http (apiClient/bffClient), query (makeQuery + error toasts), seo
 mocks/                  MSW handlers + Faker database (fake upstream API)
-server/                 Server-only: auth (cookies, refresh), bff responses, upstream http, redis, PrefetchBoundary
+server/                 Server-only: auth (cookies, refresh), bff responses, upstream client, getRedis, PrefetchBoundary
 env.ts                  All env vars, zod-validated: `server` + `client` objects (@t3-oss/env-nextjs)
 instrumentation.ts      Boot: validates env, starts MSW when API_MOCKING=enabled
 proxy.ts                Next 16 proxy (formerly middleware): i18n routing + optimistic auth guard
 ```
+
+App-agnostic building blocks come from workspace packages: `@repo/http`, `@repo/query`,
+`@repo/table`, `@repo/hooks`, `@repo/redis`, `@repo/ui` (see the root `AGENTS.md` §3).
 
 ## Feature anatomy — copy `features/users`
 
@@ -47,7 +50,8 @@ Dependency direction: `schemas` ← `api` ← `hooks` ← `components` ← `app`
 and `schemas`; client code never imports `server/` (except Server Actions in `*.actions.ts`).
 Features import other features only through `schemas` or a deliberately shared component
 (e.g. the shell renders `auth/components/user-menu`). Anything shared by two features moves to
-`lib/`, `hooks/`, `components/` or `config/`.
+`lib/`, `hooks/`, `components/` or `config/` — or, when no app knowledge is involved, to a
+`packages/*` package.
 
 ## Logic vs. view
 
@@ -101,9 +105,9 @@ export const usersListQuery = makeQuery({
 - Fetchers use `http` from their context with `API_ENDPOINTS` paths (the proxy maps them 1:1).
   `bffClient` (→ `/api/auth/*`) is only for login/logout. A 401 in the browser emits
   `unauthorized` → `useUnauthorizedRedirect` sends the user to login.
-- Every request goes through an `HttpClient` instance (`lib/http/http-client.ts`). Only the
-  response data comes out, or an `ApiError` is thrown — axios types never leave it. Instances:
-  `apiClient` / `bffClient` (browser) and `upstream` / `upstreamFor(token)` (server).
+- Every request goes through an `HttpClient` instance (`@repo/http`). Only the response data
+  comes out, or an `ApiError` is thrown — axios types never leave it. Instances: `apiClient` /
+  `bffClient` (browser) and `upstream` / `upstreamFor(token)` (server).
 - Server-only calls (Server Components, `'use cache'`, route handlers) pass the response schema to
   the client: `upstream.get(url, { schema })` / `upstream.post(url, body, { schema })` → typed,
   validated data; errors labelled with the endpoint (`GET /stats`).
@@ -115,7 +119,7 @@ Plain React, no table library: the API pages, sorts and filters; the UI renders 
 ```ts
 // 1. URL contract — features/<x>/<x>.search-params.ts (nuqs/server: shared with the server)
 export const usersSearchParams = {
-  ...tableSearchParams, // page, pageSize, q, sortBy, order
+  ...tableSearchParams, // @repo/table/search-params: page, pageSize, q, sortBy, order
   sortBy: parseAsStringLiteral(USER_SORT_FIELDS),
   role: parseAsStringLiteral(USER_ROLES), // every extra key is a filter
 };
@@ -137,8 +141,9 @@ return { ...controls, rows: query.data?.users ?? [], total: query.data?.total ??
 <DataTablePagination table={table} />
 ```
 
-- `useTableState(parsers)` (`lib/table`): URL state + `setSearch`, `setFilter`, `toggleSort`,
-  `setPage`, `setPageSize`, `resetFilters`. Every change except paging returns to page 1.
+- `useTableState(parsers)` (`@repo/table/use-table-state`): URL state + `setSearch`, `setFilter`,
+  `toggleSort`, `setPage`, `setPageSize`, `resetFilters`. Every change except paging returns to
+  page 1.
 - Column ids are the API sort fields; filter ids are keys of the search params.
 - New filter = one parser in `<x>.search-params.ts` + one entry in the filters array.
 
@@ -178,7 +183,8 @@ Login is rate limited in Redis (5/min/IP); if Redis is down it fails open (logge
   `'use cache'`. Request-time data (cookies, searchParams) only inside `<Suspense>`; call
   `await connection()` to keep work out of the build.
 - **Client**: React Query defaults (staleTime 60s, gcTime 5m); per-query `staleTime`.
-- **Redis**: `remember(key, ttl, schema, load)` (validated cache-aside) and `rateLimit(key, opts)`.
+- **Redis** (`@repo/redis`): `remember(getRedis(), key, ttl, schema, load)` (validated cache-aside)
+  and `rateLimit(getRedis(), key, opts)`.
 - **HTTP**: `/_next/static` immutable; `/sw.js` no-cache; BFF responses `no-store`.
 
 ## i18n & RTL

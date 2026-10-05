@@ -7,7 +7,8 @@ a requirement-by-requirement checklist and the caveats.
 
 ## What's inside
 
-- **Turborepo + Bun** workspaces, strict env mode, cached build/typecheck/test/lint tasks
+- **Turborepo + Bun** workspaces, strict env mode, cached build/typecheck/test/lint tasks;
+  app-agnostic code in shared packages (`@repo/http`, `query`, `table`, `hooks`, `redis`, `ui`)
 - **Next.js 16** (App Router, Cache Components, React Compiler, `proxy.ts`), **React 19.3**,
   **TypeScript 7**, **Tailwind 4**, **shadcn/ui** (Base UI, RTL) in `packages/ui`
 - **BFF auth**: tokens only in httpOnly cookies; `/api/auth/*` + `/api/proxy/*` with refresh

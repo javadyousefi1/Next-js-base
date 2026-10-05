@@ -1,8 +1,8 @@
 import "server-only";
+import { ApiError, isApiError } from "@repo/http";
 import type { NextRequest } from "next/server";
 
 import type { TokenPair } from "@/features/auth/schemas/auth.schema";
-import { ApiError, isApiError } from "@/lib/http/errors";
 
 import { readAuthCookies } from "./cookies";
 import { upstreamRefresh } from "./upstream-auth";

@@ -28,8 +28,13 @@ bun run docker:up    # استک production: اپ ادمین + Redis با docker 
 
 ```
 apps/admin/                 اپ Next.js 16 (پنل ادمین مرجع)
+packages/http/              کلاس HttpClient (axios داخلش): خروجی فقط دیتا یا ApiError
+packages/query/             لایه‌ی React Query: createMakeQuery، makeMutation، invalidation
+packages/table/             جدول headless: قرارداد URL با nuqs، useTableState، تایپ‌ها
+packages/hooks/             هوک‌های عمومی React (debounce، interval، local storage…)
+packages/redis/             کمکی‌های Redis فقط-سرور: کلاینت، remember، rateLimit
 packages/ui/                دیزاین سیستم: کامپوننت‌های shadcn (base-nova + RTL)، توکن‌های Tailwind 4، cn()
-packages/oxlint-plugin/     قوانین اختصاصی لینتر پروژه (project/*) + ۳۷ تست
+packages/oxlint-plugin/     قوانین اختصاصی لینتر پروژه (project/*) + ۳۸ تست
 packages/typescript-config/ تنظیمات مشترک tsconfig
 scripts/                    setup، doctor، clean، هوک git، هوک Claude، ساخت آیکن PWA
 docs/                       معماری، تصمیم‌ها، عملیات، و همین گزارش
@@ -66,12 +71,12 @@ proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان +
 | 5   | متن کامیت ولیدیت شود و فرمت داشته باشد                          | ✅    | commitlint + Conventional Commits + لیست scopeها (`commitlint.config.ts`)                                                                   |
 | 6   | روی main قبل از push بیلد چک شود                                | ✅    | `scripts/git/pre-push.sh`: برای main بیلد production + تست e2e                                                                              |
 | 7   | قبل از push تست‌ها اجرا شوند                                    | ✅    | همان هوک: همیشه `bun run check` (lint + format + typecheck + تست‌ها)                                                                        |
-| 8   | axios + React Query                                             | ✅    | `lib/http` (کلاینت مرورگر → BFF) و `server/http` (سرور → API اصلی)، هر دو نمونه‌ای از یک کلاس `HttpClient`                                  |
-| 9   | کوئری‌ها و میوتیشن‌ها wrap شده باشند                            | ✅    | `makeQuery` و `makeMutation` در `lib/query`؛ استفاده‌ی مستقیم از `useQuery` با لینت ممنوع است                                               |
+| 8   | axios + React Query                                             | ✅    | `lib/http` (کلاینت مرورگر → BFF) و `server/http` (سرور → API اصلی)، هر دو نمونه‌ای از کلاس `HttpClient` در پکیج `@repo/http`                |
+| 9   | کوئری‌ها و میوتیشن‌ها wrap شده باشند                            | ✅    | `makeQuery` و `makeMutation` در پکیج `@repo/query`؛ استفاده‌ی مستقیم از `useQuery` با لینت ممنوع است                                        |
 | 10  | `makeQuery` با کلیدهای مرتبط که با تغییرشان آپدیت شود           | ✅    | `relatedKeys` + invalidation زنجیره‌ای و امن در برابر حلقه (`lib/query/invalidate.ts` + تست)                                                |
 | 11  | ورودی/خروجی makeQuery و makeMutation با zod ولیدیت شود          | ✅    | `params`/`variables` قبل از درخواست و `response` قبل از رسیدن به کش parse می‌شوند؛ خطاها `VALIDATION` و `INVALID_RESPONSE`                  |
-| 12  | کلی هوک کاستوم مفید                                             | ✅    | ۱۵ هوک در `src/hooks` (بخش ۵)                                                                                                               |
-| 13  | هوک مدیریت سرچ/فیلتر/صفحه‌بندی جدول با separation of concerns   | ✅    | `useTableState` (وضعیت URL + اکشن‌ها) + کامپوننت‌های ساده؛ ستون‌ها و فیلترها آرایه‌ی ساده‌اند (بدون کتابخانه‌ی جدول)                        |
+| 12  | کلی هوک کاستوم مفید                                             | ✅    | ۱۲ هوک عمومی در پکیج `@repo/hooks` + `useAppRouter` در اپ (بخش ۵)                                                                           |
+| 13  | هوک مدیریت سرچ/فیلتر/صفحه‌بندی جدول با separation of concerns   | ✅    | `useTableState` در `@repo/table` (وضعیت URL + اکشن‌ها) + کامپوننت‌های ساده؛ ستون‌ها و فیلترها آرایه‌ی ساده‌اند (بدون کتابخانه‌ی جدول)       |
 | 14  | دیزاین سیستم shadcn                                             | ✅    | `packages/ui` با CLI رسمی shadcn، استایل base-nova، پشتیبانی RTL، ۳۳ کامپوننت                                                               |
 | 15  | فول TypeScript                                                  | ✅    | TypeScript 7 (کامپایلر native) با strict و `noUncheckedIndexedAccess`                                                                       |
 | 16  | Tailwind                                                        | ✅    | Tailwind CSS 4.3                                                                                                                            |
@@ -214,13 +219,13 @@ const filters = useUsersFilters();
 - فیلتر جدید یعنی یک پارسر در `search-params` به‌علاوه‌ی یک آیتم در آرایه‌ی `filters`، با همان id.
 - id ستون‌ها همان فیلد مرتب‌سازی API است.
 
-### ۵.۴.۱ هوک‌های عمومی (`src/hooks`)
+### ۵.۴.۱ هوک‌های عمومی (`@repo/hooks`)
 
-`use-app-router` (روتر زبان‌دار + top loader)، `use-debounced-value`، `use-debounced-callback`،
-`use-local-storage` (با اعتبارسنجی zod و همگام بین تب‌ها)، `use-media-query`، `use-is-client`،
-`use-disclosure`، `use-copy-to-clipboard`، `use-interval`، `use-event-listener`، `use-latest`،
-`use-previous`، `use-isomorphic-layout-effect`، و در `packages/ui`: `use-mobile`. هوک جدول در
-`lib/table/use-table-state.ts` است (`useTableState`).
+در پکیج `@repo/hooks`: `use-debounced-value`، `use-debounced-callback`، `use-local-storage` (با
+اعتبارسنجی zod و همگام بین تب‌ها)، `use-media-query`، `use-is-client`، `use-disclosure`،
+`use-copy-to-clipboard`، `use-interval`، `use-event-listener`، `use-latest`، `use-previous`،
+`use-isomorphic-layout-effect`. در خود اپ (`src/hooks`) فقط `use-app-router` (روتر زبان‌دار + top
+loader) مانده و در `packages/ui`: `use-mobile`. هوک جدول در `@repo/table/use-table-state` است.
 
 ### ۵.۵ کشینگ
 
@@ -229,7 +234,7 @@ const filters = useUsersFilters();
 | Next.js         | `'use cache'` + `cacheLife('minutes')` + `cacheTag` برای آمار داشبورد                       | `updateTag` در Server Action (دکمه‌ی «به‌روزرسانی آمار») |
 | پوسته‌ی استاتیک | Partial Prerendering همه‌ی صفحات                                                            | بیلد دوباره                                              |
 | React Query     | کش کلاینت با کلیدهای سلسله‌مراتبی                                                           | `invalidates` / `relatedKeys`                            |
-| Redis           | `remember()` (cache-aside با zod)، شمارنده‌های rate limit                                   | TTL                                                      |
+| Redis           | `remember(getRedis(), …)` از `@repo/redis` (cache-aside با zod)، شمارنده‌های `rateLimit`    | TTL                                                      |
 | HTTP / SW       | فایل‌های `/_next/static` immutable، آیکن‌ها ۷ روز، `sw.js` بدون کش، پاسخ‌های BFF `no-store` | هش فایل‌ها                                               |
 | Turborepo       | خروجی تسک‌ها بر اساس هش ورودی و env                                                         | خودکار                                                   |
 
@@ -497,3 +502,46 @@ export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, si
 - باگ قدیمی پروکسی (پیدا شده در بازبینی کد): اگر API اصلی 204 بدون بدنه برمی‌گرداند (مثلاً برای
   DELETE)، `Response.json` خطا می‌داد و مرورگر 502 می‌گرفت. حالا `bffJson` برای 204/205/304 پاسخ
   بدون بدنه می‌فرستد.
+
+---
+
+## ۱۴. کدهای عمومی به پکیج‌های مونوریپو منتقل شدند
+
+طبق خواسته‌ی شما، هر چیزی که به این پروژه وابسته نیست و هر اپ دیگری هم می‌تواند استفاده کند، از
+`apps/admin` به پکیج‌های Turborepo رفت. پکیج‌ها از نوع Just-in-Time هستند (طبق مستندات نصب‌شده‌ی
+Turborepo): `exports` مستقیم به سورس TypeScript اشاره می‌کند و Next.js با `transpilePackages`
+کامپایلشان می‌کند. پس مرحله‌ی build جدا ندارند.
+
+| پکیج          | محتوا                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------- |
+| `@repo/http`  | `HttpClient`، `ApiError` و `toApiError`، `parseResponse` (+ تست با سرور HTTP واقعی)       |
+| `@repo/query` | `createMakeQuery`، `makeMutation`، invalidation زنجیره‌ای، `QueryClient`، `useInvalidate` |
+| `@repo/table` | قرارداد URL جدول (`tableSearchParams`)، `useTableState`، تایپ‌ها                          |
+| `@repo/hooks` | ۱۲ هوک عمومی (debounce، interval، local storage، media query…)                            |
+| `@repo/redis` | `createRedisClient`، `remember`، `rateLimit` (فقط سرور)                                   |
+
+**قانون پکیج‌ها:** هیچ پکیجی از `apps/*` import نمی‌کند و env، روت‌ها و ترجمه‌ها را نمی‌خواند. اپ
+آن‌ها را به خودش وصل می‌کند:
+
+- `apiClient`/`bffClient` (در `src/lib/http`) و `upstream` (در `src/server/http`) نمونه‌های
+  `HttpClient` اپ هستند.
+- `makeQuery = createMakeQuery(apiClient)` در `src/lib/query`؛ import فیچرها از `@/lib/query`
+  عوض نشد.
+- `getRedis()` در `src/server/redis` با env اپ؛ helperها کلاینت را صریح می‌گیرند:
+  `rateLimit(getRedis(), key, opts)`.
+
+**چه چیزی عمداً در اپ ماند:** env، config، i18n، SEO، فیچرها، BFF و احراز هویت، `PrefetchBoundary`
+(کوکی همین اپ را می‌خواند)، `use-app-router` (روتر i18n + top loader)، toast خطاها، و کامپوننت‌های
+data-table و feedback. این کامپوننت‌ها ترجمه‌های همین اپ را نشان می‌دهند. منطقشان (`useTableState`)
+در `@repo/table` است. اگر اپ دوم هم همین UI را خواست، می‌شود با گرفتن متن‌ها از props منتقلشان کرد.
+
+**بررسی‌ها:**
+
+- `bun run check` در همه‌ی ۸ workspace سبز بود (typecheck، lint، و تست‌های http، query، admin و
+  قوانین lint).
+- بیلد production موفق بود و e2e ۱۶ از ۱۶ سبز شد.
+- `turbo prune admin --docker` همه‌ی پکیج‌های جدید را برداشت و `bun install --frozen-lockfile` روی
+  خروجی‌اش موفق بود (همان مسیر Dockerfile).
+- لینت هم پوشش داده شد: `new HttpClient` فقط در `lib/http`/`server/http`، import پکیج
+  `@repo/redis` از فایل `"use client"` خطاست، و فایل‌های redis باید `server-only` داشته باشند.
+- scopeهای کامیت `http`، `query`، `table`، `hooks` و `redis` اضافه شدند.

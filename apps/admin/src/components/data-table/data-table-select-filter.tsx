@@ -1,5 +1,6 @@
 "use client";
 
+import type { DataTableFilter } from "@repo/table/types";
 import {
   Select,
   SelectContent,
@@ -8,8 +9,6 @@ import {
   SelectValue,
 } from "@repo/ui/components/select";
 import { useTranslations } from "next-intl";
-
-import type { DataTableFilter } from "@/lib/table/types";
 
 type DataTableSelectFilterProps = {
   filter: DataTableFilter;

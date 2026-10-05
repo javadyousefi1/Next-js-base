@@ -1,8 +1,7 @@
 "use client";
 
+import type { DataTableFilter } from "@repo/table/types";
 import { useTranslations } from "next-intl";
-
-import type { DataTableFilter } from "@/lib/table/types";
 
 import { USER_ROLES } from "../schemas/user.schema";
 

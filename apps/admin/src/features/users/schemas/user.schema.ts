@@ -1,6 +1,5 @@
+import { PAGE_SIZES, SORT_ORDERS } from "@repo/table/search-params";
 import { z } from "zod";
-
-import { PAGE_SIZES, SORT_ORDERS } from "@/lib/table/search-params";
 
 export const USER_ROLES = ["admin", "moderator", "user"] as const;
 export const userRoleSchema = z.enum(USER_ROLES);

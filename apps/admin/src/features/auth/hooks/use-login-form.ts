@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { ApiError } from "@repo/http";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
@@ -9,7 +10,6 @@ import { useForm } from "react-hook-form";
 
 import { CALLBACK_URL_PARAM, sanitizeCallbackUrl } from "@/config/routes";
 import { useAppRouter } from "@/hooks/use-app-router";
-import type { ApiError } from "@/lib/http/errors";
 
 import { loginMutation, sessionQuery } from "../api/auth.queries";
 import { loginInputSchema, PASSWORD_MIN_LENGTH, type LoginInput } from "../schemas/auth.schema";

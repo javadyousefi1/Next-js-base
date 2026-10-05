@@ -39,8 +39,9 @@ shadcn code, mocks, scripts and tests.
 
 ## Tests
 
-- Unit: `bun test` in `apps/admin` (e.g. related-key invalidation).
-- Lint rules: `node --test` in `packages/oxlint-plugin` (37 cases).
+- Unit: `bun test` in `apps/admin` and in the packages (`@repo/http` against a real local server,
+  `@repo/query` invalidation and validation).
+- Lint rules: `node --test` in `packages/oxlint-plugin` (38 cases).
 - E2E: 15 Playwright tests (`apps/admin/e2e`) against the production build with MSW:
   auth redirect/validation/errors/login/logout + httpOnly check, users table search/filter/sort/
   pagination/shared URL, RTL + language switch, dark mode, robots/hreflang/manifest/SW headers.
