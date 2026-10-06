@@ -18,9 +18,7 @@ const baseCookie = { httpOnly: true, secure, sameSite: "lax", path: "/" } as con
 const EXPIRY_MARGIN_SECONDS = 30;
 
 export function setAuthCookies(responseCookies: ResponseCookies, tokens: TokenPair): void {
-  const accessTtl = tokens.expiresInMins
-    ? tokens.expiresInMins * 60
-    : env.AUTH_ACCESS_TOKEN_TTL_SECONDS;
+  const accessTtl = tokens.expiresInSeconds ?? env.AUTH_ACCESS_TOKEN_TTL_SECONDS;
 
   responseCookies.set(AUTH_COOKIES.accessToken, tokens.accessToken, {
     ...baseCookie,

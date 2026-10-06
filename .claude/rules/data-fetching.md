@@ -15,8 +15,12 @@ paths:
 
 # Data fetching
 
-- Order: zod schemas (`schemas/`) → service (`api/<x>.service.ts`, HTTP only, returns `unknown`)
-  → definition (`api/<x>.queries.ts`, `makeQuery`/`makeMutation`) → hook.
+- Order: domain types + params schema (`schemas/`) → backend contract (`api/<x>.backend.ts`) →
+  service (`api/<x>.service.ts`, HTTP only, returns `unknown`) → definition (`api/<x>.queries.ts`,
+  `makeQuery`/`makeMutation`) → hook.
+- Only `*.backend.ts` knows backend field names, query params and envelopes. Its response schema
+  is typed against the domain: `z.ZodType<Domain>` when the shapes match, a typed `.transform()`
+  when they differ. Views/hooks never read backend-only fields (lists are `{ items, total }`).
 - Fetchers are transport-agnostic: `(params, { http, signal }) => http.get(API_ENDPOINTS.…)`.
   `http` is `apiClient` in the browser and the authenticated upstream client during server
   prefetch, so every query works in `<PrefetchBoundary>` with zero extra code. Both are

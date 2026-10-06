@@ -53,11 +53,30 @@ export function codeFromStatus(status: number): ApiErrorCode {
   return "UNKNOWN";
 }
 
+/** Where backends commonly put a human-readable error text, in order of preference. */
+const MESSAGE_KEYS = ["message", "error", "detail", "title"] as const;
+
+function stringField(value: unknown, key: string): string | undefined {
+  if (!value || typeof value !== "object" || !(key in value)) return undefined;
+  const field: unknown = Reflect.get(value, key);
+  return typeof field === "string" ? field : undefined;
+}
+
+/**
+ * The error text of a response body, whatever the backend calls it: the first string among
+ * `message`, `error`, `detail`, `title`, else the first entry of `errors` (a string or an
+ * object with a string `message`). `undefined` when the body has none of them.
+ */
 function messageFromBody(body: unknown): string | undefined {
-  if (body && typeof body === "object" && "message" in body && typeof body.message === "string") {
-    return body.message;
+  for (const key of MESSAGE_KEYS) {
+    const message = stringField(body, key);
+    if (message) return message;
   }
-  return undefined;
+
+  const errors = body && typeof body === "object" && "errors" in body ? body.errors : undefined;
+  if (!Array.isArray(errors)) return undefined;
+  const first: unknown = errors[0];
+  return typeof first === "string" ? first : stringField(first, "message");
 }
 
 /** Normalizes anything thrown by axios (or our own code) into an `ApiError`. */

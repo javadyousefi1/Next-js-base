@@ -37,7 +37,7 @@ type SendOptions = RequestOptions & { schema?: z.ZodType; body?: unknown };
  *   `makeQuery` parses it with its `response` schema)
  * - an `ApiError` (network, timeout, 4xx/5xx, invalid response) — never an AxiosError
  *
- *   const stats = await upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsSchema });
+ *   const stats = await upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsResponse });
  *
  * Apps create the instances, one per base URL (e.g. a browser client for their BFF and a
  * server client for the upstream API).

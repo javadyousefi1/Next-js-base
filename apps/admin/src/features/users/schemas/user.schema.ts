@@ -5,18 +5,18 @@ export const USER_ROLES = ["admin", "moderator", "user"] as const;
 export const userRoleSchema = z.enum(USER_ROLES);
 export type UserRole = z.infer<typeof userRoleSchema>;
 
-export const userSchema = z.object({
-  id: z.number().int(),
-  firstName: z.string(),
-  lastName: z.string(),
-  username: z.string(),
-  email: z.email(),
-  phone: z.string(),
-  age: z.number().int(),
-  role: userRoleSchema.default("user"),
-  company: z.object({ name: z.string(), title: z.string() }).partial().optional(),
-});
-export type User = z.infer<typeof userSchema>;
+/** A user as the app uses it; the backend shape lives in api/users.backend.ts. */
+export type User = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  username: string;
+  email: string;
+  phone: string;
+  age: number;
+  role: UserRole;
+  company?: { name?: string; title?: string };
+};
 
 export const USER_SORT_FIELDS = ["firstName", "email", "age", "role"] as const;
 
@@ -36,11 +36,5 @@ export const usersListParamsSchema = z.object({
 export type UsersListParams = z.output<typeof usersListParamsSchema>;
 export type UsersListParamsInput = z.input<typeof usersListParamsSchema>;
 
-/** Output contract of the users list query (upstream shape: DummyJSON pagination). */
-export const usersListResponseSchema = z.object({
-  users: z.array(userSchema),
-  total: z.number().int().nonnegative(),
-  skip: z.number().int().nonnegative(),
-  limit: z.number().int().nonnegative(),
-});
-export type UsersListResponse = z.infer<typeof usersListResponseSchema>;
+/** A page of users as the app uses it; the backend shape lives in api/users.backend.ts. */
+export type UsersList = { items: User[]; total: number };

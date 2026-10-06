@@ -93,7 +93,7 @@ export function createMakeQuery(defaultHttp: HttpClient) {
  * export const usersListQuery = makeQuery({
  *   key: QUERY_KEYS.users.list,
  *   params: usersListParamsSchema,
- *   response: usersListResponseSchema,
+ *   response: usersListResponse, // from users.backend.ts
  *   fetcher: fetchUsersList, // (params, { http, signal }) => http.get(API_ENDPOINTS.users.list, …)
  * });
  */

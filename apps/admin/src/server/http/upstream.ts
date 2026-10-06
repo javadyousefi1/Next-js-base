@@ -2,10 +2,7 @@ import "server-only";
 import { HttpClient } from "@repo/http";
 
 import { env } from "@/env";
-
-export function bearer(accessToken: string) {
-  return { Authorization: `Bearer ${accessToken}` };
-}
+import { authorizationHeader } from "@/features/auth/api/auth.backend";
 
 function createUpstreamClient(headers?: Record<string, string>): HttpClient {
   return new HttpClient({
@@ -23,11 +20,11 @@ function createUpstreamClient(headers?: Record<string, string>): HttpClient {
  * upstream; the browser goes through the BFF (`/api/*`). Pass the response schema and get typed,
  * validated data back — errors are `ApiError`s labelled with the endpoint (`GET /stats`):
  *
- *   upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsSchema })
+ *   upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsResponse })
  */
 export const upstream = createUpstreamClient();
 
 /** Upstream client that sends the user's access token (server prefetch, `<PrefetchBoundary>`). */
 export function upstreamFor(accessToken: string): HttpClient {
-  return createUpstreamClient(bearer(accessToken));
+  return createUpstreamClient(authorizationHeader(accessToken));
 }

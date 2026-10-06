@@ -1,9 +1,10 @@
 import type { NextRequest } from "next/server";
 
 import { API_ENDPOINTS } from "@/config/api-endpoints";
+import { authorizationHeader } from "@/features/auth/api/auth.backend";
 import { withSession } from "@/server/auth/session";
 import { bffError, bffJson } from "@/server/bff/responses";
-import { bearer, upstream } from "@/server/http/upstream";
+import { upstream } from "@/server/http/upstream";
 
 /**
  * BFF proxy: `/api/proxy/<path>` → `${API_BASE_URL}/<path>`.
@@ -33,7 +34,7 @@ async function forward(request: NextRequest, context: RouteContext<"/api/proxy/[
     const { result, refreshedTokens } = await withSession(request, (accessToken) =>
       upstream.request(request.method, url, {
         body,
-        headers: { ...bearer(accessToken), "Content-Type": "application/json" },
+        headers: { ...authorizationHeader(accessToken), "Content-Type": "application/json" },
       }),
     );
     return bffJson(result.data, { status: result.status, refreshedTokens });

@@ -143,7 +143,7 @@ export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, si
 export const usersListQuery = makeQuery({
   key: QUERY_KEYS.users.list, // فقط از ثابت‌ها؛ لیبل خطاها هم از همین کلید ساخته می‌شود
   params: usersListParamsSchema, // ورودی قبل از درخواست parse می‌شود
-  response: usersListResponseSchema, // خروجی قبل از ورود به کش parse می‌شود
+  response: usersListResponse, // از users.backend.ts: شکل بک‌اند چک و به مدل اپ تبدیل می‌شود
   fetcher: fetchUsersList,
   relatedKeys: [], // با invalidate شدن این کلیدها، این کوئری هم رفرش می‌شود
   staleTime: 30_000,
@@ -162,7 +162,7 @@ export const usersListQuery = makeQuery({
 - خطاها همیشه `ApiError` با `code` هستند؛ خطاهای 4xx دوباره تلاش نمی‌شوند؛ خطای رفرش‌های
   پس‌زمینه toast می‌شود و خطای بار اول داخل خود ویو نمایش داده می‌شود.
 - فراخوانی‌های فقط-سرور (مثل آمار داشبورد) اسکیما را به خود کلاینت می‌دهند:
-  `upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsSchema })`. پاسخ داخل کلاینت با zod چک
+  `upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsResponse })`. پاسخ داخل کلاینت با zod چک
   می‌شود و لیبل خطا از ثابت endpoint ساخته می‌شود (`GET /stats`). جزئیات در بخش ۱۳.
 
 ### ۵.۲ پیش‌بارگذاری سمت سرور (hydration) در یک خط
@@ -473,7 +473,7 @@ Table v9 + nuqs را دارد) دوباره نوشته شد:
 
 ```ts
 // سرور: اسکیما به خود upstream پاس داده می‌شود، یک خط
-return upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsSchema });
+return upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsResponse });
 
 // fetcher (مرورگر و سرور): یک خط، makeQuery پاسخ را با `response` خودش چک می‌کند
 export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, signal }) =>
@@ -558,3 +558,20 @@ data-table و feedback. این کامپوننت‌ها ترجمه‌های هم�
   اول بگو» (تغییر فلو، API پکیج، ساختار پوشه‌ها، وابستگی‌ها یا فایل‌های زیاد).
 - **مدل ساب‌ایجنت‌ها در frontmatter ثابت شد:** `explorer` = haiku، `implementer` و `test-writer` = sonnet،
   `code-reviewer` و `architecture-guard` = opus. مدل جلسه‌ی اصلی را خودتان با `/model opus` انتخاب کنید.
+
+---
+
+## ۱۶. مستقل شدن فرانت از بک‌اند
+
+هدف: با عوض شدن بک‌اند‌دولوپر یا بک‌اند (همه JWT)، کد ویوها، هوک‌ها، جدول، کوکی‌ها و BFF عوض نشود.
+
+- **مدل خود اپ (domain):** `schemas/*.schema.ts` فقط تایپ‌های خود اپ را دارد (`User`، `UsersList =
+{ items, total }`، `DashboardStats`، `SessionUser`، `TokenPair` با `expiresInSeconds`).
+- **فقط یک فایل در هر فیچر بک‌اند را می‌شناسد:** `api/<x>.backend.ts`. پارامترهای اپ را به پارامترهای
+  بک‌اند تبدیل می‌کند و جواب بک‌اند را با zod چک و به مدل اپ تبدیل می‌کند (`z.ZodType<Domain>` وقتی
+  شکل‌ها یکی است، `.transform()` وقتی فرق دارد). برای auth همین فایل بدنه‌ی login/refresh، فیلدهای
+  توکن، کاربر `/me` و هدر `Authorization` را دارد.
+- **متن خطا:** `@repo/http` خودش `message`، `error`، `detail`، `title` یا `errors[0]` را می‌خواند؛
+  کدی در اپ لازم نیست.
+- **چک‌لیست بک‌اند جدید:** `API_BASE_URL` ⇐ مسیرها در `config/api-endpoints.ts` ⇐ فایل‌های
+  `*.backend.ts` ⇐ mock (یا `API_MOCKING=disabled`). هیچ جای دیگری عوض نمی‌شود.

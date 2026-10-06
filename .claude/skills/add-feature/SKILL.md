@@ -11,8 +11,9 @@ request conflicts with AGENTS.md (e.g. "fetch directly in the component"), say s
 
 ## Steps
 
-1. **Contract** — `features/<name>/schemas/<name>.schema.ts`: entity schema, list/detail params
-   schemas (input), response schemas (output), inferred types. URL-derived params use `.catch()`.
+1. **Contract** — `features/<name>/schemas/<name>.schema.ts`: domain types (what views use) and
+   list/detail params schemas (input; URL-derived params use `.catch()`). The backend's shapes go
+   in `api/<name>.backend.ts` (response schemas typed against the domain, query mapping).
 2. **Mock API** — add endpoints to `src/config/api-endpoints.ts`, MSW handlers to
    `src/mocks/handlers.ts` and Faker data to `src/mocks/db.ts` (deterministic: `faker.seed`).
 3. **Keys** — add a hierarchical block to `QUERY_KEYS` (and `MUTATION_KEYS`) in

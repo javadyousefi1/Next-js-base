@@ -36,8 +36,9 @@ App-agnostic building blocks come from workspace packages: `@repo/http`, `@repo/
 
 ```
 features/users/
-  schemas/user.schema.ts       zod: entity + params (input contract) + response (output contract)
-  api/users.service.ts         fetcher: (params, { http, signal }) → raw data; maps params → upstream query
+  schemas/user.schema.ts       domain: User / UsersList types + params schema (the app's own shapes)
+  api/users.backend.ts         the ONLY file that knows the backend: query mapping + response schema → domain
+  api/users.service.ts         fetcher: (params, { http, signal }) → raw data
   api/users.queries.ts         makeQuery / makeMutation definitions (key + schemas + fetcher)
   users.search-params.ts       nuqs parsers = the table's URL contract (page prefetch + hook)
   hooks/use-users-table.ts     URL state (useTableState) → query → TableController
@@ -88,7 +89,7 @@ export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, si
 export const usersListQuery = makeQuery({
   key: QUERY_KEYS.users.list, // from src/config/query-keys.ts — also names errors ("users.list")
   params: usersListParamsSchema, // input contract: parsed BEFORE the request
-  response: usersListResponseSchema, // output contract: parsed BEFORE it reaches the cache
+  response: usersListResponse, // users.backend.ts: backend shape parsed → domain, BEFORE the cache
   fetcher: fetchUsersList,
   relatedKeys: [], // other keys whose invalidation must refetch this query
   staleTime: 30_000,
@@ -112,6 +113,29 @@ export const usersListQuery = makeQuery({
   the client: `upstream.get(url, { schema })` / `upstream.post(url, body, { schema })` → typed,
   validated data; errors labelled with the endpoint (`GET /stats`).
 
+## Backend independence (`*.backend.ts`)
+
+Views, hooks, the table, cookies and the BFF only know the app's **domain** types
+(`schemas/*.schema.ts`). Each feature has one `api/<x>.backend.ts` that knows the backend:
+
+```ts
+// features/users/api/users.backend.ts
+export function toBackendListQuery(params: UsersListParams) { … }        // app params → backend query
+export const usersListResponse = z
+  .object({ users: z.array(backendUserSchema), total: z.number() })      // backend shape (validated)
+  .transform(({ users, total }): UsersList => ({ items: users, total })); // → domain
+```
+
+- Backend fields already match the domain → annotate `z.ZodType<DomainType>`; they differ →
+  `.transform((raw): DomainType => …)`. The compiler flags every mismatch in this one file.
+- Auth (JWT) lives in `features/auth/api/auth.backend.ts`: login/refresh bodies, token fields
+  (→ `TokenPair` with `expiresInSeconds`), `/me` user, `authorizationHeader`.
+- Error messages need no code: `@repo/http` reads `message`, `error`, `detail`, `title` or
+  `errors[0]`.
+
+**New backend checklist:** `API_BASE_URL` (env) → paths in `src/config/api-endpoints.ts` → every
+`*.backend.ts` → the MSW mock (`src/mocks`, or `API_MOCKING=disabled`). Nothing else changes.
+
 ## Tables (search + filters + sorting + pagination)
 
 Plain React, no table library: the API pages, sorts and filters; the UI renders the current page.
@@ -129,7 +153,7 @@ export const loadUsersSearchParams = createLoader(usersSearchParams);
 const { params, ...controls } = useTableState(usersSearchParams);
 const search = useDebouncedValue(params.q, 300);
 const query = usersListQuery.useQuery({ ...params, q: search }, { placeholderData: keepPreviousData });
-return { ...controls, rows: query.data?.users ?? [], total: query.data?.total ?? 0, isLoading, isFetching, isError, retry };
+return { ...controls, rows: query.data?.items ?? [], total: query.data?.total ?? 0, isLoading, isFetching, isError, retry };
 
 // 3. Columns and filters are plain arrays — components/<x>-columns.tsx, components/<x>-filters.ts
 { id: "age", header: t("columns.age"), sortable: true, cell: (user) => user.age }

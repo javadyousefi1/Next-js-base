@@ -13,6 +13,13 @@ const server = Bun.serve({
     if (pathname === "/user") return Response.json({ id: 1, name: "Ada" });
     if (pathname === "/created") return Response.json({ id: 2 }, { status: 201 });
     if (pathname === "/private") return Response.json({ message: "Expired" }, { status: 401 });
+    if (pathname === "/error-key") return Response.json({ error: "Bad email" }, { status: 400 });
+    if (pathname === "/errors-list") {
+      return Response.json({ errors: [{ message: "Name is required" }] }, { status: 422 });
+    }
+    if (pathname === "/errors-strings")
+      return Response.json({ errors: ["Too short"] }, { status: 422 });
+    if (pathname === "/detail") return Response.json({ detail: "Already exists" }, { status: 409 });
     if (pathname === "/slow") await Bun.sleep(500);
     return Response.json({ message: "No such user" }, { status: 404 });
   },
@@ -55,6 +62,16 @@ describe("HttpClient", () => {
       status: 404,
       message: "No such user",
     });
+  });
+
+  test("the message is found in the common error shapes", async () => {
+    const messages = await Promise.all(
+      ["/error-key", "/errors-list", "/errors-strings", "/detail"].map(async (path) => {
+        const error = await failure(client.get(path));
+        return error instanceof ApiError ? error.message : undefined;
+      }),
+    );
+    expect(messages).toEqual(["Bad email", "Name is required", "Too short", "Already exists"]);
   });
 
   test("every error is reported to onError (401 → session expired in the browser)", async () => {

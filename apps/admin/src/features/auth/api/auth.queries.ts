@@ -7,15 +7,15 @@ import {
   loginInputSchema,
   logoutResponseSchema,
   sessionResponseSchema,
-  sessionUserSchema,
 } from "../schemas/auth.schema";
+import { meResponse } from "./auth.backend";
 import { fetchCurrentUser, login, logout } from "./auth.service";
 
 /** The signed-in user (validated). A 401 here triggers the global "session expired" redirect. */
 export const sessionQuery = makeQuery({
   key: QUERY_KEYS.auth.session,
   params: z.void(),
-  response: sessionUserSchema,
+  response: meResponse,
   fetcher: fetchCurrentUser,
   staleTime: 5 * 60_000,
 });

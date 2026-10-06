@@ -22,7 +22,7 @@ export function useUsersTable(): TableController<User> {
 
   return {
     ...controls,
-    rows: query.data?.users ?? NO_USERS,
+    rows: query.data?.items ?? NO_USERS,
     total: query.data?.total ?? 0,
     isLoading: query.isPending,
     isFetching: query.isFetching,

@@ -1,10 +1,8 @@
-import { z } from "zod";
+import type { UserRole } from "@/features/users/schemas/user.schema";
 
-import { USER_ROLES } from "@/features/users/schemas/user.schema";
-
-export const dashboardStatsSchema = z.object({
-  totalUsers: z.number().int().nonnegative(),
-  roles: z.record(z.enum(USER_ROLES), z.number().int().nonnegative()),
-  generatedAt: z.iso.datetime(),
-});
-export type DashboardStats = z.infer<typeof dashboardStatsSchema>;
+/** Dashboard numbers as the app uses them; the backend shape lives in api/dashboard.backend.ts. */
+export type DashboardStats = {
+  totalUsers: number;
+  roles: Record<UserRole, number>;
+  generatedAt: string;
+};

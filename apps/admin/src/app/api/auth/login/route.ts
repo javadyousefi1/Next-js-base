@@ -30,9 +30,9 @@ export async function POST(request: NextRequest) {
   if (!input.success) return bffJson({ message: "Invalid input" }, { status: 400 });
 
   try {
-    const { accessToken, refreshToken, expiresInMins, ...user } = await upstreamLogin(input.data);
+    const { user, tokens } = await upstreamLogin(input.data);
     const response = bffJson({ user });
-    setAuthCookies(response.cookies, { accessToken, refreshToken, expiresInMins });
+    setAuthCookies(response.cookies, tokens);
     return response;
   } catch (error) {
     return bffError(error);

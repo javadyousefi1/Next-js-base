@@ -30,15 +30,19 @@ Short ADRs. Each one says what was chosen, why, and what to watch out for.
     origins, framing and object embeds. Move to nonces if you accept full dynamic rendering.
 11. **MSW + Faker as the upstream API.** The app runs end-to-end with no backend and deterministic
     data (seeded Faker); the same mocks drive e2e tests. Disable with `API_MOCKING=disabled`. The
-    contract is DummyJSON-like — adapt schemas and mappers to your real API.
-12. **Fail-open Redis.** Rate limiting and caching degrade (logged) instead of taking login down.
-13. **Optimistic route guard.** `proxy.ts` only checks cookie presence (no network call per
+    mock speaks a DummyJSON-like contract; only the `*.backend.ts` files know it.
+12. **Backend-independent frontend.** Each feature's `api/<x>.backend.ts` is the only code that
+    knows the backend (query params, response shapes, JWT auth fields); it maps them to the app's
+    domain types with typed zod schemas. A different backend changes those files, the endpoint
+    paths and the mock — never views, hooks or the BFF.
+13. **Fail-open Redis.** Rate limiting and caching degrade (logged) instead of taking login down.
+14. **Optimistic route guard.** `proxy.ts` only checks cookie presence (no network call per
     request). Authorization is the upstream API's job; expired sessions are handled by the BFF.
-14. **Roboto + Vazirmatn.** Roboto (requested) has no Arabic-script glyphs, so Persian text falls
+15. **Roboto + Vazirmatn.** Roboto (requested) has no Arabic-script glyphs, so Persian text falls
     back to Vazirmatn (loaded on demand) instead of a random system font.
-15. **"No logic in components"** applies to app views (lint-enforced). shadcn primitives in
+16. **"No logic in components"** applies to app views (lint-enforced). shadcn primitives in
     `packages/ui` are vendor UI code and keep their internal UI state.
-16. **React Compiler + react-hook-form.** The compiler can memoize RHF's mutable `formState`
+17. **React Compiler + react-hook-form.** The compiler can memoize RHF's mutable `formState`
     reads; form hooks opt out with `"use no memo"` (see `use-login-form.ts`).
-17. **`experimental.useOffline`** is an experimental Next.js flag (offline banner + retry). Remove
+18. **`experimental.useOffline`** is an experimental Next.js flag (offline banner + retry). Remove
     the flag and the banner if you need only stable APIs.

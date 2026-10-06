@@ -31,13 +31,8 @@ export type SessionResponse = z.infer<typeof sessionResponseSchema>;
 
 export const logoutResponseSchema = z.object({ ok: z.literal(true) });
 
-/** Upstream token pair (server only — never sent to the browser). */
-export const tokenPairSchema = z.object({
-  accessToken: z.string().min(1),
-  refreshToken: z.string().min(1),
-  expiresInMins: z.number().int().positive().optional(),
-});
-export type TokenPair = z.infer<typeof tokenPairSchema>;
+/** The token pair of the backend session (server only — never sent to the browser). */
+export type TokenPair = { accessToken: string; refreshToken: string; expiresInSeconds?: number };
 
-/** Upstream `/auth/login` response: user fields + tokens. */
-export const upstreamLoginResponseSchema = sessionUserSchema.extend(tokenPairSchema.shape);
+/** What a successful login yields; the backend shape lives in api/auth.backend.ts. */
+export type LoginResult = { user: SessionUser; tokens: TokenPair };
