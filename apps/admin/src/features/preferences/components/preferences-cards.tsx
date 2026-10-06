@@ -50,7 +50,8 @@ export function AppearanceCard() {
 
 export function LanguageCard() {
   const t = useTranslations("Settings.language");
-  const { locale, locales, switchTo } = useLocaleSwitcher();
+  const { canSwitch, locale, locales, switchTo } = useLocaleSwitcher();
+  if (!canSwitch) return null;
 
   return (
     <Card>

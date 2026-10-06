@@ -16,7 +16,7 @@ this repository. Read this file completely before changing anything. App-specifi
    `node_modules/next/dist/docs/`, Turborepo docs in the installed `turbo` package (see the block
    at the end of this file). If you can't verify an API, say so.
 3. **Copy the closest existing pattern.** `apps/admin/src/features/users` is the reference feature
-   (schema → service → query → hook → view). Match its names, folders, comments and size.
+   (schema → backend → service → query → hook → view). Match its names, folders, comments and size.
 4. **Keep it simple.** Small readable functions, no clever abstractions, no new dependency or new
    pattern without asking first.
 5. **Cover the whole request.** Re-read the request before finishing; list anything you didn't do

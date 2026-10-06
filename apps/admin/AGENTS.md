@@ -83,7 +83,7 @@ Features import other features only through `schemas` or a deliberately shared c
 // features/<x>/api/<x>.service.ts — one fetcher for browser AND server
 // `http` = apiClient (→ /api/proxy) in the browser, upstream + user token on the server
 export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, signal }) =>
-  http.get(API_ENDPOINTS.users.list, { params: toQuery(params), signal });
+  http.get(API_ENDPOINTS.users.list, { params: toBackendListQuery(params), signal });
 
 // features/<x>/api/<x>.queries.ts
 export const usersListQuery = makeQuery({
@@ -127,7 +127,8 @@ export const usersListResponse = z
 ```
 
 - Backend fields already match the domain → annotate `z.ZodType<DomainType>`; they differ →
-  `.transform((raw): DomainType => …)`. The compiler flags every mismatch in this one file.
+  `.transform((raw): DomainType => …)`. The compiler flags every missing or wrongly typed field
+  in this one file.
 - Auth (JWT) lives in `features/auth/api/auth.backend.ts`: login/refresh bodies, token fields
   (→ `TokenPair` with `expiresInSeconds`), `/me` user, `authorizationHeader`.
 - Error messages need no code: `@repo/http` reads `message`, `error`, `detail`, `title` or
@@ -214,7 +215,12 @@ Login is rate limited in Redis (5/min/IP); if Redis is down it fails open (logge
 ## i18n & RTL
 
 - Locales `en`, `fa` (`src/i18n/routing.ts`), URLs always prefixed. Messages in `messages/*.json`,
-  same keys in both files. Server: `getTranslations`; client: `useTranslations`.
+  same keys in both files. `APP_DIRECTION` in `routing.ts` picks what the app ships: `"rtl"`
+  (Persian only), `"ltr"` (English only) or `"both"` (+ language switcher); the first locale is the
+  default. Server: `getTranslations`; client: `useTranslations`.
+- Fonts: LTR → Roboto first; RTL → Vazirmatn first, for Latin text too (`--app-font` in
+  `styles/globals.css`). Never put Roboto first in RTL: its generated fallback face is local Arial,
+  which has Persian glyphs on Windows/macOS and would win over Vazirmatn.
 - Navigation only through `@/i18n/navigation` (`Link`, `redirect`, `usePathname`) or
   `useAppRouter` (adds the top loader).
 - Use logical Tailwind classes (`ms-*`, `pe-*`, `start-*`, `text-start`); flip directional icons with

@@ -15,7 +15,8 @@ import { useLocaleSwitcher } from "../hooks/use-locale-switcher";
 
 export function LocaleSwitcher() {
   const t = useTranslations("Nav");
-  const { locale, locales, switchTo } = useLocaleSwitcher();
+  const { canSwitch, locale, locales, switchTo } = useLocaleSwitcher();
+  if (!canSwitch) return null;
 
   return (
     <DropdownMenu>

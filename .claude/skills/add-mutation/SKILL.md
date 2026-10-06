@@ -10,15 +10,16 @@ description: Add a validated write operation in apps/admin — zod variables/res
    mapping go in `api/<f>.backend.ts` (typed against the domain; `z.unknown()` when the endpoint
    answers 204 No Content — the body is empty).
 2. **Keys** — add to `MUTATION_KEYS` in `src/config/query-keys.ts`.
-3. **Service** — `api/<f>.service.ts`: `return apiClient.post/put/patch/delete(…)` (resolves to the
-   raw data; `makeMutation` validates it with `response`).
+3. **Service** — `api/<f>.service.ts`: `return apiClient.post(API_ENDPOINTS.<f>.…,
+toBackend<X>Body(variables))` (also `put`/`patch`/`delete`; resolves to the raw data and
+   `makeMutation` validates it with `response`).
 4. **Definition** (`api/<f>.queries.ts`):
 
    ```ts
    export const create<X>Mutation = makeMutation({
      mutationKey: MUTATION_KEYS.<f>.create,
      variables: create<X>Schema,
-     response: <x>Schema,
+     response: <x>Response, // from <f>.backend.ts
      mutationFn: create<X>,
      invalidates: [QUERY_KEYS.<f>.lists()], // + every query listing them in relatedKeys
      // silent: true → no global error toast (the form shows the error)

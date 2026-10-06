@@ -14,19 +14,19 @@ description: Add a validated read endpoint in apps/admin — zod params/response
 
    No params? use `z.void()` (then call `xQuery.useQuery()` without arguments).
 
-1b. **Backend contract** (`api/<f>.backend.ts`) — the only place that knows the backend:
+2. **Backend contract** (`api/<f>.backend.ts`) — the only place that knows the backend:
 
-```ts
-export const <x>Response: z.ZodType<<Entity>> = z.object({ id: z.number(), name: z.string() });
-// backend differs? z.object({ ... }).transform((raw): <Entity> => ({ ... }))
-```
+   ```ts
+   export const <x>Response: z.ZodType<<Entity>> = z.object({ id: z.number(), name: z.string() });
+   // backend differs? z.object({ ... }).transform((raw): <Entity> => ({ ... }))
+   ```
 
-Lists map to `{ items, total }`; backend query params are built here too (`toBackend…Query`).
+   Lists map to `{ items, total }`; backend query params are built here too (`toBackend…Query`).
 
-2. **Endpoint** — `src/config/api-endpoints.ts` (path relative to the upstream API).
-3. **Key** — `src/config/query-keys.ts`, under the feature's root key:
+3. **Endpoint** — `src/config/api-endpoints.ts` (path relative to the upstream API).
+4. **Key** — `src/config/query-keys.ts`, under the feature's root key:
    `detail: (id: number) => [...usersRoot, "detail", id] as const`.
-4. **Service** (`api/<f>.service.ts`) — HTTP only, returns `unknown`. Use the injected `http`
+5. **Service** (`api/<f>.service.ts`) — HTTP only, returns `unknown`. Use the injected `http`
    (browser: BFF proxy; server prefetch: upstream with the user's token), never import a client:
 
    ```ts
@@ -34,7 +34,7 @@ Lists map to `{ items, total }`; backend query params are built here too (`toBac
      http.get(`${API_ENDPOINTS.users.list}/${params.id}`, { signal });
    ```
 
-5. **Definition** (`api/<f>.queries.ts`):
+6. **Definition** (`api/<f>.queries.ts`):
 
    ```ts
    export const <x>Query = makeQuery({
@@ -47,11 +47,11 @@ Lists map to `{ items, total }`; backend query params are built here too (`toBac
    });
    ```
 
-6. **Use it in a hook** — `const query = <x>Query.useQuery(params)`; map `query.data`,
+7. **Use it in a hook** — `const query = <x>Query.useQuery(params)`; map `query.data`,
    `query.isPending`, `query.isError` to a view model. Never in a component.
-7. **SSR (optional)** — in the page: `<PrefetchBoundary queries={[<x>Query.with(params)]}
+8. **SSR (optional)** — in the page: `<PrefetchBoundary queries={[<x>Query.with(params)]}
 fallback={<Skeleton />}>`. Nothing else to write (same fetcher, server transport).
-8. **Mock** — handler in `src/mocks/handlers.ts` returning the BACKEND shape (what `<x>Response`
+9. **Mock** — handler in `src/mocks/handlers.ts` returning the BACKEND shape (what `<x>Response`
    parses).
-9. **Verify** — a malformed mock response must surface `INVALID_RESPONSE` (dev logs show the zod
-   tree); `bun run check`.
+10. **Verify** — a malformed mock response must surface `INVALID_RESPONSE` (dev logs show the zod
+    tree); `bun run check`.

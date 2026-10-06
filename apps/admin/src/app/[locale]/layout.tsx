@@ -12,8 +12,13 @@ import { routing } from "@/i18n/routing";
 import { rootMetadata } from "@/lib/seo/metadata";
 
 const roboto = Roboto({ subsets: ["latin", "latin-ext"], variable: "--font-roboto" });
-// Roboto has no Arabic-script glyphs: Persian text falls back to Vazirmatn (loaded on demand).
-const vazirmatn = Vazirmatn({ subsets: ["arabic"], variable: "--font-vazirmatn", preload: false });
+// RTL pages render all text in Vazirmatn (Latin too, hence the latin subset); loaded on demand.
+// Order per direction: `--app-font` in styles/globals.css.
+const vazirmatn = Vazirmatn({
+  subsets: ["arabic", "latin"],
+  variable: "--font-vazirmatn",
+  preload: false,
+});
 
 /** Every locale is prerendered at build time (static shell + Cache Components). */
 export function generateStaticParams() {

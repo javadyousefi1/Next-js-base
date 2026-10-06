@@ -7,7 +7,8 @@ import type { LoginInput, LoginResult, SessionUser, TokenPair } from "../schemas
 /**
  * The ONLY file that knows the backend's auth API: JWT access + refresh token (here
  * DummyJSON-style). A new backend → change this file (+ `API_ENDPOINTS`, the MSW mock), nothing
- * else. It is imported by the browser too (`meResponse`), so it must stay free of server-only code.
+ * else. It is imported by the browser too (`meResponse`): no env and no secrets here — a backend
+ * that needs a client secret for token calls gets it in `src/server/auth/upstream-auth.ts`.
  */
 
 /** Login credentials → the backend's login request body. */
@@ -30,17 +31,14 @@ const backendTokenShape = {
   refreshToken: z.string().min(1),
   expiresInMins: z.number().int().positive().optional(),
 };
+const backendTokens = z.object(backendTokenShape);
 
 /** Backend tokens (access lifetime in minutes) → the app's `TokenPair` (seconds). */
 function toTokenPair({
   accessToken,
   refreshToken,
   expiresInMins,
-}: {
-  accessToken: string;
-  refreshToken: string;
-  expiresInMins?: number;
-}): TokenPair {
+}: z.output<typeof backendTokens>): TokenPair {
   return {
     accessToken,
     refreshToken,
@@ -69,4 +67,4 @@ export const loginResponse = z
   }));
 
 /** Refresh response: a new token pair. */
-export const refreshResponse = z.object(backendTokenShape).transform(toTokenPair);
+export const refreshResponse = backendTokens.transform(toTokenPair);

@@ -138,7 +138,7 @@ proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان +
 ```ts
 // fetcher فقط یک‌بار نوشته می‌شود و هم در مرورگر و هم روی سرور کار می‌کند
 export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, signal }) =>
-  http.get(API_ENDPOINTS.users.list, { params: toQuery(params), signal });
+  http.get(API_ENDPOINTS.users.list, { params: toBackendListQuery(params), signal });
 
 export const usersListQuery = makeQuery({
   key: QUERY_KEYS.users.list, // فقط از ثابت‌ها؛ لیبل خطاها هم از همین کلید ساخته می‌شود
@@ -321,7 +321,7 @@ loader) مانده و در `packages/ui`: `use-mobile`. هوک جدول در `@r
    تکرارپذیر بمانند. ارتقا را آگاهانه انجام دهید (بخش ۴).
 4. **API ساختگی:** پیش‌فرض‌های `.env.example` و docker-compose با MSW کار می‌کنند تا پروژه بدون
    بک‌اند اجرا شود. برای production مقدار `API_MOCKING=disabled` و `API_BASE_URL` واقعی را بگذارید.
-   قرارداد API شبیه DummyJSON است، پس اسکیماها و mapperها را با بک‌اند واقعی تطبیق دهید.
+   قرارداد API شبیه DummyJSON است و فقط فایل‌های `*.backend.ts` آن را می‌شناسند (بخش ۱۶).
 5. **فونت فارسی:** Roboto (طبق خواسته) حروف فارسی ندارد. برای همین متن فارسی با Vazirmatn نمایش
    داده می‌شود تا به فونت تصادفی سیستم نیفتد.
 6. **«منطق در کامپوننت ممنوع»** برای ویوهای اپ اجباری است. کامپوننت‌های پایه‌ی shadcn در `packages/ui`
@@ -477,7 +477,7 @@ return upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsResponse });
 
 // fetcher (مرورگر و سرور): یک خط، makeQuery پاسخ را با `response` خودش چک می‌کند
 export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, signal }) =>
-  http.get(API_ENDPOINTS.users.list, { params: toQuery(params), signal });
+  http.get(API_ENDPOINTS.users.list, { params: toBackendListQuery(params), signal });
 ```
 
 | نمونه                        | کجا                       | مقصد                                      |
@@ -575,3 +575,18 @@ data-table و feedback. این کامپوننت‌ها ترجمه‌های هم�
   کدی در اپ لازم نیست.
 - **چک‌لیست بک‌اند جدید:** `API_BASE_URL` ⇐ مسیرها در `config/api-endpoints.ts` ⇐ فایل‌های
   `*.backend.ts` ⇐ mock (یا `API_MOCKING=disabled`). هیچ جای دیگری عوض نمی‌شود.
+
+---
+
+## ۱۷. فونت فارسی در راست‌چین و تنظیم جهت اپ
+
+- **علت مشکل فونت:** `next/font` برای Roboto یک فونت جایگزین با `local(Arial)` می‌سازد که در زنجیره‌ی
+  فونت قبل از Vazirmatn می‌آمد. Arial در ویندوز و مک حروف فارسی دارد، پس فارسی با Arial نمایش داده
+  می‌شد. گزینه‌ی `adjustFontFallback: false` در Turbopack (Next 16.3.8) نادیده گرفته می‌شود، پس راه
+  دیگری لازم بود.
+- **راه‌حل:** در `dir="rtl"` کل متن (لاتین هم) با Vazirmatn نمایش داده می‌شود و Vazirmatn اول زنجیره
+  است (`--app-font` در `styles/globals.css`، زیرمجموعه‌ی `latin` به Vazirmatn اضافه شد). در چپ‌چین
+  Roboto اول است. با Chromium تأیید شد: صفحه‌ی `/fa` با Vazirmatn و `/en` با Roboto رندر می‌شود.
+- **تنظیم جهت:** `APP_DIRECTION` در `src/i18n/routing.ts` با سه حالت `"rtl"` (فقط فارسی)، `"ltr"` (فقط
+  انگلیسی) و `"both"` (هر دو با دکمه‌ی تغییر زبان). لیست زبان‌ها، زبان پیش‌فرض و نمایش دکمه‌ی تغییر زبان
+  از همین ساخته می‌شوند. حالت `"rtl"` تست شد: `/` به `/fa` می‌رود و دکمه‌ی تغییر زبان نشان داده نمی‌شود.

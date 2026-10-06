@@ -1,10 +1,22 @@
 /*
  * App stylesheet: design tokens + Tailwind come from @repo/ui. Only app-level overrides here.
  * Fonts are loaded with next/font in `app/[locale]/layout.tsx` (CSS variables on <html>):
- * Roboto for Latin, Vazirmatn as the fallback for Persian glyphs.
+ * Roboto first in LTR, Vazirmatn first in RTL (see below).
  */
 @import "@repo/ui/globals.css";
 
 @theme inline {
-  --font-sans: var(--font-roboto), var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--app-font);
+}
+
+:root {
+  --app-font: var(--font-roboto), var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * RTL: Vazirmatn first. With Roboto first, Roboto's generated fallback face (local Arial, which has
+ * Persian glyphs on Windows/macOS) renders Persian text before Vazirmatn is ever reached.
+ */
+[dir="rtl"] {
+  --app-font: var(--font-vazirmatn), var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
 }
