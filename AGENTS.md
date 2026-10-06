@@ -21,7 +21,12 @@ this repository. Read this file completely before changing anything. App-specifi
    pattern without asking first.
 5. **Cover the whole request.** Re-read the request before finishing; list anything you didn't do
    and why. Never leave a TODO without saying so.
-6. **Done means green.** `bun run check` passes (lint + format + typecheck + unit tests). For app
+6. **Ask, don't hunt.** When the request leaves the scope or the place open, ask one or two short,
+   concrete questions instead of searching the whole repository "just in case".
+7. **Announce heavy changes.** Before changing a flow (auth, data fetching, routing, caching), a
+   package API, the folder structure, dependencies, or many files at once, describe what changes
+   and why, and wait for a yes.
+8. **Done means green.** `bun run check` passes (lint + format + typecheck + unit tests). For app
    changes also `bun run build`, and `bun run test:e2e` when a user flow changed.
 
 ## 1. Stack

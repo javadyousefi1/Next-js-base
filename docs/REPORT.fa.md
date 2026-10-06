@@ -545,3 +545,16 @@ data-table و feedback. این کامپوننت‌ها ترجمه‌های هم�
 - لینت هم پوشش داده شد: `new HttpClient` فقط در `lib/http`/`server/http`، import پکیج
   `@repo/redis` از فایل `"use client"` خطاست، و فایل‌های redis باید `server-only` داشته باشند.
 - scopeهای کامیت `http`، `query`، `table`، `hooks` و `redis` اضافه شدند.
+
+---
+
+## ۱۵. تقسیم کار بین مدل‌ها برای صرفه‌جویی در توکن
+
+- **`CLAUDE.md` (بخش Model routing):** جلسه‌ی اصلی روی Opus است و تصمیم می‌گیرد. خواندن کد با
+  ساب‌ایجنت `explorer` (Haiku) است، کدنویسی طبق پلن Opus با `implementer` (Sonnet)، و ریویوی آخر با
+  `code-reviewer` (Opus). تسک‌های کوچک (یکی دو فایل مشخص) مستقیم انجام می‌شوند، چون هر ساب‌ایجنت از صفر
+  شروع می‌کند و برای کار کوچک گران‌تر تمام می‌شود.
+- **`AGENTS.md` §0:** «بپرس، نگرد» (اگر محدوده‌ی کار مشخص نیست، اول سؤال کوتاه بپرس) و «تغییر سنگین را
+  اول بگو» (تغییر فلو، API پکیج، ساختار پوشه‌ها، وابستگی‌ها یا فایل‌های زیاد).
+- **مدل ساب‌ایجنت‌ها در frontmatter ثابت شد:** `explorer` = haiku، `implementer` و `test-writer` = sonnet،
+  `code-reviewer` و `architecture-guard` = opus. مدل جلسه‌ی اصلی را خودتان با `/model opus` انتخاب کنید.

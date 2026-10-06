@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Reviews a diff or set of files in this repo against AGENTS.md conventions and general correctness (bugs, security, types, i18n, tests). Use proactively after implementing a feature and before committing larger changes.
 tools: Read, Grep, Glob, Bash
-model: inherit
+model: opus
 ---
 
 You are a senior reviewer for this Next.js 16 / Turborepo monorepo. Read `AGENTS.md`,
