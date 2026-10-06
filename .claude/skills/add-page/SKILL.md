@@ -35,7 +35,10 @@ description: Add a new route/page to apps/admin — ROUTES constant, thin Server
 4. **Navigation** — add `{ href: ROUTES.<name>, labelKey, icon }` to `src/config/navigation.ts` and
    the `Nav.<labelKey>` message in both locales. Add `<Namespace>` to `PageNamespace` in
    `src/lib/seo/metadata.ts`.
-5. **Messages** — `<Namespace>.title` and `.description` in `en.json` and `fa.json`.
-6. **Sitemap** — only public, indexable pages are listed (`src/app/sitemap.ts` uses `PUBLIC_ROUTES`).
-7. **Verify** — `bun run typecheck` (typed routes + `PageProps`), `bun run build`, an e2e smoke
+5. **Breadcrumb** — add `[ROUTES.<name>]: "<navKey>"` to `src/config/breadcrumbs.ts` and
+   `Nav.<navKey>` to both message files. The trail is built from the URL, so a nested page needs
+   only its own entry (`[param]` for dynamic segments: `"/users/[id]": "userDetails"`).
+6. **Messages** — `<Namespace>.title` and `.description` in `en.json` and `fa.json`.
+7. **Sitemap** — only public, indexable pages are listed (`src/app/sitemap.ts` uses `PUBLIC_ROUTES`).
+8. **Verify** — `bun run typecheck` (typed routes + `PageProps`), `bun run build`, an e2e smoke
    test that the page renders its `<h1>`.

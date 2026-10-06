@@ -17,7 +17,7 @@ app/                    Routing only — thin pages/layouts, BFF route handlers,
   api/health/           Liveness probe (Docker HEALTHCHECK)
   manifest.ts · robots.ts · sitemap.ts
 components/             Shared, feature-agnostic VIEWS: data-table, feedback, layout, providers
-config/                 Constants: routes, query-keys, api-endpoints, cache-tags, navigation, site, auth
+config/                 Constants: routes, query-keys, api-endpoints, cache-tags, navigation, breadcrumbs, site, auth
 features/<name>/        Vertical slices (anatomy below)
 hooks/                  App hooks (useAppRouter: i18n router + top loader); generic ones: @repo/hooks
 i18n/                   next-intl routing, navigation (Link, useRouter…), request config, locale meta

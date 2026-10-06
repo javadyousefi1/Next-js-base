@@ -40,4 +40,14 @@ test.describe("users table (URL state + React Query)", () => {
     await expect(page.getByRole("searchbox")).toHaveValue("admin@example");
     await expect(page.getByRole("cell", { name: "admin@example.com" })).toBeVisible();
   });
+
+  test("the breadcrumb shows the trail and links back to the dashboard", async ({ page }) => {
+    const breadcrumb = page.getByRole("navigation", { name: "Breadcrumb" });
+    const dashboard = breadcrumb.getByRole("link", { name: "Dashboard" });
+    await expect(dashboard).toBeVisible();
+    await expect(breadcrumb.getByText("Users")).toHaveAttribute("aria-current", "page");
+
+    await dashboard.click();
+    await expect(page).toHaveURL(/\/en$/);
+  });
 });
