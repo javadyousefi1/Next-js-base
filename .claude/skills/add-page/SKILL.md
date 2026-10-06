@@ -37,7 +37,8 @@ description: Add a new route/page to apps/admin — ROUTES constant, thin Server
    `src/lib/seo/metadata.ts`.
 5. **Breadcrumb** — add `[ROUTES.<name>]: "<navKey>"` to `src/config/breadcrumbs.ts` and
    `Nav.<navKey>` to both message files. The trail is built from the URL, so a nested page needs
-   only its own entry (`[param]` for dynamic segments: `"/users/[id]": "userDetails"`).
+   only its own entry (`[param]` for dynamic segments: `"/users/[id]": "userDetails"`). Without
+   an entry the page shows no breadcrumb.
 6. **Messages** — `<Namespace>.title` and `.description` in `en.json` and `fa.json`.
 7. **Sitemap** — only public, indexable pages are listed (`src/app/sitemap.ts` uses `PUBLIC_ROUTES`).
 8. **Verify** — `bun run typecheck` (typed routes + `PageProps`), `bun run build`, an e2e smoke

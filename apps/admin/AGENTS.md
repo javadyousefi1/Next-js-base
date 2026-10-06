@@ -172,6 +172,12 @@ return { ...controls, rows: query.data?.items ?? [], total: query.data?.total ??
 - Column ids are the API sort fields; filter ids are keys of the search params.
 - New filter = one parser in `<x>.search-params.ts` + one entry in the filters array.
 
+## Breadcrumbs
+
+The shell header builds the trail from the URL. Every page adds one entry to
+`src/config/breadcrumbs.ts` (`[ROUTES.x]: "<Nav key>"`, `"/users/[id]"` for a dynamic segment) and
+the `Nav` message in both locales; nested pages need nothing else. Skill: `add-page`.
+
 ## Server prefetch (hydration)
 
 ```tsx

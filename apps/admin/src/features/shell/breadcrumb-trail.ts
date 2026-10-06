@@ -18,7 +18,7 @@ function matches(pattern: string, path: string) {
   );
 }
 
-/** A path's own entry, else the first entry whose `[param]` segments match. */
+/** A path's own entry, else the first entry whose `[param]` segments match (first match wins). */
 function findLabel(labels: typeof BREADCRUMBS, path: string) {
   return labels[path] ?? Object.entries(labels).find(([pattern]) => matches(pattern, path))?.[1];
 }
@@ -26,6 +26,7 @@ function findLabel(labels: typeof BREADCRUMBS, path: string) {
 /**
  * The labelled pages on the way to `pathname`, outermost first:
  * `/users/42/edit` → `/`, `/users`, `/users/42`, `/users/42/edit` (the ones that have a label).
+ * Empty when the page itself has no entry — otherwise a parent would pose as the current page.
  */
 export function breadcrumbTrail(pathname: string, labels = BREADCRUMBS): Crumb[] {
   const segments = toSegments(pathname);
@@ -36,5 +37,5 @@ export function breadcrumbTrail(pathname: string, labels = BREADCRUMBS): Crumb[]
     const labelKey = findLabel(labels, href);
     if (labelKey) trail.push({ href, labelKey });
   }
-  return trail;
+  return trail.at(-1)?.href === paths.at(-1) ? trail : [];
 }

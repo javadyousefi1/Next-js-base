@@ -20,6 +20,7 @@ import { useBreadcrumbs } from "../hooks/use-breadcrumbs";
 export function AppBreadcrumbs() {
   const t = useTranslations("Nav");
   const crumbs = useBreadcrumbs();
+  if (crumbs.length === 0) return null;
 
   return (
     <Breadcrumb aria-label={t("breadcrumb")}>

@@ -21,16 +21,21 @@ describe("breadcrumbTrail", () => {
     expect(trail.map((crumb) => crumb.href)).toEqual(["/", "/users", "/users/42"]);
   });
 
-  test("skips paths without a label", () => {
-    const trail = breadcrumbTrail("/users/42/unknown", labels);
-    expect(trail.map((crumb) => crumb.href)).toEqual(["/", "/users", "/users/42"]);
+  test("a page without its own entry has no trail (no parent poses as the current page)", () => {
+    expect(breadcrumbTrail("/users/42/unknown", labels)).toEqual([]);
+  });
 
-    // A path in the middle without a label does not cut the trail.
-    const nested = breadcrumbTrail("/users/42/edit", {
+  test("paths in between without an entry are skipped", () => {
+    const trail = breadcrumbTrail("/users/42/edit", {
       "/": "dashboard",
       "/users/[id]/edit": "settings",
     });
-    expect(nested.map((crumb) => crumb.href)).toEqual(["/", "/users/42/edit"]);
+    expect(trail.map((crumb) => crumb.href)).toEqual(["/", "/users/42/edit"]);
+  });
+
+  test("a trailing slash and encoded segments", () => {
+    expect(breadcrumbTrail("/users/")).toEqual(breadcrumbTrail("/users"));
+    expect(breadcrumbTrail("/users/a%2Fb", labels).at(-1)?.href).toBe("/users/a%2Fb");
   });
 
   test("an exact entry beats a pattern", () => {
