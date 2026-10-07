@@ -15,13 +15,29 @@ test.describe("users table (URL state + React Query)", () => {
     await expect(page.getByText("1 result")).toBeVisible();
   });
 
-  test("filters by role and resets", async ({ page }) => {
+  test("filters by role in the drawer and resets", async ({ page }) => {
+    await page.getByRole("button", { name: "Filters", exact: true }).click();
     await page.getByRole("combobox", { name: "Role" }).click();
     await page.getByRole("option", { name: "Admin" }).click();
+    // Filters apply at once: no apply button.
     await expect(page).toHaveURL(/role=admin/);
+
+    // Escape closes the drawer; the Filters button now shows how many filters are set.
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("button", { name: "Filters, 1 active" })).toBeVisible();
 
     await page.getByRole("button", { name: "Clear filters" }).first().click();
     await expect(page).not.toHaveURL(/role=/);
+  });
+
+  test("clearing the filters also empties the search box", async ({ page }) => {
+    const search = page.getByRole("searchbox");
+    await search.fill("admin");
+    await expect(page).toHaveURL(/q=admin/);
+
+    await page.getByRole("button", { name: "Clear filters" }).click();
+    await expect(page).not.toHaveURL(/q=/);
+    await expect(search).toHaveValue("");
   });
 
   test("paginates and sorts on the server", async ({ page }) => {

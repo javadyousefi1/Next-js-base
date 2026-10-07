@@ -1,6 +1,6 @@
 "use client";
 
-import type { DataTableColumn, TableController } from "@repo/table/types";
+import { useDataTable } from "@repo/table/data-table-context";
 import {
   Table,
   TableBody,
@@ -17,16 +17,10 @@ import { DataTableColumnHeader } from "./data-table-column-header";
 import { DataTableEmpty } from "./data-table-empty";
 import { DataTableSkeleton } from "./data-table-skeleton";
 
-type DataTableProps<TRow extends { id: string | number }> = {
-  table: TableController<TRow>;
-  columns: DataTableColumn<TRow>[];
-};
-
 /** Rows of a server-driven table, with its loading / error / empty states and sortable headers. */
-export function DataTable<TRow extends { id: string | number }>({
-  table,
-  columns,
-}: DataTableProps<TRow>) {
+export function DataTable() {
+  const { table, columns } = useDataTable();
+
   if (table.isLoading) {
     return <DataTableSkeleton columns={columns.length} rows={table.state.pageSize} />;
   }

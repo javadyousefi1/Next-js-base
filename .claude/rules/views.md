@@ -9,7 +9,9 @@ paths:
 
 - Render only. Call ONE feature hook (e.g. `useUsersTable()`), `useTranslations`, and render its
   result. No `useState`/`useEffect`/`useQuery`/`useForm`/`fetch`/axios — move logic into
-  `features/<name>/hooks/` (lint: `project/no-logic-in-views`).
+  `features/<name>/hooks/` (lint: `project/no-logic-in-views`). Shared data-table views
+  (`components/data-table`) read the table with `useDataTable()`; text inputs use
+  `useDebouncedInput()` (`@repo/hooks`).
 - Props in, JSX out. Event handlers only forward to callbacks the hook returned.
 - Pages (`app/**/page.tsx`) are Server Components: compose views, `generateMetadata` via
   `pageMetadata()`, request-time work inside `<Suspense>`.

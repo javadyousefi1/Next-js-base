@@ -1,52 +1,35 @@
 "use client";
 
-import type { DataTableFilter, TableControls } from "@repo/table/types";
+import { useDebouncedInput } from "@repo/hooks/use-debounced-input";
+import { useDataTable } from "@repo/table/data-table-context";
 import { Button } from "@repo/ui/components/button";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@repo/ui/components/input-group";
 import { SearchIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { DataTableSelectFilter } from "./data-table-select-filter";
+import { DataTableFilters } from "./data-table-filters";
 
-const NO_FILTERS: DataTableFilter[] = [];
-
-type DataTableToolbarProps = {
-  table: TableControls;
-  searchPlaceholder: string;
-  filters?: DataTableFilter[];
-};
-
-/** Search box + one select per filter + "clear filters". */
-export function DataTableToolbar({
-  table,
-  searchPlaceholder,
-  filters = NO_FILTERS,
-}: DataTableToolbarProps) {
+/** Search box + "clear filters" + the Filters drawer button at the end. */
+export function DataTableToolbar() {
   const t = useTranslations("DataTable");
+  const { table, searchPlaceholder } = useDataTable();
+  const search = useDebouncedInput(table.state.q, table.setSearch);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       <InputGroup className="w-full sm:max-w-xs">
         <InputGroupInput
           type="search"
-          value={table.state.q}
+          value={search.value}
           placeholder={searchPlaceholder}
           aria-label={searchPlaceholder}
-          onChange={(event) => table.setSearch(event.target.value)}
+          onChange={(event) => search.onChange(event.target.value)}
+          onBlur={search.onBlur}
         />
         <InputGroupAddon>
           <SearchIcon />
         </InputGroupAddon>
       </InputGroup>
-
-      {filters.map((filter) => (
-        <DataTableSelectFilter
-          key={filter.id}
-          filter={filter}
-          value={table.filters[filter.id] ?? null}
-          onChange={(value) => table.setFilter(filter.id, value)}
-        />
-      ))}
 
       {table.hasFilters ? (
         <Button variant="ghost" onClick={table.resetFilters}>
@@ -54,6 +37,8 @@ export function DataTableToolbar({
           {t("resetFilters")}
         </Button>
       ) : null}
+
+      <DataTableFilters />
     </div>
   );
 }

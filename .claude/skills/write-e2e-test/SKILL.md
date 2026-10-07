@@ -23,9 +23,13 @@ import { signIn } from "./fixtures";
 
 test("filters users by role", async ({ page }) => {
   await signIn(page, "/en/users");
+  // Filters live in a side drawer and apply at once (no apply button).
+  await page.getByRole("button", { name: "Filters", exact: true }).click();
   await page.getByRole("combobox", { name: "Role" }).click();
   await page.getByRole("option", { name: "Admin" }).click();
   await expect(page).toHaveURL(/role=admin/);
+  await page.keyboard.press("Escape"); // closes the drawer
+  await expect(page.getByRole("button", { name: "Filters, 1 active" })).toBeVisible();
 });
 ```
 

@@ -1,7 +1,7 @@
 "use client";
 
+import { useDataTable } from "@repo/table/data-table-context";
 import { PAGE_SIZES } from "@repo/table/search-params";
-import type { TableController } from "@repo/table/types";
 import { Button } from "@repo/ui/components/button";
 import {
   Select,
@@ -18,12 +18,10 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-type DataTablePaginationProps = {
-  table: TableController<unknown>;
-};
-
-export function DataTablePagination({ table }: DataTablePaginationProps) {
+/** Total, rows per page and page buttons of the table. */
+export function DataTablePagination() {
   const t = useTranslations("DataTable");
+  const { table } = useDataTable();
   const { page, pageSize } = table.state;
   const pageCount = Math.max(1, Math.ceil(table.total / pageSize));
 

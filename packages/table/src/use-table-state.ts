@@ -2,10 +2,11 @@
 
 import { useQueryStates, type ParserMap } from "nuqs";
 
+import { normalizeFilterValue, toggleOption } from "./filters";
 import { TABLE_URL_OPTIONS } from "./search-params";
 import type { TableControls, TableState } from "./types";
 
-type UrlPatch = Record<string, string | number | null>;
+type UrlPatch = Record<string, string | number | readonly string[] | null>;
 
 const BASE_KEYS = new Set(["page", "pageSize", "q", "sortBy", "order"]);
 
@@ -26,23 +27,23 @@ export function useTableState<TParsers extends ParserMap>(parsers: TParsers) {
   const update = (patch: UrlPatch) => set({ ...patch, page: 1 });
 
   const filterIds = Object.keys(parsers).filter((key) => !BASE_KEYS.has(key));
-  const filters = Object.fromEntries(
-    filterIds.map((id) => {
-      const value = state[id];
-      return [id, typeof value === "string" ? value : null];
-    }),
-  );
+  const filters = Object.fromEntries(filterIds.map((id) => [id, normalizeFilterValue(state[id])]));
+  const noFilters = Object.fromEntries(filterIds.map((id) => [id, null]));
+  const activeFilterCount = Object.values(filters).filter((value) => value !== null).length;
 
   const controls: TableControls = {
     state,
     filters,
-    hasFilters: state.q !== "" || filterIds.some((id) => filters[id] !== null),
+    activeFilterCount,
+    hasFilters: state.q !== "" || activeFilterCount > 0,
     setSearch: (q) => update({ q }),
-    setFilter: (id, value) => update({ [id]: value }),
+    setFilter: (id, value) => update({ [id]: normalizeFilterValue(value) }),
+    toggleFilterOption: (id, option) => update({ [id]: toggleOption(filters[id] ?? null, option) }),
     toggleSort: (columnId) => update(nextSort(state, columnId)),
     setPage: (page) => set({ page }),
     setPageSize: (pageSize) => update({ pageSize }),
-    resetFilters: () => update({ q: "", ...Object.fromEntries(filterIds.map((id) => [id, null])) }),
+    resetFilters: () => update({ q: "", ...noFilters }),
+    clearFilters: () => update(noFilters),
   };
 
   return { params, ...controls };

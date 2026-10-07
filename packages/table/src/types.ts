@@ -11,19 +11,33 @@ export type TableState = {
   order: SortOrder;
 };
 
+/**
+ * Value of one filter: one option for `select` and `text`, several for `multiSelect`,
+ * `null` = not filtered.
+ */
+export type FilterValue = string | readonly string[] | null;
+
 /** State + actions returned by `useTableState`. */
 export type TableControls = {
   state: TableState;
   /** Current value of each filter (`{ role: "admin" }`), `null` = not filtered. */
-  filters: Record<string, string | null>;
+  filters: Record<string, FilterValue>;
+  /** How many filters are set — the badge on the Filters button. The search box is not counted. */
+  activeFilterCount: number;
+  /** The search box or any filter is set. */
   hasFilters: boolean;
   setSearch: (q: string) => void;
-  setFilter: (id: string, value: string | null) => void;
+  /** Sets one filter; `""` and `[]` clear it. */
+  setFilter: (id: string, value: FilterValue) => void;
+  /** multiSelect: adds the option when it is missing, removes it when it is present. */
+  toggleFilterOption: (id: string, option: string) => void;
   toggleSort: (columnId: string) => void;
   setPage: (page: number) => void;
   setPageSize: (pageSize: number) => void;
   /** Clears the search and every filter (keeps sorting and page size). */
   resetFilters: () => void;
+  /** Clears every filter but keeps the search (the Filters drawer). */
+  clearFilters: () => void;
 };
 
 /** What the data-table components receive: the controls + the current page of data. */
@@ -44,9 +58,13 @@ export type DataTableColumn<TRow> = {
   sortable?: boolean;
 };
 
-export type DataTableFilter = {
-  /** URL key (`?role=admin`) — must exist in the feature's search params. */
-  id: string;
-  title: string;
-  options: { value: string; label: string }[];
-};
+export type FilterOption = { value: string; label: string };
+
+/**
+ * One field of the Filters drawer. `id` is its URL key (`?role=admin`) and must exist in the
+ * feature's search params, with the parser of the same `type` (see `filterParams`).
+ */
+export type DataTableFilter =
+  | { type: "select"; id: string; title: string; options: readonly FilterOption[] }
+  | { type: "multiSelect"; id: string; title: string; options: readonly FilterOption[] }
+  | { type: "text"; id: string; title: string; placeholder?: string };

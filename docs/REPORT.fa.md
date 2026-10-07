@@ -198,30 +198,34 @@ upstream اجرا می‌کند و کش را dehydrate می‌کند. برای �
 صفحه‌بندی، مرتب‌سازی و فیلتر روی API انجام می‌شود و UI فقط صفحه‌ی فعلی را نمایش می‌دهد. برای همین
 کتابخانه‌ی جدول لازم نیست:
 
-| تکه                                                    | کارش                                                                                                                                                   |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `users.search-params.ts`                               | قرارداد URL با پارسرهای nuqs؛ هم صفحه‌ی سرور و هم هوک از آن می‌خوانند                                                                                  |
-| `useTableState(parsers)`                               | وضعیت URL + اکشن‌ها (`setSearch`، `setFilter`، `toggleSort`، `setPage`، `setPageSize`، `resetFilters`)؛ هر تغییر غیر از صفحه، صفحه را به ۱ برمی‌گرداند |
-| `useUsersTable`                                        | وضعیت URL ⇐ کوئری ⇐ `TableController` (کنترل‌ها + ردیف‌ها + حالت‌ها)                                                                                   |
-| `columns` و `filters`                                  | دو آرایه‌ی ساده: `{ id, header, cell, sortable }` و `{ id, title, options }`                                                                           |
-| `DataTableToolbar`، `DataTable`، `DataTablePagination` | کامپوننت‌های ساده با `<table>`                                                                                                                         |
+| تکه                      | کارش                                                                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `users.search-params.ts` | قرارداد URL با پارسرهای nuqs (`filterParams.select/multiSelect/text`)؛ هم صفحه‌ی سرور و هم هوک از آن می‌خوانند                |
+| `useTableState(parsers)` | وضعیت URL + اکشن‌ها (`setSearch`، `setFilter`، `toggleFilterOption`، `toggleSort`، `setPage`، `resetFilters`، `clearFilters`) |
+| `useUsersTable`          | وضعیت URL ⇐ کوئری ⇐ `TableController` (کنترل‌ها + ردیف‌ها + حالت‌ها)                                                          |
+| `columns` و `filters`    | دو آرایه‌ی ساده: `{ id, header, cell, sortable }` و کانفیگ فیلتر `{ type, id, title, options }`                               |
+| `DataTableProvider`      | context جدول (`@repo/table/data-table-context`)؛ تولبار، جدول، صفحه‌بندی و drawer فیلتر بدون prop از آن می‌خوانند             |
 
 ```tsx
-const table = useUsersTable();
-const columns = useUsersColumns();
-const filters = useUsersFilters();
-
-<DataTableToolbar table={table} filters={filters} searchPlaceholder={t("searchPlaceholder")} />
-<DataTable table={table} columns={columns} />
-<DataTablePagination table={table} />
+<DataTableProvider
+  table={useUsersTable()}
+  columns={columns}
+  filters={filters}
+  searchPlaceholder={t("searchPlaceholder")}
+>
+  <DataTableToolbar />
+  <DataTable />
+  <DataTablePagination />
+</DataTableProvider>
 ```
 
-- فیلتر جدید یعنی یک پارسر در `search-params` به‌علاوه‌ی یک آیتم در آرایه‌ی `filters`، با همان id.
+- فیلتر جدید یعنی یک خط `filterParams.<type>(…)` در `search-params` به‌علاوه‌ی یک آیتم در آرایه‌ی
+  `filters` با همان id و همان `type` (به‌علاوه‌ی فیلدش در params schema و پارامتر بک‌اند در `*.backend.ts`).
 - id ستون‌ها همان فیلد مرتب‌سازی API است.
 
 ### ۵.۴.۱ هوک‌های عمومی (`@repo/hooks`)
 
-در پکیج `@repo/hooks`: `use-debounced-value`، `use-debounced-callback`، `use-local-storage` (با
+در پکیج `@repo/hooks`: `use-debounced-value`، `use-debounced-callback`، `use-debounced-input`، `use-local-storage` (با
 اعتبارسنجی zod و همگام بین تب‌ها)، `use-media-query`، `use-is-client`، `use-disclosure`،
 `use-copy-to-clipboard`، `use-interval`، `use-event-listener`، `use-latest`، `use-previous`،
 `use-isomorphic-layout-effect`. در خود اپ (`src/hooks`) فقط `use-app-router` (روتر زبان‌دار + top
@@ -619,3 +623,23 @@ data-table و feedback. این کامپوننت‌ها ترجمه‌های هم�
 - **لوگوی سایدبار:** در حالت بسته، دکمه‌ی هدر ۳۲ پیکسل است. مربع لوگو `shrink-0` نداشت و flex آن را تا
   ۱۶ پیکسل فشرده می‌کرد، و تکه‌ای از اسم اپ هم دیده می‌شد. حالا لوگو همیشه ۳۲×۳۲ است و اسم کامل
   پنهان می‌شود (در هر دو جهت تست شد).
+
+---
+
+## ۲۰. جدول: context، drawer فیلتر و فیلتر از روی کانفیگ
+
+- **context:** `DataTableProvider` در `@repo/table` جدول، ستون‌ها، فیلترها و متن جستجو را نگه می‌دارد.
+  `DataTableToolbar`، `DataTable` و `DataTablePagination` دیگر هیچ prop نمی‌گیرند.
+- **دکمه و drawer:** انتهای تولبار دکمه‌ی «فیلترها» با badge تعداد فیلترهای فعال است و drawer (Sheet
+  خود shadcn) از همان سمت باز می‌شود: در انگلیسی راست، در فارسی چپ. پایینش «پاک کردن همه» فقط
+  فیلترها را پاک می‌کند و جستجو می‌ماند.
+- **فیلتر از روی کانفیگ:** هر صفحه فقط کانفیگ می‌دهد؛ سه نوع `select`، `multiSelect` (چک‌باکس) و
+  `text`. هر نوع یک پارسر URL هم‌نام دارد: `role: filterParams.select(USER_ROLES)` ⇐
+  `{ type: "select", id: "role", … }`.
+- **اعمال فوری:** هر تغییر همان لحظه جدول را به‌روز می‌کند. جستجو و فیلتر متنی ۳۰۰ میلی‌ثانیه بعد از
+  توقف تایپ (یا با خروج از فیلد) اعمال می‌شوند (`useDebouncedInput` در `@repo/hooks`). پس هوک جدول دیگر
+  debounce ندارد. drawer بعد از بسته شدن mount می‌ماند تا بستن با Escape تایپ نیمه‌کاره را گم نکند.
+- **تست:** تست واحد برای منطق فیلترها؛ e2e فیلتر نقش از داخل drawer و پاک شدن جعبه‌ی جستجو با «پاک
+  کردن فیلترها». حالت‌های مسابقه‌ای (پاک کردن بلافاصله بعد از تایپ، تایپ آهسته) در مرورگر چک شد.
+- **تست ناپایدار:** تست «درخواست بدون session به لاگین برمی‌گردد» قبل از پاک کردن کوکی‌ها حالا منتظر لود
+  صفحه می‌ماند.

@@ -5,13 +5,16 @@
   "description": "Headless server-side tables: the nuqs URL contract (page, pageSize, q, sortBy, order + filters), useTableState and the table types.",
   "type": "module",
   "exports": {
+    "./data-table-context": "./src/data-table-context.tsx",
     "./*": "./src/*.ts"
   },
   "scripts": {
+    "test": "bun test src",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
+    "@types/bun": "1.4.2",
     "@types/react": "19.3.0",
     "nuqs": "2.10.1",
     "react": "19.3.0",

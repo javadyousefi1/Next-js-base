@@ -1,6 +1,5 @@
 "use client";
 
-import { useDebouncedValue } from "@repo/hooks/use-debounced-value";
 import type { TableController } from "@repo/table/types";
 import { useTableState } from "@repo/table/use-table-state";
 import { keepPreviousData } from "@tanstack/react-query";
@@ -14,11 +13,8 @@ const NO_USERS: User[] = [];
 /** URL state → users query → everything the data-table components need. */
 export function useUsersTable(): TableController<User> {
   const { params, ...controls } = useTableState(usersSearchParams);
-  const search = useDebouncedValue(params.q, 300);
-  const query = usersListQuery.useQuery(
-    { ...params, q: search },
-    { placeholderData: keepPreviousData }, // keep the previous page visible while loading
-  );
+  // The search box debounces its own typing; keep the previous page visible while loading.
+  const query = usersListQuery.useQuery(params, { placeholderData: keepPreviousData });
 
   return {
     ...controls,

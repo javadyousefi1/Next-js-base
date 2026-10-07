@@ -5,12 +5,13 @@ import { useTranslations } from "next-intl";
 
 import { USER_ROLES } from "../schemas/user.schema";
 
-/** Filters shown in the toolbar. Each `id` is a key of `usersSearchParams`. */
+/** Fields of the Filters drawer. Each `id` is a key of `usersSearchParams`. */
 export function useUsersFilters(): DataTableFilter[] {
   const t = useTranslations("Users");
 
   return [
     {
+      type: "select",
       id: "role",
       title: t("roleFilter"),
       options: USER_ROLES.map((role) => ({ value: role, label: t(`roles.${role}`) })),

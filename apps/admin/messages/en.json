@@ -134,7 +134,12 @@
     "previous": "Previous page",
     "next": "Next page",
     "last": "Last page",
-    "anyValue": "{title}: All",
+    "filters": "Filters",
+    "filtersDescription": "Results update as soon as you change a filter.",
+    "filtersButton": "{count, plural, =0 {Filters} one {Filters, # active} other {Filters, # active}}",
+    "clearAll": "Clear all",
+    "close": "Close",
+    "all": "All",
     "resetFilters": "Clear filters",
     "empty": {
       "title": "No results",

@@ -42,9 +42,9 @@ features/users/
   api/users.queries.ts         makeQuery / makeMutation definitions (key + schemas + fetcher)
   users.search-params.ts       nuqs parsers = the table's URL contract (page prefetch + hook)
   hooks/use-users-table.ts     URL state (useTableState) → query → TableController
-  components/users-table.tsx   <DataTableToolbar> + <DataTable> + <DataTablePagination>
+  components/users-table.tsx   <DataTableProvider> + <DataTableToolbar> + <DataTable> + <DataTablePagination>
   components/users-columns.tsx useUsersColumns(): { id, header, cell, sortable }[]
-  components/users-filters.ts  useUsersFilters(): { id, title, options }[]
+  components/users-filters.ts  useUsersFilters(): { type, id, title, options }[]
 ```
 
 Dependency direction: `schemas` ← `api` ← `hooks` ← `components` ← `app`. `server/` may use `api`
@@ -146,31 +146,43 @@ Plain React, no table library: the API pages, sorts and filters; the UI renders 
 export const usersSearchParams = {
   ...tableSearchParams, // @repo/table/search-params: page, pageSize, q, sortBy, order
   sortBy: parseAsStringLiteral(USER_SORT_FIELDS),
-  role: parseAsStringLiteral(USER_ROLES), // every extra key is a filter
+  role: filterParams.select(USER_ROLES), // every extra key is a filter: select · multiSelect · text
 };
 export const loadUsersSearchParams = createLoader(usersSearchParams);
 
 // 2. Hook — hooks/use-<x>-table.ts: URL state → query → TableController
 const { params, ...controls } = useTableState(usersSearchParams);
-const search = useDebouncedValue(params.q, 300);
-const query = usersListQuery.useQuery({ ...params, q: search }, { placeholderData: keepPreviousData });
+const query = usersListQuery.useQuery(params, { placeholderData: keepPreviousData });
 return { ...controls, rows: query.data?.items ?? [], total: query.data?.total ?? 0, isLoading, isFetching, isError, retry };
 
 // 3. Columns and filters are plain arrays — components/<x>-columns.tsx, components/<x>-filters.ts
 { id: "age", header: t("columns.age"), sortable: true, cell: (user) => user.age }
-{ id: "role", title: t("roleFilter"), options: USER_ROLES.map((r) => ({ value: r, label: t(`roles.${r}`) })) }
+{ type: "select", id: "role", title: t("roleFilter"), options: USER_ROLES.map((r) => ({ value: r, label: t(`roles.${r}`) })) }
+// also { type: "multiSelect", id, title, options } and { type: "text", id, title, placeholder? }
 
-// 4. View
-<DataTableToolbar table={table} filters={filters} searchPlaceholder={t("searchPlaceholder")} />
-<DataTable table={table} columns={columns} />
-<DataTablePagination table={table} />
+// 4. View — the provider (@repo/table/data-table-context) hands the table to prop-less components
+<DataTableProvider table={table} columns={columns} filters={filters} searchPlaceholder={t("searchPlaceholder")}>
+  <DataTableToolbar />
+  <DataTable />
+  <DataTablePagination />
+</DataTableProvider>
 ```
 
 - `useTableState(parsers)` (`@repo/table/use-table-state`): URL state + `setSearch`, `setFilter`,
-  `toggleSort`, `setPage`, `setPageSize`, `resetFilters`. Every change except paging returns to
-  page 1.
-- Column ids are the API sort fields; filter ids are keys of the search params.
-- New filter = one parser in `<x>.search-params.ts` + one entry in the filters array.
+  `toggleFilterOption`, `toggleSort`, `setPage`, `setPageSize`, `resetFilters` (search + filters:
+  toolbar, empty state), `clearFilters` (filters only: the drawer). Every change except paging
+  returns to page 1.
+- Column ids are the API sort fields; filter ids are keys of the search params, and a filter's
+  parser (`filterParams.<type>`) must match its `type`.
+- Filters: the toolbar ends with a "Filters" button (badge = active filters) that opens a side
+  drawer (shadcn Sheet) with one field per config entry — on the button's side: right in LTR, left
+  in RTL. Changes apply instantly, there is no Apply button. The search box and `text` filters
+  commit after a 300 ms pause or on blur (`useDebouncedInput`, inside the component), so the table
+  hook needs no debounce. The drawer stays mounted when closed, so Escape never drops a pending
+  commit. No filters in the config → no button.
+- New filter = one `filterParams.<type>(…)` line in `<x>.search-params.ts` + one entry in the
+  filters array (+ the field in the list params schema and the backend param in `<x>.backend.ts`;
+  a multiSelect field maps `[]` to `null` there, so `?x=` and no `x` share one cache entry).
 
 ## Breadcrumbs
 

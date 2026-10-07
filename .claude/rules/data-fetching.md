@@ -36,9 +36,11 @@ paths:
   code passes the schema to the client: `upstream.get(url, { schema })` /
   `upstream.post(url, body, { schema })` — validated and labelled by the endpoint. `bffClient` is
   only for login/logout (they set cookies).
-- Tables: `<x>.search-params.ts` (nuqs parsers) + `useTableState` + plain `columns`/`filters`
-  arrays + `<DataTableToolbar|DataTable|DataTablePagination table={table}>`. No table library.
-  Never a per-page toolbar, URL-state hook or prefetch function.
+- Tables: `<x>.search-params.ts` (nuqs parsers; filters via `filterParams.select|multiSelect|text`),
+  `useTableState`, plain `columns`/`filters` arrays (every filter has a `type`), and
+  `<DataTableProvider table columns filters searchPlaceholder>` around the prop-less
+  `<DataTableToolbar|DataTable|DataTablePagination />`. No table library. Never a per-page
+  toolbar, URL-state hook or prefetch function.
 - Every upstream endpoint used by the app has an MSW handler in `src/mocks/handlers.ts` with
   Faker data in `src/mocks/db.ts`, so the app runs without a backend (`API_MOCKING=enabled`).
 - Errors are `ApiError` (`code`, `status`, `retryAfterSeconds`); branch on `code`, never on text.

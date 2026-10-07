@@ -1,5 +1,6 @@
 "use client";
 
+import { DataTableProvider } from "@repo/table/data-table-context";
 import { useTranslations } from "next-intl";
 
 import { DataTable } from "@/components/data-table/data-table";
@@ -17,14 +18,17 @@ export function UsersTable() {
   const filters = useUsersFilters();
 
   return (
-    <div className="flex flex-col gap-4">
-      <DataTableToolbar
-        table={table}
-        filters={filters}
-        searchPlaceholder={t("searchPlaceholder")}
-      />
-      <DataTable table={table} columns={columns} />
-      <DataTablePagination table={table} />
-    </div>
+    <DataTableProvider
+      table={table}
+      columns={columns}
+      filters={filters}
+      searchPlaceholder={t("searchPlaceholder")}
+    >
+      <div className="flex flex-col gap-4">
+        <DataTableToolbar />
+        <DataTable />
+        <DataTablePagination />
+      </div>
+    </DataTableProvider>
   );
 }

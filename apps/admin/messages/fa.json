@@ -134,7 +134,12 @@
     "previous": "صفحه‌ی قبل",
     "next": "صفحه‌ی بعد",
     "last": "صفحه‌ی آخر",
-    "anyValue": "{title}: همه",
+    "filters": "فیلترها",
+    "filtersDescription": "با هر تغییر فیلتر، نتیجه‌ها همان لحظه به‌روز می‌شوند.",
+    "filtersButton": "{count, plural, =0 {فیلترها} other {فیلترها، # فعال}}",
+    "clearAll": "پاک کردن همه",
+    "close": "بستن",
+    "all": "همه",
     "resetFilters": "پاک کردن فیلترها",
     "empty": {
       "title": "نتیجه‌ای پیدا نشد",
