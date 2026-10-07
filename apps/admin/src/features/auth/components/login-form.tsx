@@ -14,7 +14,9 @@ export function LoginForm() {
   const login = useLoginForm();
 
   return (
-    <form noValidate onSubmit={login.onSubmit} className="flex flex-col gap-6">
+    // method="post": a submit before React hydrates the form (dev, slow JS) sends the password in
+    // the body, never in the URL.
+    <form method="post" noValidate onSubmit={login.onSubmit} className="flex flex-col gap-6">
       <FieldGroup>
         <Field data-invalid={Boolean(login.errors.username)}>
           <FieldLabel htmlFor="username">{t("username")}</FieldLabel>
