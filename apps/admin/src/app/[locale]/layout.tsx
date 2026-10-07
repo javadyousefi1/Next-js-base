@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 import { cn } from "@repo/ui/lib/utils";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { Roboto, Vazirmatn } from "next/font/google";
+import localFont from "next/font/local";
 
 import { AppProviders } from "@/components/providers/app-providers";
 import { SITE } from "@/config/site";
@@ -11,11 +11,18 @@ import { getLocaleParam } from "@/i18n/params";
 import { routing } from "@/i18n/routing";
 import { rootMetadata } from "@/lib/seo/metadata";
 
-const roboto = Roboto({ subsets: ["latin", "latin-ext"], variable: "--font-roboto" });
-// RTL pages render all text in Vazirmatn (Latin too, hence the latin subset); loaded on demand.
+// Self-hosted variable fonts (src/fonts): dev and build never download from Google Fonts, which
+// silently falls back to Arial in dev — and fails the build — when Google is unreachable.
+const roboto = localFont({
+  src: "../../fonts/roboto-latin-variable.woff2",
+  weight: "100 900",
+  variable: "--font-roboto",
+});
+// RTL pages render all text in Vazirmatn (its Latin glyphs are Roboto's); loaded on demand.
 // Order per direction: `--app-font` in styles/globals.css.
-const vazirmatn = Vazirmatn({
-  subsets: ["arabic", "latin"],
+const vazirmatn = localFont({
+  src: "../../fonts/vazirmatn-variable.woff2",
+  weight: "100 900",
   variable: "--font-vazirmatn",
   preload: false,
 });

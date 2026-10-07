@@ -39,7 +39,9 @@ Short ADRs. Each one says what was chosen, why, and what to watch out for.
 14. **Optimistic route guard.** `proxy.ts` only checks cookie presence (no network call per
     request). Authorization is the upstream API's job; expired sessions are handled by the BFF.
 15. **Roboto + Vazirmatn.** Roboto (requested) has no Arabic-script glyphs, so Persian text falls
-    back to Vazirmatn (loaded on demand) instead of a random system font.
+    back to Vazirmatn (loaded on demand) instead of a random system font. Both are self-hosted
+    (`src/fonts`, `next/font/local`): Google Fonts can be unreachable, and then dev silently falls
+    back to Arial and the build fails.
 16. **"No logic in components"** applies to app views (lint-enforced). shadcn primitives in
     `packages/ui` are vendor UI code and keep their internal UI state.
 17. **React Compiler + react-hook-form.** The compiler can memoize RHF's mutable `formState`

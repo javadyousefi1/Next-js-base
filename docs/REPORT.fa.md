@@ -80,7 +80,7 @@ proxy.ts        (جایگزین middleware در Next 16) روتینگ زبان +
 | 14  | دیزاین سیستم shadcn                                             | ✅    | `packages/ui` با CLI رسمی shadcn، استایل base-nova، پشتیبانی RTL، ۳۳ کامپوننت                                                               |
 | 15  | فول TypeScript                                                  | ✅    | TypeScript 7 (کامپایلر native) با strict و `noUncheckedIndexedAccess`                                                                       |
 | 16  | Tailwind                                                        | ✅    | Tailwind CSS 4.3                                                                                                                            |
-| 17  | فونت Roboto                                                     | ✅    | `next/font/google`؛ برای متن فارسی Vazirmatn به‌عنوان fallback (هشدار ۵)                                                                    |
+| 17  | فونت Roboto                                                     | ✅    | `next/font/local` (فایل‌ها داخل ریپو)؛ برای متن فارسی Vazirmatn (هشدار ۵)                                                                   |
 | 18  | بیس Playwright داخل اپ نکست                                     | ✅    | `apps/admin/playwright.config.ts` + ۱۵ تست در `e2e/` (همه سبز)                                                                              |
 | 19  | منطق در همه‌جا از دیزاین جدا باشد                               | ✅    | الگوی hook/view + قانون لینت `project/no-logic-in-views`                                                                                    |
 | 20  | داک، skill و agent از روی صحبت‌های من، برای یکی شدن دست‌خط      | ✅    | `AGENTS.md`، `CLAUDE.md`، `.claude/rules`، ۹ skill، ۳ ساب‌ایجنت، هوک فرمت/لینت خودکار                                                       |
@@ -604,3 +604,18 @@ data-table و feedback. این کامپوننت‌ها ترجمه‌های هم�
   در موبایل فقط صفحه‌ی فعلی نمایش داده می‌شود.
 - جداکننده‌ی عمودی هدر که قبلاً بالا می‌چسبید، وسط‌چین شد.
 - skill `add-page` یک مرحله‌ی «بردکرامپ» گرفت؛ تست e2e جدید رفتن از «کاربران» به «داشبورد» را چک می‌کند.
+
+---
+
+## ۱۹. فونت فارسی (دوباره) و لوگوی سایدبار بسته
+
+- **علت اصلی:** Next فونت‌های `next/font/google` را موقع dev و build از Google Fonts دانلود می‌کند. اگر
+  Google در دسترس نباشد (مثلاً ترمینال بدون VPN)، dev فقط پیام «Failed to download Vazirmatn from
+  Google Fonts» را چاپ می‌کند و به‌جای فونت، Arial نمایش می‌دهد؛ `next build` هم کلاً شکست می‌خورد.
+  همین حالت با بستن دسترسی به Google بازسازی شد و فارسی با Arial رندر شد.
+- **راه‌حل:** فونت‌ها داخل ریپو هستند (`apps/admin/src/fonts` با `next/font/local`): Vazirmatn متغیر
+  (۱۱۱ KB، همه‌ی وزن‌ها؛ حروف لاتینش همان Roboto است) و Roboto لاتین متغیر (۴۳ KB)، هر دو با لایسنس
+  OFL. دیگر هیچ درخواستی به Google زده نمی‌شود؛ با Google بسته، فارسی با Vazirmatn رندر شد.
+- **لوگوی سایدبار:** در حالت بسته، دکمه‌ی هدر ۳۲ پیکسل است. مربع لوگو `shrink-0` نداشت و flex آن را تا
+  ۱۶ پیکسل فشرده می‌کرد، و تکه‌ای از اسم اپ هم دیده می‌شد. حالا لوگو همیشه ۳۲×۳۲ است و اسم کامل
+  پنهان می‌شود (در هر دو جهت تست شد).

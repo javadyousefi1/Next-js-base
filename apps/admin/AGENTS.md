@@ -227,6 +227,8 @@ Login is rate limited in Redis (5/min/IP); if Redis is down it fails open (logge
 - Fonts: LTR → Roboto first; RTL → Vazirmatn first, for Latin text too (`--app-font` in
   `styles/globals.css`). Never put Roboto first in RTL: its generated fallback face is local Arial,
   which has Persian glyphs on Windows/macOS and would win over Vazirmatn.
+- Both fonts are self-hosted in `src/fonts` (`next/font/local`). Never use `next/font/google`: when
+  Google Fonts is unreachable, dev silently renders Arial and `next build` fails.
 - Navigation only through `@/i18n/navigation` (`Link`, `redirect`, `usePathname`) or
   `useAppRouter` (adds the top loader).
 - Use logical Tailwind classes (`ms-*`, `pe-*`, `start-*`, `text-start`); flip directional icons with
@@ -245,3 +247,13 @@ server value read in the browser throws. Add every new key to `.env.example`, to
 - Unit: `*.test.ts` next to the code, `bun test` (`bun run test`).
 - E2E: `e2e/*.spec.ts`, Playwright against `next start` with MSW (`bun run test:e2e`). Use roles and
   labels (`getByRole`, `getByLabel`), never CSS classes. Skill: `write-e2e-test`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
