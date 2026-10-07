@@ -208,7 +208,7 @@ upstream اجرا می‌کند و کش را dehydrate می‌کند. برای �
 
 ```tsx
 <DataTableProvider
-  table={useUsersTable()}
+  table={table}
   columns={columns}
   filters={filters}
   searchPlaceholder={t("searchPlaceholder")}
