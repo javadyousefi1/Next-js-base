@@ -39,7 +39,7 @@
     "password": "Password",
     "submit": "Sign in",
     "submitting": "Signing in…",
-    "demoHint": "Demo account: admin / admin123",
+    "demoHint": "Demo accounts: admin / admin123 · member / member123 (no users page)",
     "errors": {
       "invalidCredentials": "Invalid username or password.",
       "rateLimited": "Too many attempts. Try again in {seconds} seconds.",
@@ -48,6 +48,13 @@
     "validation": {
       "usernameRequired": "Username is required.",
       "passwordMin": "Password must be at least {min} characters."
+    }
+  },
+  "Access": {
+    "noAccess": {
+      "title": "No access",
+      "description": "You don't have permission to view this page.",
+      "back": "Back to dashboard"
     }
   },
   "Dashboard": {

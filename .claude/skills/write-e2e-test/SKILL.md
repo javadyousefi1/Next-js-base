@@ -5,8 +5,8 @@ description: Write Playwright end-to-end tests for apps/admin the way this repo 
 
 # Write an e2e test
 
-- Location: `apps/admin/e2e/<area>.spec.ts`. Shared steps: `e2e/fixtures.ts` (`signIn(page, path)`,
-  `DEMO_USER`).
+- Location: `apps/admin/e2e/<area>.spec.ts`. Shared steps: `e2e/fixtures.ts` (`signIn(page, path, user?)`,
+  `DEMO_USER` = admin, `MEMBER_USER` = no users access).
 - The suite runs against `next start` with `API_MOCKING=enabled` (MSW + Faker, seeded data), so
   data is deterministic — e.g. `admin@example.com` always exists.
 - Locators: `getByRole`, `getByLabel`, `getByText` with the English copy from `messages/en.json`.

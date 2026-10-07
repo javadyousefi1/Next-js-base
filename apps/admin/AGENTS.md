@@ -17,7 +17,7 @@ app/                    Routing only — thin pages/layouts, BFF route handlers,
   api/health/           Liveness probe (Docker HEALTHCHECK)
   manifest.ts · robots.ts · sitemap.ts
 components/             Shared, feature-agnostic VIEWS: data-table, feedback, layout, providers
-config/                 Constants: routes, query-keys, api-endpoints, cache-tags, navigation, breadcrumbs, site, auth
+config/                 Constants: routes, query-keys, api-endpoints, cache-tags, navigation, breadcrumbs, site, auth, access
 features/<name>/        Vertical slices (anatomy below)
 hooks/                  App hooks (useAppRouter: i18n router + top loader); generic ones: @repo/hooks
 i18n/                   next-intl routing, navigation (Link, useRouter…), request config, locale meta
@@ -30,7 +30,7 @@ proxy.ts                Next 16 proxy (formerly middleware): i18n routing + opti
 ```
 
 App-agnostic building blocks come from workspace packages: `@repo/http`, `@repo/query`,
-`@repo/table`, `@repo/hooks`, `@repo/redis`, `@repo/ui` (see the root `AGENTS.md` §3).
+`@repo/table`, `@repo/access`, `@repo/hooks`, `@repo/redis`, `@repo/ui` (see the root `AGENTS.md` §3).
 
 ## Feature anatomy — copy `features/users`
 
@@ -184,6 +184,48 @@ return { ...controls, rows: query.data?.items ?? [], total: query.data?.total ??
   filters array (+ the field in the list params schema and the backend param in `<x>.backend.ts`;
   a multiSelect field maps `[]` to `null` there, so `?x=` and no `x` share one cache entry).
 
+## Access control (roles + permissions)
+
+Who may see a page or a component. The model lives in `@repo/access` (no app knowledge); the app
+only supplies the data.
+
+- **Grants** (what a role gets): one permission (`users.read`), a whole area (`users.*`) or
+  everything (`*`). Permissions are `<area>.<action>`.
+- **Checks** (what a page or component asks for): a permission (`"users.read"`) or a role
+  (`{ role: "admin" }`, any of `{ role: ["admin", "moderator"] }`).
+- `src/config/access.ts`: `PERMISSIONS` (every permission), `ACCESS_POLICY` (role → grants, the
+  whole policy in one object) and `ROUTE_ACCESS` (page → required check; a key covers its nested
+  pages, `[param]` matches any value, the most specific key wins). It also registers the role and
+  permission types, so checks are type-checked.
+- The session user carries `roles` + `permissions`. **Only `features/auth/api/auth.backend.ts`
+  maps what the backend sends** (`toSessionUser`: here one `role` → `roles` + the permissions of
+  `ACCESS_POLICY`); a backend with role lists or its own permissions changes that function and
+  nothing else.
+
+```tsx
+// Component level — views: <Can> · hooks: useAccess().can(rule)   (@repo/access/access-context)
+<Can permission="stats.refresh" fallback={<Hint />}><RefreshStatsButton /></Can>
+<Can role={["admin", "moderator"]}>…</Can>
+const { can, isReady } = useAccess();   // everything is denied until the session has loaded
+if (can("users.read")) …
+
+// Route level — one line per guarded page in src/config/access.ts
+export const ROUTE_ACCESS = { [ROUTES.users]: "users.read" };
+
+// Server — Server Actions and route handlers are public endpoints (src/server/auth/access.ts)
+if (!(await hasAccess("stats.refresh"))) return;
+```
+
+- `<RouteGuard>` (app layout) renders "No access" (not a redirect) for a page whose `ROUTE_ACCESS`
+  rule is not met. Until the session has loaded the page renders as usual (optimistic, like
+  `proxy.ts`), so its server prefetch still paints at once. The sidebar hides the links of such
+  pages until the session allows them (`useNavItems`). A page without an entry is open to every
+  signed-in user. Keys cover nested pages, the most specific key wins (a static segment beats
+  `[param]`), and `/` would cover every page — keep the dashboard open. A session that cannot be
+  read means no access (least privilege), and an unknown backend role becomes `user`.
+- This hides UI. The backend still authorizes every request — never rely on `<Can>` or the route
+  guard for security.
+
 ## Breadcrumbs
 
 The shell header builds the trail from the URL. Every page adds one entry to
@@ -258,7 +300,8 @@ server value read in the browser throws. Add every new key to `.env.example`, to
 
 - Unit: `*.test.ts` next to the code, `bun test` (`bun run test`).
 - E2E: `e2e/*.spec.ts`, Playwright against `next start` with MSW (`bun run test:e2e`). Use roles and
-  labels (`getByRole`, `getByLabel`), never CSS classes. Skill: `write-e2e-test`.
+  labels (`getByRole`, `getByLabel`), never CSS classes. Skill: `write-e2e-test`. Demo logins:
+  `admin` / `admin123` and `member` / `member123` (no users access).
 
 <!-- BEGIN:nextjs-agent-rules -->
 

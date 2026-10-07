@@ -69,6 +69,7 @@ use npm/yarn/pnpm here (the root `devEngines` pins Bun).
 apps/admin/              Next.js admin panel (reference app) — see apps/admin/AGENTS.md
 packages/http/           HttpClient (axios inside): data or ApiError out, zod-validated responses
 packages/query/          React Query layer: createMakeQuery / makeMutation, invalidation, QueryClient
+packages/access/         Role-based access: grants, permission/role checks, route rules, <Can>
 packages/table/          Headless server-side tables: nuqs URL contract, useTableState, types
 packages/hooks/          Generic React hooks (debounce, interval, local storage, media query…)
 packages/redis/          Server-only Redis helpers: client, remember (cache-aside), rateLimit
@@ -112,7 +113,7 @@ nuisance: fix the code, don't disable the rule. Disabling needs a comment with a
 
 - Hooks (Husky): **pre-commit** lint-staged (oxlint --fix + oxfmt on staged files) · **commit-msg**
   commitlint · **pre-push** `bun run check`, plus `bun run build` and e2e when pushing to `main`.
-- Scopes: `admin`, `http`, `query`, `table`, `hooks`, `redis`, `ui`, `oxlint-plugin`,
+- Scopes: `admin`, `access`, `http`, `query`, `table`, `hooks`, `redis`, `ui`, `oxlint-plugin`,
   `typescript-config`, `deps`, `docker`, `ci`, `docs`,
   `tooling`, `ai`. Example: `feat(admin): add user details page`.
 - Never bypass hooks (`--no-verify`) or force-push shared branches.

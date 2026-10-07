@@ -1,5 +1,7 @@
+import { permissionsOf } from "@repo/access/access";
 import { z } from "zod";
 
+import { ACCESS_POLICY, PERMISSIONS } from "@/config/access";
 import { userRoleSchema } from "@/features/users/schemas/user.schema";
 
 import type { LoginInput, LoginResult, SessionUser, TokenPair } from "../schemas/auth.schema";
@@ -52,17 +54,32 @@ const backendUserShape = {
   email: z.email(),
   firstName: z.string(),
   lastName: z.string(),
-  role: userRoleSchema.default("user"),
+  // Missing or unknown role → "user" (least privilege) instead of failing the whole session.
+  role: userRoleSchema.catch("user"),
 };
+const backendUser = z.object(backendUserShape);
+
+/**
+ * Backend user → the app's `SessionUser` (who they are and what they may do). This backend sends
+ * one `role`; the permissions come from `ACCESS_POLICY`. A backend that sends a role list or its
+ * own permissions maps them here and nowhere else.
+ */
+function toSessionUser({ role, ...user }: z.output<typeof backendUser>): SessionUser {
+  return {
+    ...user,
+    roles: [role],
+    permissions: permissionsOf(ACCESS_POLICY, [role], PERMISSIONS),
+  };
+}
 
 /** The signed-in user (`/auth/me`). */
-export const meResponse: z.ZodType<SessionUser> = z.object(backendUserShape);
+export const meResponse = backendUser.transform(toSessionUser);
 
 /** Login response: user fields + tokens → `{ user, tokens }`. */
 export const loginResponse = z
   .object({ ...backendUserShape, ...backendTokenShape })
   .transform(({ accessToken, refreshToken, expiresInMins, ...user }): LoginResult => ({
-    user,
+    user: toSessionUser(user),
     tokens: toTokenPair({ accessToken, refreshToken, expiresInMins }),
   }));
 

@@ -21,7 +21,11 @@ export type MockUser = {
   company: { name: string; title: string };
 };
 
-export const DEMO_CREDENTIALS = { username: "admin", password: "admin123" } as const;
+/** Demo logins: an admin (every permission) and a member (role `user`: no users access). */
+export const DEMO_ACCOUNTS = {
+  admin: { username: "admin", password: "admin123" },
+  member: { username: "member", password: "member123" },
+} as const;
 
 function createUser(id: number): MockUser {
   const firstName = faker.person.firstName();
@@ -48,7 +52,7 @@ const adminUser: MockUser = {
   id: 1,
   firstName: "Admin",
   lastName: "User",
-  username: DEMO_CREDENTIALS.username,
+  username: DEMO_ACCOUNTS.admin.username,
   email: "admin@example.com",
   phone: "+1 555 0100",
   age: 34,
@@ -56,10 +60,26 @@ const adminUser: MockUser = {
   company: { name: "Acme", title: "Administrator" },
 };
 
+const memberUser: MockUser = {
+  id: 2,
+  firstName: "Member",
+  lastName: "User",
+  username: DEMO_ACCOUNTS.member.username,
+  email: "member@example.com",
+  phone: "+1 555 0101",
+  age: 28,
+  role: "user",
+  company: { name: "Acme", title: "Support" },
+};
+
 type Session = { userId: number; expiresAt: number };
 
 export const db = {
-  users: [adminUser, ...Array.from({ length: 56 }, (_, index) => createUser(index + 2))],
+  users: [
+    adminUser,
+    memberUser,
+    ...Array.from({ length: 56 }, (_, index) => createUser(index + 3)),
+  ],
   accessTokens: new Map<string, Session>(),
   refreshTokens: new Map<string, Session>(),
 };

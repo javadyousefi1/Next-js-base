@@ -40,6 +40,10 @@ description: Add a new route/page to apps/admin — ROUTES constant, thin Server
    only its own entry (`[param]` for dynamic segments: `"/users/[id]": "userDetails"`). Without
    an entry the page shows no breadcrumb.
 6. **Messages** — `<Namespace>.title` and `.description` in `en.json` and `fa.json`.
-7. **Sitemap** — only public, indexable pages are listed (`src/app/sitemap.ts` uses `PUBLIC_ROUTES`).
-8. **Verify** — `bun run typecheck` (typed routes + `PageProps`), `bun run build`, an e2e smoke
+7. **Access (only if the page needs more than a session)** — add `[ROUTES.<name>]: "<area>.<action>"`
+   to `ROUTE_ACCESS` in `src/config/access.ts` (and the permission to `PERMISSIONS` / the grants
+   in `ACCESS_POLICY`). The route guard shows "No access" and the sidebar link is hidden; no
+   other change.
+8. **Sitemap** — only public, indexable pages are listed (`src/app/sitemap.ts` uses `PUBLIC_ROUTES`).
+9. **Verify** — `bun run typecheck` (typed routes + `PageProps`), `bun run build`, an e2e smoke
    test that the page renders its `<h1>`.

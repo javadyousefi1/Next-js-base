@@ -14,4 +14,5 @@ paths:
 - E2E: Playwright against the production build with MSW. Query by role/label/text
   (`getByRole("button", { name: "Next page" })`, `exact: true` when names overlap), assert URLs
   for URL state, never CSS selectors or sleeps. Shared steps live in `e2e/fixtures.ts`.
-- The demo account is `admin` / `admin123` (MSW). New endpoints need MSW handlers first.
+- Demo accounts (MSW): `admin` / `admin123` and `member` / `member123` (role `user`: no users
+  access; `MEMBER_USER` in `e2e/fixtures.ts`). New endpoints need MSW handlers first.

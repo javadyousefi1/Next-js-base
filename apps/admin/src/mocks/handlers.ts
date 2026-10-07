@@ -4,7 +4,7 @@ import { delay } from "msw/utils/delay";
 import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { env } from "@/env";
 
-import { db, DEMO_CREDENTIALS, USER_ROLES, type MockUser } from "./db";
+import { db, DEMO_ACCOUNTS, USER_ROLES, type MockUser } from "./db";
 
 /**
  * MSW handlers that imitate the upstream REST API (DummyJSON-compatible contract).
@@ -44,8 +44,9 @@ export const handlers = [
   http.post(url(API_ENDPOINTS.auth.login), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const body = (await request.json()) as { username?: string; password?: string };
-    const isValid =
-      body.username === DEMO_CREDENTIALS.username && body.password === DEMO_CREDENTIALS.password;
+    const isValid = Object.values(DEMO_ACCOUNTS).some(
+      (account) => body.username === account.username && body.password === account.password,
+    );
     const user = db.users.find((candidate) => candidate.username === body.username);
 
     if (!isValid || !user) {
@@ -69,7 +70,10 @@ export const handlers = [
   }),
 
   http.get(url(API_ENDPOINTS.users.list), async ({ request }) => {
-    if (!currentUser(request)) return unauthorized();
+    const caller = currentUser(request);
+    if (!caller) return unauthorized();
+    // A real API authorizes too: members may not list users (the UI only hides the page).
+    if (caller.role === "user") return HttpResponse.json({ message: "Forbidden" }, { status: 403 });
     await delay(RESPONSE_DELAY_MS);
 
     const params = new URL(request.url).searchParams;

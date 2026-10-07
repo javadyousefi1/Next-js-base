@@ -11,7 +11,8 @@ paths:
 # Server code
 
 - First line `import "server-only";` (lint: `project/require-server-only`). Server Actions live in
-  `*.actions.ts` with `"use server"` and must check the session themselves.
+  `*.actions.ts` with `"use server"` and must check access themselves:
+  `if (!(await hasAccess("<permission>"))) return;` (`@/server/auth/access`).
 - Tokens exist only in httpOnly cookies (`src/server/auth/cookies.ts`). Never return a token in a
   response body, never log it, never pass it to client components. Token-issuing upstream
   endpoints (`/auth/login`, `/auth/refresh`) are blocked in the BFF proxy — keep it that way.

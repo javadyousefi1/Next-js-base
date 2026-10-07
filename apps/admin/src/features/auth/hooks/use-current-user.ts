@@ -10,6 +10,7 @@ export function useCurrentUser() {
   return {
     user,
     isLoading: query.isPending,
+    isError: query.isError,
     initials: user ? `${user.firstName[0] ?? ""}${user.lastName[0] ?? ""}`.toUpperCase() : "",
     fullName: user ? `${user.firstName} ${user.lastName}` : "",
   };

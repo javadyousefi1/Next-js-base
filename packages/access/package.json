@@ -1,0 +1,25 @@
+{
+  "name": "@repo/access",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Role-based access: grants (permission, area.* or *), checks by permission or role, route rules, and <Can> / useAccess() for React.",
+  "type": "module",
+  "exports": {
+    "./access-context": "./src/access-context.tsx",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "test": "bun test src",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "1.4.2",
+    "@types/react": "19.3.0",
+    "react": "19.3.0",
+    "typescript": "7.0.2"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0"
+  }
+}

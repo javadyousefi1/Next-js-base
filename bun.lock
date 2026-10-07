@@ -24,6 +24,7 @@
       "dependencies": {
         "@faker-js/faker": "10.6.0",
         "@hookform/resolvers": "5.9.1",
+        "@repo/access": "workspace:*",
         "@repo/hooks": "workspace:*",
         "@repo/http": "workspace:*",
         "@repo/query": "workspace:*",
@@ -60,6 +61,20 @@
         "babel-plugin-react-compiler": "1.0.0",
         "tailwindcss": "4.3.3",
         "typescript": "7.0.2",
+      },
+    },
+    "packages/access": {
+      "name": "@repo/access",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "@types/bun": "1.4.2",
+        "@types/react": "19.3.0",
+        "react": "19.3.0",
+        "typescript": "7.0.2",
+      },
+      "peerDependencies": {
+        "react": "^19.3.0",
       },
     },
     "packages/hooks": {
@@ -569,6 +584,8 @@
     "@redis/search": ["@redis/search@6.3.0", "", { "peerDependencies": { "@redis/client": "^6.3.0" } }, "sha512-RPXAZmKjZZG7Tm7m1w9keFdXzbL91PiSHQBfQRe9xwW40jNsTRbG0FwhIz4QlHPU4gKDAsCy8IQHj4yZl4H9rw=="],
 
     "@redis/time-series": ["@redis/time-series@6.3.0", "", { "peerDependencies": { "@redis/client": "^6.3.0" } }, "sha512-+fJOB8mN1z5WRakCJNh5lVdz1KqvHGSOistsKeitD24QsCtPwyRQXWC0iq6T/i/ubLE/YcguZqPm8F598MKk4A=="],
+
+    "@repo/access": ["@repo/access@workspace:packages/access"],
 
     "@repo/hooks": ["@repo/hooks@workspace:packages/hooks"],
 

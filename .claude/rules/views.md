@@ -19,5 +19,7 @@ paths:
   `project/cn-for-conditional-classes`). RTL-safe logical classes (`ms-*`, `pe-*`, `start-*`,
   `text-start`); directional icons get `rtl:rotate-180`.
 - Every visible string comes from `messages/{en,fa}.json`.
+- Show/hide by access with `<Can permission="…" | role="…">` (`@repo/access/access-context`),
+  never by comparing roles in the view.
 - Links: `<Link href={ROUTES.x}>` from `@/i18n/navigation`; UI from `@repo/ui/components/*`.
 - Accessibility: one `<h1>` per page, labels for inputs, `aria-label` on icon-only buttons.

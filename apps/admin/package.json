@@ -15,6 +15,7 @@
   "dependencies": {
     "@faker-js/faker": "10.6.0",
     "@hookform/resolvers": "5.9.1",
+    "@repo/access": "workspace:*",
     "@repo/hooks": "workspace:*",
     "@repo/http": "workspace:*",
     "@repo/query": "workspace:*",

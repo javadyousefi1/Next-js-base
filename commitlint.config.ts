@@ -12,6 +12,7 @@ const config: UserConfig = {
       "always",
       [
         "admin",
+        "access",
         "http",
         "query",
         "table",

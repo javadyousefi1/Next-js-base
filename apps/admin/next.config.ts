@@ -53,6 +53,7 @@ const nextConfig: NextConfig = {
 
   // Workspace packages ship TypeScript source; t3-env must be transpiled for standalone output.
   transpilePackages: [
+    "@repo/access",
     "@repo/hooks",
     "@repo/http",
     "@repo/query",

@@ -39,7 +39,7 @@
     "password": "رمز عبور",
     "submit": "ورود",
     "submitting": "در حال ورود…",
-    "demoHint": "حساب نمایشی: admin / admin123",
+    "demoHint": "حساب‌های نمایشی: admin / admin123 · member / member123 (بدون صفحه‌ی کاربران)",
     "errors": {
       "invalidCredentials": "نام کاربری یا رمز عبور اشتباه است.",
       "rateLimited": "تلاش‌های زیادی انجام شد. {seconds} ثانیه دیگر دوباره تلاش کنید.",
@@ -48,6 +48,13 @@
     "validation": {
       "usernameRequired": "نام کاربری الزامی است.",
       "passwordMin": "رمز عبور باید حداقل {min} کاراکتر باشد."
+    }
+  },
+  "Access": {
+    "noAccess": {
+      "title": "دسترسی ندارید",
+      "description": "اجازه‌ی دیدن این صفحه را ندارید.",
+      "back": "بازگشت به داشبورد"
     }
   },
   "Dashboard": {

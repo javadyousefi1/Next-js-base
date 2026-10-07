@@ -1,3 +1,4 @@
+import { Can } from "@repo/access/access-context";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
@@ -25,7 +26,11 @@ export default async function DashboardPage() {
       <PageHeader
         title={t("title")}
         description={t("description")}
-        actions={<RefreshStatsButton />}
+        actions={
+          <Can permission="stats.refresh">
+            <RefreshStatsButton />
+          </Can>
+        }
       />
       <Suspense fallback={<DashboardStatsSkeleton />}>
         <DashboardStats />

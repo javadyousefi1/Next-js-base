@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
+import { PERMISSIONS } from "@/config/access";
+
+import type { SessionUser } from "../schemas/auth.schema";
 import {
   authorizationHeader,
   loginResponse,
@@ -9,7 +12,8 @@ import {
   toRefreshBody,
 } from "./auth.backend";
 
-const user = {
+/** What the backend sends (one role). */
+const backendUser = {
   id: 1,
   username: "admin",
   email: "admin@example.com",
@@ -18,10 +22,14 @@ const user = {
   role: "admin" as const,
 };
 
+/** What the app uses: roles + the permissions its policy gives them. */
+const { role: _role, ...profile } = backendUser;
+const user: SessionUser = { ...profile, roles: ["admin"], permissions: [...PERMISSIONS] };
+
 describe("loginResponse", () => {
   test("splits the backend response into user and tokens (minutes → seconds)", () => {
     const result = loginResponse.parse({
-      ...user,
+      ...backendUser,
       accessToken: "at",
       refreshToken: "rt",
       expiresInMins: 30,
@@ -34,7 +42,11 @@ describe("loginResponse", () => {
   });
 
   test("leaves the lifetime undefined when the backend sends none", () => {
-    const { tokens } = loginResponse.parse({ ...user, accessToken: "at", refreshToken: "rt" });
+    const { tokens } = loginResponse.parse({
+      ...backendUser,
+      accessToken: "at",
+      refreshToken: "rt",
+    });
     expect(tokens.expiresInSeconds).toBeUndefined();
   });
 });
@@ -48,9 +60,26 @@ describe("refreshResponse", () => {
 });
 
 describe("meResponse", () => {
-  test("is the session user, role defaults to user", () => {
-    const { role: _role, ...withoutRole } = user;
-    expect(meResponse.parse(withoutRole)).toEqual({ ...withoutRole, role: "user" });
+  test("maps the backend role to roles + permissions (admin gets every permission)", () => {
+    expect(meResponse.parse(backendUser)).toEqual(user);
+  });
+
+  test("a moderator gets the permissions of the users area", () => {
+    expect(meResponse.parse({ ...backendUser, role: "moderator" })).toEqual({
+      ...profile,
+      roles: ["moderator"],
+      permissions: ["users.read"],
+    });
+  });
+
+  test("the role defaults to user, which has no permissions", () => {
+    expect(meResponse.parse(profile)).toEqual({ ...profile, roles: ["user"], permissions: [] });
+    // An unknown role is least privilege too, not a broken session.
+    expect(meResponse.parse({ ...profile, role: "superuser" })).toEqual({
+      ...profile,
+      roles: ["user"],
+      permissions: [],
+    });
   });
 });
 

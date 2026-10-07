@@ -1,5 +1,7 @@
 import { SidebarInset, SidebarProvider } from "@repo/ui/components/sidebar";
 
+import { RouteGuard } from "@/features/auth/components/route-guard";
+import { SessionAccessProvider } from "@/features/auth/components/session-access-provider";
 import { SessionWatcher } from "@/features/auth/components/session-watcher";
 import { OfflineBanner } from "@/features/pwa/components/offline-banner";
 import { AppHeader } from "@/features/shell/components/app-header";
@@ -15,14 +17,16 @@ export default async function AppLayout({ children, params }: LayoutProps<"/[loc
   return (
     <SidebarProvider>
       <SessionWatcher />
-      <AppSidebar side={side} />
-      <SidebarInset>
-        <AppHeader />
-        <OfflineBanner />
-        <main id="main-content" className="flex flex-1 flex-col gap-6 p-4 md:p-6">
-          {children}
-        </main>
-      </SidebarInset>
+      <SessionAccessProvider>
+        <AppSidebar side={side} />
+        <SidebarInset>
+          <AppHeader />
+          <OfflineBanner />
+          <main id="main-content" className="flex flex-1 flex-col gap-6 p-4 md:p-6">
+            <RouteGuard>{children}</RouteGuard>
+          </main>
+        </SidebarInset>
+      </SessionAccessProvider>
     </SidebarProvider>
   );
 }

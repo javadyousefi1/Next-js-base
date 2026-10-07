@@ -26,7 +26,7 @@ a requirement-by-requirement checklist and the caveats.
 
 ```bash
 bun run setup     # toolchain check, install, .env.local, Playwright browser
-bun run dev       # http://localhost:3000 — login: admin / admin123
+bun run dev       # http://localhost:3000 — login: admin / admin123 (or member / member123, no users access)
 ```
 
 | Command             | Purpose                                              |

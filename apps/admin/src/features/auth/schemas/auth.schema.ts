@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { PERMISSIONS } from "@/config/access";
 import { userRoleSchema } from "@/features/users/schemas/user.schema";
 
 export const PASSWORD_MIN_LENGTH = 6;
@@ -14,14 +15,15 @@ export const loginInputSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginInputSchema>;
 
-/** The user as exposed to the browser (never contains tokens). */
+/** The user as exposed to the browser (never contains tokens): who they are and what they may do. */
 export const sessionUserSchema = z.object({
   id: z.number().int(),
   username: z.string(),
   email: z.email(),
   firstName: z.string(),
   lastName: z.string(),
-  role: userRoleSchema.default("user"),
+  roles: z.array(userRoleSchema),
+  permissions: z.array(z.enum(PERMISSIONS)),
 });
 export type SessionUser = z.infer<typeof sessionUserSchema>;
 
