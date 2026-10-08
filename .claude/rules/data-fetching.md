@@ -44,3 +44,9 @@ paths:
 - Every upstream endpoint used by the app has an MSW handler in `src/mocks/handlers.ts` with
   Faker data in `src/mocks/db.ts`, so the app runs without a backend (`API_MOCKING=enabled`).
 - Errors are `ApiError` (`code`, `status`, `retryAfterSeconds`); branch on `code`, never on text.
+  Invalid input → `VALIDATION`; unexpected response → `INVALID_RESPONSE` (zod tree logged in dev);
+  4xx are not retried; background failures toast, a first-load failure renders `<QueryError>`;
+  a 401 in the browser emits `unauthorized` → redirect to login. Error messages need no code:
+  `@repo/http` reads `message`, `error`, `detail`, `title` or `errors[0]`.
+- `<PrefetchBoundary queries={[xQuery.with(params)]}>` (params may be a promise) wraps itself in
+  `<Suspense>`, runs each fetcher on the server with the user's token and dehydrates the cache.

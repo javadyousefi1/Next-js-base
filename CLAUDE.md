@@ -15,12 +15,17 @@ Everything above (AGENTS.md) applies. This part is specific to Claude Code.
   relevant. Report failures honestly with the output.
 - Next.js 16 docs for the installed version: `node_modules/next/dist/docs/` (read them; APIs
   changed: `proxy.ts`, Cache Components, `cacheLife`/`cacheTag`/`updateTag`, async params).
+- **Docs only where they are read.** `docs/REPORT.fa.md` (the Persian report) is updated only when
+  the user asks — git log is the changelog. Keep `AGENTS.md` files short indexes; code examples
+  belong in skills (loaded on demand) and path rules.
+- **Filter command output** (`grep`/`tail` on build, test and e2e logs) instead of printing it.
 
 ## Model routing (token budget)
 
-Opus decides, Haiku reads, Sonnet types. Run the main session on Opus (`/model opus` — the main
-model can't be set from this file); it orchestrates and delegates to subagents whose model is
-fixed in their frontmatter:
+Opus decides, Haiku reads, Sonnet types. Run the main session on Opus for design and multi-step
+work, on Sonnet (`/model sonnet`) for routine tasks a skill already covers (a page, a translation,
+a simple fix) — the main model can't be set from this file. Subagents have their model fixed in
+their frontmatter:
 
 | Step         | Who                    | Does                                                                                                        |
 | ------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
@@ -30,9 +35,19 @@ fixed in their frontmatter:
 | 4. Code      | `implementer` (Sonnet) | Implements exactly the plan with the project skills, runs `bun run check`.                                  |
 | 5. Review    | `code-reviewer` (Opus) | Reviews the diff. Main fixes small findings or sends them back to `implementer`; build/e2e when relevant.   |
 
-- Use the pipeline for new features and cross-file or cross-package work. Small edits in one or
-  two known files: the main session does them directly — every subagent starts cold and re-reads
-  context, so on tiny tasks the pipeline costs more tokens than it saves.
+- Size the pipeline to the task — every subagent starts cold and re-reads context (a feature
+  implementer ≈ 150–330k tokens, a review ≈ 100k):
+
+  | Task                                                     | Pipeline                                   |
+  | -------------------------------------------------------- | ------------------------------------------ |
+  | Small: one or two known files, UI tweak, copy, small fix | main session directly, no subagents        |
+  | Medium: a feature or cross-file change, no risk          | `implementer` (+ `explorer` if needed)     |
+  | Large or risky: auth, access, data flow, a package API   | full pipeline incl. `code-reviewer` (Opus) |
+
+- Run subagents in the **foreground** (`run_in_background: false`) and finish the task in the same
+  turn: ending a turn with half-done work fires the environment's "commit and push" stop hook and
+  wastes a turn. Background only for truly independent work.
+- One task (or a group of related tasks) per session; after it is pushed, start fresh (`/clear`).
 - Don't read many files in the main session; ask `explorer`. Read yourself only the few lines a
   decision depends on (Haiku summaries can miss details).
 - Heavy change or a different flow (§0.7) → tell the user in step 3, before `implementer` starts.
@@ -45,6 +60,8 @@ fixed in their frontmatter:
 | `add-page`         | Add a route: `ROUTES`, thin page, metadata, nav entry, i18n, guard          |
 | `add-query`        | Add a read endpoint: zod schemas, service, key, `makeQuery`, MSW handler    |
 | `add-mutation`     | Add a write endpoint: `makeMutation`, invalidation, form hook               |
+| `add-table`        | Table: URL state, filters drawer from config, sorting, pagination, prefetch |
+| `add-access`       | Guard a page, component or Server Action with roles/permissions             |
 | `add-env-var`      | Add an environment variable everywhere it must be declared                  |
 | `add-translation`  | Add/change UI text in both locales (ICU, RTL)                               |
 | `add-ui-component` | Add a shadcn component to `packages/ui` with the CLI                        |

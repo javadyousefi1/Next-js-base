@@ -1,8 +1,10 @@
 # apps/admin — AGENTS.md
 
-The reference Next.js 16 app. Repository rules: [`../../AGENTS.md`](../../AGENTS.md).
-Next.js docs for **this exact version** are bundled: `node_modules/next/dist/docs/` (App Router
-in `01-app/`). Read them before using a Next.js API you are not sure about.
+The reference Next.js 16 app. Repository rules: [`../../AGENTS.md`](../../AGENTS.md). Details and
+code live where they are needed: path rules in `.claude/rules/` (load with the files they cover)
+and skills in `.claude/skills/` (`add-feature`, `add-page`, `add-query`, `add-mutation`,
+`add-table`, `add-access`, `add-translation`, `add-env-var`, `write-e2e-test`). Next.js docs for
+**this exact version**: `node_modules/next/dist/docs/` (App Router in `01-app/`).
 
 ## Folder structure (`src/`)
 
@@ -30,223 +32,59 @@ proxy.ts                Next 16 proxy (formerly middleware): i18n routing + opti
 ```
 
 App-agnostic building blocks come from workspace packages: `@repo/http`, `@repo/query`,
-`@repo/table`, `@repo/access`, `@repo/hooks`, `@repo/redis`, `@repo/ui` (see the root `AGENTS.md` §3).
+`@repo/table`, `@repo/access`, `@repo/hooks`, `@repo/redis`, `@repo/ui` (root `AGENTS.md` §3).
 
 ## Feature anatomy — copy `features/users`
 
 ```
-features/users/
-  schemas/user.schema.ts       domain: User / UsersList types + params schema (the app's own shapes)
-  api/users.backend.ts         the ONLY file that knows the backend: query mapping + response schema → domain
-  api/users.service.ts         fetcher: (params, { http, signal }) → raw data
-  api/users.queries.ts         makeQuery / makeMutation definitions (key + schemas + fetcher)
-  users.search-params.ts       nuqs parsers = the table's URL contract (page prefetch + hook)
-  hooks/use-users-table.ts     URL state (useTableState) → query → TableController
-  components/users-table.tsx   <DataTableProvider> + <DataTableToolbar> + <DataTable> + <DataTablePagination>
-  components/users-columns.tsx useUsersColumns(): { id, header, cell, sortable }[]
-  components/users-filters.ts  useUsersFilters(): { type, id, title, options }[]
+schemas/<f>.schema.ts     domain types + params schema (the app's own shapes)
+api/<f>.backend.ts        the ONLY file that knows the backend: query mapping + response → domain
+api/<f>.service.ts        fetcher: (params, { http, signal }) → raw data
+api/<f>.queries.ts        makeQuery / makeMutation (key + schemas + fetcher)
+<f>.search-params.ts      tables: nuqs parsers = the URL contract (page prefetch + hook)
+hooks/use-<f>-*.ts        logic: state, queries, mapping → a render-ready model
+components/*.tsx          views: render the hook's result
 ```
 
 Dependency direction: `schemas` ← `api` ← `hooks` ← `components` ← `app`. `server/` may use `api`
 and `schemas`; client code never imports `server/` (except Server Actions in `*.actions.ts`).
-Features import other features only through `schemas` or a deliberately shared component
-(e.g. the shell renders `auth/components/user-menu`). Anything shared by two features moves to
-`lib/`, `hooks/`, `components/` or `config/` — or, when no app knowledge is involved, to a
-`packages/*` package.
+Features import other features only through `schemas` or a deliberately shared component.
+Shared by two features → `lib/`, `hooks/`, `components/`, `config/`, or a `packages/*` package
+when no app knowledge is involved.
 
-## Logic vs. view
+## Rules in short (details: `.claude/rules/*`, skills)
 
-- A **view** (`components/**`, `app/**`) renders props and the return value of ONE feature hook. It
-  may call `useTranslations`, other presentational hooks and event handlers that forward to the
-  hook. No `useState`/`useEffect`/`useQuery`/`useForm`/`fetch`/axios (lint: `project/no-logic-in-views`).
-- A **hook** owns state, effects, queries, mutations, validation, mapping and navigation, and returns
-  plain values + callbacks named for the view (`status`, `rows`, `setSearch`, `onSubmit`).
-- Pages are Server Components that compose views; they may call a feature's server function
-  (e.g. prefetch) inside `<Suspense>`.
+- **Views vs hooks** — a view renders props and ONE feature hook's result (+ `useTranslations`,
+  presentational hooks); state, effects, queries, forms and mapping live in hooks (lint:
+  `project/no-logic-in-views`). Rules: `views.md`, `hooks.md`.
+- **Server vs client** — cookies/tokens, secrets, upstream API, Redis: `src/server/**`, route
+  handlers, Server Components (`import "server-only"`). Interactivity: `"use client"` on the lowest
+  file. Shared non-personal data: Server Component + `'use cache'`. Writes: `makeMutation`; Server
+  Actions only for server-only effects (`updateTag`). Never pass tokens or secrets as props.
+  Rule: `server.md`.
+- **Data** — `makeQuery` / `makeMutation` with zod `params`/`variables` and `response`; keys from
+  `QUERY_KEYS`; fetchers use the injected `http` (browser: BFF; server prefetch: upstream with the
+  user's token). Errors are always `ApiError` (`code`, `status`). Rule: `data-fetching.md`;
+  skills: `add-query`, `add-mutation`.
+- **Backend independence** — views, hooks, tables, cookies and the BFF only know domain types.
+  A new backend = `API_BASE_URL` → `src/config/api-endpoints.ts` → every `*.backend.ts`
+  (`z.ZodType<Domain>` or a typed `.transform()`; lists → `{ items, total }`) → the MSW mock.
+  Nothing else changes. Auth (JWT) mapping: `features/auth/api/auth.backend.ts`.
+- **Prefetch** — pages wrap a view in `<PrefetchBoundary queries={[xQuery.with(params)]}
+fallback={…}>`: it runs the same fetchers on the server with the user's token and hydrates
+  the cache; no session → the client fetches.
 
-## Server vs. client
+## Tables · access · breadcrumbs
 
-| Need                                         | Put it in                                                                                 |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Cookies/tokens, secrets, upstream API, Redis | `src/server/**`, `features/*/server/**`, route handlers, Server Components                |
-| Interactivity, browser APIs, state           | `"use client"` leaf components + hooks                                                    |
-| Data for interactive views                   | `makeQuery` (browser → BFF), optionally prefetched on the server                          |
-| Shared, non-personal data (stats, catalogs)  | Server Component + `'use cache'` + `cacheLife` + `cacheTag`                               |
-| Writes                                       | `makeMutation` (browser → BFF); Server Actions only for server-only effects (`updateTag`) |
-
-`"use client"` goes on the lowest file that needs it. Server modules start with
-`import "server-only"`. Never pass tokens or secrets as props.
-
-## Data fetching
-
-```ts
-// features/<x>/api/<x>.service.ts — one fetcher for browser AND server
-// `http` = apiClient (→ /api/proxy) in the browser, upstream + user token on the server
-export const fetchUsersList: QueryFetcher<UsersListParams> = (params, { http, signal }) =>
-  http.get(API_ENDPOINTS.users.list, { params: toBackendListQuery(params), signal });
-
-// features/<x>/api/<x>.queries.ts
-export const usersListQuery = makeQuery({
-  key: QUERY_KEYS.users.list, // from src/config/query-keys.ts — also names errors ("users.list")
-  params: usersListParamsSchema, // input contract: parsed BEFORE the request
-  response: usersListResponse, // users.backend.ts: backend shape parsed → domain, BEFORE the cache
-  fetcher: fetchUsersList,
-  relatedKeys: [], // other keys whose invalidation must refetch this query
-  staleTime: 30_000,
-});
-// in a hook: usersListQuery.useQuery(params) · on the server: usersListQuery.with(params)
-```
-
-- Invalid input → `ApiError` code `VALIDATION`; unexpected response → `INVALID_RESPONSE` (logged with
-  the zod tree in development). The UI never receives unvalidated data.
-- `makeMutation({ variables, response, mutationFn, invalidates })` — `invalidates` keys (and every
-  query that lists them in `relatedKeys`, transitively) are invalidated after success.
-- Errors are always `ApiError` (`code`, `status`, `retryAfterSeconds`). 4xx are not retried. Background
-  failures show a toast; a first-load failure renders `<QueryError>` in the view.
-- Fetchers use `http` from their context with `API_ENDPOINTS` paths (the proxy maps them 1:1).
-  `bffClient` (→ `/api/auth/*`) is only for login/logout. A 401 in the browser emits
-  `unauthorized` → `useUnauthorizedRedirect` sends the user to login.
-- Every request goes through an `HttpClient` instance (`@repo/http`). Only the response data
-  comes out, or an `ApiError` is thrown — axios types never leave it. Instances: `apiClient` /
-  `bffClient` (browser) and `upstream` / `upstreamFor(token)` (server).
-- Server-only calls (Server Components, `'use cache'`, route handlers) pass the response schema to
-  the client: `upstream.get(url, { schema })` / `upstream.post(url, body, { schema })` → typed,
-  validated data; errors labelled with the endpoint (`GET /stats`).
-
-## Backend independence (`*.backend.ts`)
-
-Views, hooks, the table, cookies and the BFF only know the app's **domain** types
-(`schemas/*.schema.ts`). Each feature has one `api/<x>.backend.ts` that knows the backend:
-
-```ts
-// features/users/api/users.backend.ts
-export function toBackendListQuery(params: UsersListParams) { … }        // app params → backend query
-export const usersListResponse = z
-  .object({ users: z.array(backendUserSchema), total: z.number() })      // backend shape (validated)
-  .transform(({ users, total }): UsersList => ({ items: users, total })); // → domain
-```
-
-- Backend fields already match the domain → annotate `z.ZodType<DomainType>`; they differ →
-  `.transform((raw): DomainType => …)`. The compiler flags every missing or wrongly typed field
-  in this one file.
-- Auth (JWT) lives in `features/auth/api/auth.backend.ts`: login/refresh bodies, token fields
-  (→ `TokenPair` with `expiresInSeconds`), `/me` user, `authorizationHeader`.
-- Error messages need no code: `@repo/http` reads `message`, `error`, `detail`, `title` or
-  `errors[0]`.
-
-**New backend checklist:** `API_BASE_URL` (env) → paths in `src/config/api-endpoints.ts` → every
-`*.backend.ts` → the MSW mock (`src/mocks`, or `API_MOCKING=disabled`). Nothing else changes.
-
-## Tables (search + filters + sorting + pagination)
-
-Plain React, no table library: the API pages, sorts and filters; the UI renders the current page.
-
-```ts
-// 1. URL contract — features/<x>/<x>.search-params.ts (nuqs/server: shared with the server)
-export const usersSearchParams = {
-  ...tableSearchParams, // @repo/table/search-params: page, pageSize, q, sortBy, order
-  sortBy: parseAsStringLiteral(USER_SORT_FIELDS),
-  role: filterParams.select(USER_ROLES), // every extra key is a filter: select · multiSelect · text
-};
-export const loadUsersSearchParams = createLoader(usersSearchParams);
-
-// 2. Hook — hooks/use-<x>-table.ts: URL state → query → TableController
-const { params, ...controls } = useTableState(usersSearchParams);
-const query = usersListQuery.useQuery(params, { placeholderData: keepPreviousData });
-return { ...controls, rows: query.data?.items ?? [], total: query.data?.total ?? 0, isLoading, isFetching, isError, retry };
-
-// 3. Columns and filters are plain arrays — components/<x>-columns.tsx, components/<x>-filters.ts
-{ id: "age", header: t("columns.age"), sortable: true, cell: (user) => user.age }
-{ type: "select", id: "role", title: t("roleFilter"), options: USER_ROLES.map((r) => ({ value: r, label: t(`roles.${r}`) })) }
-// also { type: "multiSelect", id, title, options } and { type: "text", id, title, placeholder? }
-
-// 4. View — the provider (@repo/table/data-table-context) hands the table to prop-less components
-<DataTableProvider table={table} columns={columns} filters={filters} searchPlaceholder={t("searchPlaceholder")}>
-  <DataTableToolbar />
-  <DataTable />
-  <DataTablePagination />
-</DataTableProvider>
-```
-
-- `useTableState(parsers)` (`@repo/table/use-table-state`): URL state + `setSearch`, `setFilter`,
-  `toggleFilterOption`, `toggleSort`, `setPage`, `setPageSize`, `resetFilters` (search + filters:
-  toolbar, empty state), `clearFilters` (filters only: the drawer). Every change except paging
-  returns to page 1.
-- Column ids are the API sort fields; filter ids are keys of the search params, and a filter's
-  parser (`filterParams.<type>`) must match its `type`.
-- Filters: the toolbar ends with a "Filters" button (badge = active filters) that opens a side
-  drawer (shadcn Sheet) with one field per config entry — on the button's side: right in LTR, left
-  in RTL. Changes apply instantly, there is no Apply button. The search box and `text` filters
-  commit after a 300 ms pause or on blur (`useDebouncedInput`, inside the component), so the table
-  hook needs no debounce. The drawer stays mounted when closed, so Escape never drops a pending
-  commit. No filters in the config → no button.
-- New filter = one `filterParams.<type>(…)` line in `<x>.search-params.ts` + one entry in the
-  filters array (+ the field in the list params schema and the backend param in `<x>.backend.ts`;
-  a multiSelect field maps `[]` to `null` there, so `?x=` and no `x` share one cache entry).
-
-## Access control (roles + permissions)
-
-Who may see a page or a component. The model lives in `@repo/access` (no app knowledge); the app
-only supplies the data.
-
-- **Grants** (what a role gets): one permission (`users.read`), a whole area (`users.*`) or
-  everything (`*`). Permissions are `<area>.<action>`.
-- **Checks** (what a page or component asks for): a permission (`"users.read"`) or a role
-  (`{ role: "admin" }`, any of `{ role: ["admin", "moderator"] }`).
-- `src/config/access.ts`: `PERMISSIONS` (every permission), `ACCESS_POLICY` (role → grants, the
-  whole policy in one object) and `ROUTE_ACCESS` (page → required check; a key covers its nested
-  pages, `[param]` matches any value, the most specific key wins). It also registers the role and
-  permission types, so checks are type-checked.
-- The session user carries `roles` + `permissions`. **Only `features/auth/api/auth.backend.ts`
-  maps what the backend sends** (`toSessionUser`: here one `role` → `roles` + the permissions of
-  `ACCESS_POLICY`); a backend with role lists or its own permissions changes that function and
-  nothing else.
-
-```tsx
-// Component level — views: <Can> · hooks: useAccess().can(rule)   (@repo/access/access-context)
-<Can permission="stats.refresh" fallback={<Hint />}><RefreshStatsButton /></Can>
-<Can role={["admin", "moderator"]}>…</Can>
-const { can, isReady } = useAccess();   // everything is denied until the session has loaded
-if (can("users.read")) …
-
-// Route level — one line per guarded page in src/config/access.ts
-export const ROUTE_ACCESS = { [ROUTES.users]: "users.read" };
-
-// Server — Server Actions and route handlers are public endpoints (src/server/auth/access.ts)
-if (!(await hasAccess("stats.refresh"))) return;
-```
-
-- `<RouteGuard>` (app layout) renders "No access" (not a redirect) for a page whose `ROUTE_ACCESS`
-  rule is not met. Until the session has loaded the page renders as usual (optimistic, like
-  `proxy.ts`), so its server prefetch still paints at once. The sidebar hides the links of such
-  pages until the session allows them (`useNavItems`). A page without an entry is open to every
-  signed-in user. Keys cover nested pages, the most specific key wins (a static segment beats
-  `[param]`), and `/` would cover every page — keep the dashboard open. A session that cannot be
-  read means no access (least privilege), and an unknown backend role becomes `user`.
-- This hides UI. The backend still authorizes every request — never rely on `<Can>` or the route
-  guard for security.
-
-## Breadcrumbs
-
-The shell header builds the trail from the URL. Every page adds one entry to
-`src/config/breadcrumbs.ts` (`[ROUTES.x]: "<Nav key>"`, `"/users/[id]"` for a dynamic segment) and
-the `Nav` message in both locales; nested pages need nothing else. Skill: `add-page`.
-
-## Server prefetch (hydration)
-
-```tsx
-<PrefetchBoundary
-  queries={[usersListQuery.with(loadUsersSearchParams(searchParams))]}
-  fallback={<DataTableSkeleton />}
->
-  <UsersTable />
-</PrefetchBoundary>
-```
-
-`PrefetchBoundary` (server-only) wraps itself in `<Suspense>`, reads the auth cookie, runs each
-query's own fetcher against the upstream API with the user's token, and dehydrates the cache. Any
-`makeQuery` definition works: `xQuery.with(params)` (params may be a promise). No session or an
-expired token → nothing is prefetched and the client fetches through the BFF.
+- **Tables** — URL state (nuqs) + `useTableState` + `<DataTableProvider>` with prop-less
+  toolbar/table/pagination; filters come from a config (`select` · `multiSelect` · `text`) and
+  open in a drawer; changes apply instantly. Skill: `add-table`.
+- **Access** — `src/config/access.ts` (`PERMISSIONS`, `ACCESS_POLICY`, `ROUTE_ACCESS`);
+  `<Can permission|role>`, `useAccess().can()`, `hasAccess()` in Server Actions; a guarded page
+  shows "No access" and its nav link hides. Only `auth.backend.ts` maps the backend's roles. It
+  hides UI — the backend still authorizes. Skill: `add-access`.
+- **Breadcrumbs** — one entry per page in `src/config/breadcrumbs.ts` (`"/users/[id]"` for a
+  dynamic segment) + the `Nav` message; nested pages need nothing else. Skill: `add-page`.
 
 ## Auth (BFF + httpOnly cookies)
 
@@ -263,45 +101,32 @@ Login is rate limited in Redis (5/min/IP); if Redis is down it fails open (logge
 
 ## Caching
 
-- **Next.js**: Cache Components are on. `'use cache'` + `cacheLife(...)` + `cacheTag(CACHE_TAGS.x)` for
-  shared data; invalidate with `updateTag(tag)` from a Server Action. Never read cookies inside
-  `'use cache'`. Request-time data (cookies, searchParams) only inside `<Suspense>`; call
-  `await connection()` to keep work out of the build.
+- **Next.js**: Cache Components on. `'use cache'` + `cacheLife` + `cacheTag(CACHE_TAGS.x)` for
+  shared data; `updateTag(tag)` from a Server Action. Never read cookies inside `'use cache'`.
+  Request-time data only inside `<Suspense>`; `await connection()` keeps work out of the build.
 - **Client**: React Query defaults (staleTime 60s, gcTime 5m); per-query `staleTime`.
-- **Redis** (`@repo/redis`): `remember(getRedis(), key, ttl, schema, load)` (validated cache-aside)
-  and `rateLimit(getRedis(), key, opts)`.
+- **Redis** (`@repo/redis`): `remember(getRedis(), key, ttl, schema, load)` and `rateLimit(…)`.
 - **HTTP**: `/_next/static` immutable; `/sw.js` no-cache; BFF responses `no-store`.
 
-## i18n & RTL
+## i18n, RTL & fonts
 
-- Locales `en`, `fa` (`src/i18n/routing.ts`), URLs always prefixed. Messages in `messages/*.json`,
-  same keys in both files. `APP_DIRECTION` in `routing.ts` picks what the app ships: `"rtl"`
-  (Persian only), `"ltr"` (English only) or `"both"` (+ language switcher); the first locale is the
-  default. Server: `getTranslations`; client: `useTranslations`.
-- Fonts: LTR → Roboto first; RTL → Vazirmatn first, for Latin text too (`--app-font` in
-  `styles/globals.css`). Never put Roboto first in RTL: its generated fallback face is local Arial,
-  which has Persian glyphs on Windows/macOS and would win over Vazirmatn.
-- Both fonts are self-hosted in `src/fonts` (`next/font/local`). Never use `next/font/google`: when
-  Google Fonts is unreachable, dev silently renders Arial and `next build` fails.
-- Navigation only through `@/i18n/navigation` (`Link`, `redirect`, `usePathname`) or
-  `useAppRouter` (adds the top loader).
-- Use logical Tailwind classes (`ms-*`, `pe-*`, `start-*`, `text-start`); flip directional icons with
-  `rtl:rotate-180`.
+- Locales `en`, `fa`, URLs always prefixed; same keys in `messages/en.json` and `fa.json`.
+  `APP_DIRECTION` in `src/i18n/routing.ts`: `"rtl"`, `"ltr"` or `"both"` (+ switcher); the first
+  locale is the default. Rule: `i18n.md`; skill: `add-translation`.
+- Fonts are self-hosted in `src/fonts` (`next/font/local`) — never `next/font/google` (when Google
+  is unreachable, dev silently renders Arial and the build fails). LTR → Roboto first; RTL →
+  Vazirmatn first, Latin too (`--app-font` in `styles/globals.css`): Roboto's fallback face is
+  local Arial, which has Persian glyphs on Windows/macOS.
+- Navigation only via `@/i18n/navigation` or `useAppRouter`. Logical classes (`ms-*`, `pe-*`,
+  `start-*`); directional icons get `rtl:rotate-180`.
 
-## Env
+## Env & testing
 
-One file, `src/env.ts`: secrets and server settings in the `server` object, `NEXT_PUBLIC_*` in the
-`client` object (also listed in `experimental__runtimeEnv`). Code reads `env.X` from `@/env`; a
-server value read in the browser throws. Add every new key to `.env.example`, to `turbo.json`
-(`env`/`passThroughEnv`) and to `docker-compose.yml` when the container needs it. Skill:
-`add-env-var`.
-
-## Testing
-
-- Unit: `*.test.ts` next to the code, `bun test` (`bun run test`).
-- E2E: `e2e/*.spec.ts`, Playwright against `next start` with MSW (`bun run test:e2e`). Use roles and
-  labels (`getByRole`, `getByLabel`), never CSS classes. Skill: `write-e2e-test`. Demo logins:
-  `admin` / `admin123` and `member` / `member123` (no users access).
+- One file, `src/env.ts` (`server` + `client` objects); new keys also in `.env.example`,
+  `turbo.json` and `docker-compose.yml`. Skill: `add-env-var`.
+- Unit: `*.test.ts` next to the code (`bun test`). E2E: `e2e/*.spec.ts`, Playwright against
+  `next start` + MSW, role/label locators. Demo logins: `admin` / `admin123`, `member` /
+  `member123` (no users access). Skill: `write-e2e-test`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
