@@ -10,7 +10,7 @@ disable-model-invocation: true
 2. `bun run check` must pass (the pre-push hook runs it anyway). App changes: `bun run build`.
 3. Message format (commitlint): `type(scope): subject`
    - types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `ci`, `chore`, `style`, `revert`
-   - scopes: `admin`, `ui`, `oxlint-plugin`, `typescript-config`, `deps`, `docker`, `ci`, `docs`, `tooling`, `ai`
+   - scopes: the list in `commitlint.config.ts` (also root `AGENTS.md` §5)
    - subject: imperative, lower case, no period, ≤ 100 chars header; body lines ≤ 100 chars;
      explain _why_ in the body when it isn't obvious.
 4. `git add <files>` then `git commit` — never `--no-verify`. If a hook fails, fix the cause and

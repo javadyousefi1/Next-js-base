@@ -1,0 +1,4 @@
+{
+  "name": "typescript-7-lsp",
+  "description": "Runs the repository's TypeScript 7 compiler as the language server (tsc --lsp --stdio), so diagnostics match bun run typecheck exactly and nothing is installed globally."
+}

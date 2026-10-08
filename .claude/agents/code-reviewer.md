@@ -24,3 +24,7 @@ Process:
    - Tests: changed behavior has unit/e2e coverage.
 4. Report findings ordered by severity: `file:line — problem — why it matters — concrete fix`.
    Say explicitly when something is fine. No vague advice, no style nitpicks the formatter handles.
+5. Report only what affects correctness, security or the stated requirements (mark each
+   blocking / should-fix). Do not propose new abstractions, extra defensive code or tests for
+   cases that cannot happen — a reviewer that must find something over-engineers the code. At
+   most 3 optional nits, clearly labelled; "nothing blocking" is a valid result.

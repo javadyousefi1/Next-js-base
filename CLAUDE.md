@@ -6,19 +6,16 @@ Everything above (AGENTS.md) applies. This part is specific to Claude Code.
 
 ## How to work here
 
-- **Raise problems first.** When a request conflicts with AGENTS.md or is technically wrong, stop
-  and say so before editing (see Working agreement §0). Ask when a decision is genuinely the user's.
 - **Plan non-trivial work** (new feature, new pattern, cross-package change) before editing; list
   the files you will touch.
 - **Use the skills** below instead of improvising — they encode the exact steps and file layout.
-- **Verify before claiming done**: `bun run check`; plus `bun run build` / `bun run test:e2e` when
-  relevant. Report failures honestly with the output.
 - Next.js 16 docs for the installed version: `node_modules/next/dist/docs/` (read them; APIs
   changed: `proxy.ts`, Cache Components, `cacheLife`/`cacheTag`/`updateTag`, async params).
 - **Docs only where they are read.** `docs/REPORT.fa.md` (the Persian report) is updated only when
   the user asks — git log is the changelog. Keep `AGENTS.md` files short indexes; code examples
   belong in skills (loaded on demand) and path rules.
-- **Filter command output** (`grep`/`tail` on build, test and e2e logs) instead of printing it.
+- Check/test/build commands are filtered by a hook (below); run them plainly. Filter other noisy
+  output yourself (`grep`, `tail`).
 
 ## Model routing (token budget)
 
@@ -52,33 +49,30 @@ their frontmatter:
   decision depends on (Haiku summaries can miss details).
 - Heavy change or a different flow (§0.7) → tell the user in step 3, before `implementer` starts.
 
-## Project skills (`.claude/skills/`)
+## Skills and subagents
 
-| Skill              | Use it to                                                                   |
-| ------------------ | --------------------------------------------------------------------------- |
-| `add-feature`      | Scaffold a feature end-to-end (schema → API → hooks → views → page → tests) |
-| `add-page`         | Add a route: `ROUTES`, thin page, metadata, nav entry, i18n, guard          |
-| `add-query`        | Add a read endpoint: zod schemas, service, key, `makeQuery`, MSW handler    |
-| `add-mutation`     | Add a write endpoint: `makeMutation`, invalidation, form hook               |
-| `add-table`        | Table: URL state, filters drawer from config, sorting, pagination, prefetch |
-| `add-access`       | Guard a page, component or Server Action with roles/permissions             |
-| `add-env-var`      | Add an environment variable everywhere it must be declared                  |
-| `add-translation`  | Add/change UI text in both locales (ICU, RTL)                               |
-| `add-ui-component` | Add a shadcn component to `packages/ui` with the CLI                        |
-| `write-e2e-test`   | Write a Playwright test the way this repo does                              |
-| `commit`           | Run checks and write a Conventional Commit                                  |
-
-## Subagents (`.claude/agents/`)
-
-- `explorer` (Haiku) — read-only: finds and summarizes code with `path:line`; never edits.
-- `implementer` (Sonnet) — writes code from the main session's plan; stops if the plan doesn't fit.
-- `code-reviewer` (Opus) — reviews a diff against AGENTS.md; use before committing larger changes.
-- `architecture-guard` (Opus) — checks logic/view separation, server/client boundary, BFF security.
-- `test-writer` (Sonnet) — writes unit (bun test) and e2e (Playwright) tests for a feature.
+Skills (`.claude/skills/`) and subagents (`.claude/agents/`) are listed to you automatically with
+their descriptions — use a skill instead of improvising whenever one fits. `commit` and `spec`
+run only when the user types them (`/commit`, `/spec <feature>`); for a large or unclear feature,
+suggest `/spec` first.
 
 ## Automation (`.claude/settings.json`)
 
 - After every Edit/Write, `scripts/claude/post-edit.sh` formats the file (oxfmt) and lints it
   (oxlint). Lint errors are returned to you — fix them before continuing.
+- Before every Bash call, `scripts/claude/quiet-commands.sh` reruns the repo's own commands
+  (`bun run` check, test, test:e2e, build, typecheck, lint, and `bun test`) through
+  `quiet-run.sh`: only problem lines (with log line numbers), the summary and the exit code come
+  back, plus the full log's path — read ranges of it (`sed -n 'A,Bp'`) when you need more.
+- Plugin `typescript-7-lsp` (repo marketplace `.claude/marketplace`): the project's TypeScript 7
+  (`tsc --lsp`) gives diagnostics after edits and go-to-definition in local terminal sessions
+  (cloud sessions don't start language servers). If Claude Code reports it isn't installed:
+  `claude plugin install typescript-7-lsp@next-js-base --scope project`.
 - Path-scoped rules in `.claude/rules/` load automatically when you work on matching files.
 - Secrets (`.env`, `.env.local`, …) are not readable; ask the user for values instead.
+
+## Compact instructions
+
+When compacting, keep: the user's request and every decision they made (answers included), the
+files changed and why, the commands run with pass/fail, what is committed and pushed, and what is
+still left to do.

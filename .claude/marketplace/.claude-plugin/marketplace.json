@@ -1,0 +1,14 @@
+{
+  "name": "next-js-base",
+  "description": "Claude Code plugins that ship with this repository.",
+  "owner": {
+    "name": "Next-js-base"
+  },
+  "plugins": [
+    {
+      "name": "typescript-7-lsp",
+      "source": "./typescript-7-lsp",
+      "description": "TypeScript 7 language server (the project's own tsc --lsp): diagnostics after edits and go-to-definition."
+    }
+  ]
+}

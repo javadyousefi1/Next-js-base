@@ -31,21 +31,9 @@ this repository. Read this file completely before changing anything. App-specifi
 
 ## 1. Stack
 
-| Area         | Choice                                                                                                         |
-| ------------ | -------------------------------------------------------------------------------------------------------------- |
-| Monorepo     | Turborepo 2 (strict env mode, cached tasks) + Bun 1.4 workspaces (isolated installs)                           |
-| App          | Next.js 16 App Router, React 19.3 + React Compiler, Cache Components, `proxy.ts`                               |
-| Language     | TypeScript 7 (native compiler), strict + `noUncheckedIndexedAccess`                                            |
-| UI           | shadcn/ui (`base-nova` style, Base UI primitives, RTL) in `packages/ui`, Tailwind CSS 4                        |
-| Data         | `HttpClient` (axios inside) → BFF route handlers → upstream API; TanStack Query via `makeQuery`/`makeMutation` |
-| Validation   | zod 4 everywhere (env, forms, query params, API responses)                                                     |
-| State in URL | nuqs (tables: search, filters, sort, pagination)                                                               |
-| i18n         | next-intl (`en`, `fa` + RTL), prefix routing `/en/...`, `/fa/...`                                              |
-| Server infra | Redis (node-redis): rate limiting + cache-aside; httpOnly cookie sessions                                      |
-| Mock API     | MSW 3 + Faker (`API_MOCKING=enabled`) — no backend needed                                                      |
-| Quality      | Oxlint (type-aware + project rules), Oxfmt, Husky, commitlint, lint-staged                                     |
-| Tests        | `bun test` (unit), `node --test` (lint rules), Playwright (e2e, against production build)                      |
-| Delivery     | Docker multi-stage (turbo prune → standalone Next.js on Node), docker compose + Redis                          |
+Turborepo 2 + Bun 1.4 · Next.js 16 (App Router, React 19.3, Cache Components) · TypeScript 7 ·
+shadcn/ui (Base UI) + Tailwind 4 · zod 4 · TanStack Query 5 · nuqs · next-intl (`en`/`fa`, RTL) ·
+Redis · MSW · Oxlint/Oxfmt · Playwright. Details and versions: `docs/architecture.md`.
 
 ## 2. Commands (repo root)
 
