@@ -4,6 +4,7 @@ import {
   formatJalali,
   JALALI_MONTH_NAMES,
   JALALI_WEEKDAY_NAMES,
+  JALALI_WEEKDAY_SHORT_NAMES,
   parseJalali,
   toLatinDigits,
   toPersianDigits,
@@ -66,6 +67,15 @@ describe("formatJalali", () => {
       expect(formatJalali({ year: 1403, month: 1, day }, "dddd")).toBe(
         JALALI_WEEKDAY_NAMES.fa[day - 4]!,
       );
+    }
+  });
+
+  test("short weekday names line up with the full names", () => {
+    for (const locale of ["fa", "en"] as const) {
+      expect(JALALI_WEEKDAY_SHORT_NAMES[locale]).toHaveLength(7);
+      JALALI_WEEKDAY_SHORT_NAMES[locale].forEach((short, index) => {
+        expect(JALALI_WEEKDAY_NAMES[locale][index]?.startsWith(short)).toBe(true);
+      });
     }
   });
 

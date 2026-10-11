@@ -6,6 +6,23 @@ export function jalaliWeekday(date: JalaliDate): number {
   return (((jalaliToEpochDay(date) + 5) % 7) + 7) % 7;
 }
 
+/**
+ * The weeks (Saturday → Friday) that show a month in a calendar grid: 4–6 rows of 7 dates, the
+ * first and last week filled with days of the neighbouring months.
+ * Throws a `RangeError` for the very first and last supported months (-61/01 and 3177/12): their
+ * filler days fall outside the supported range.
+ */
+export function jalaliMonthWeeks(year: number, month: number): JalaliDate[][] {
+  const first = { year, month, day: 1 };
+  const firstEpochDay = jalaliToEpochDay(first);
+  const end = firstEpochDay + jalaliMonthLength(year, month);
+  const weeks: JalaliDate[][] = [];
+  for (let start = firstEpochDay - jalaliWeekday(first); start < end; start += 7) {
+    weeks.push(Array.from({ length: 7 }, (_, index) => epochDayToJalali(start + index)));
+  }
+  return weeks;
+}
+
 /** `days` later (negative = earlier): 1403/12/30 + 1 → 1404/01/01. */
 export function addJalaliDays(date: JalaliDate, days: number): JalaliDate {
   if (!Number.isInteger(days)) throw new RangeError(`Days ${days} must be an integer`);

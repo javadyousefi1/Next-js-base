@@ -39,6 +39,12 @@ export const JALALI_WEEKDAY_NAMES = {
   en: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
 } as const;
 
+/** One- or two-letter weekday names for calendar headers, index 0 = Saturday. */
+export const JALALI_WEEKDAY_SHORT_NAMES = {
+  fa: ["ش", "ی", "د", "س", "چ", "پ", "ج"],
+  en: ["Sa", "Su", "Mo", "Tu", "We", "Th", "Fr"],
+} as const;
+
 const PERSIAN_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
 const ARABIC_DIGITS = "٠١٢٣٤٥٦٧٨٩";
 

@@ -5,9 +5,16 @@ import {
   addJalaliMonths,
   compareJalali,
   differenceInJalaliDays,
+  jalaliMonthWeeks,
   jalaliWeekday,
 } from "./calendar";
-import { epochDayToJalali, jalaliToEpochDay } from "./convert";
+import {
+  epochDayToJalali,
+  jalaliMonthLength,
+  jalaliToEpochDay,
+  MAX_JALALI_YEAR,
+  MIN_JALALI_YEAR,
+} from "./convert";
 
 const MS_PER_DAY = 86_400_000;
 
@@ -147,5 +154,50 @@ describe("differenceInJalaliDays / compareJalali", () => {
     const farvardin = { year: 1403, month: 1, day: 1 };
     expect([mehr, esfand, farvardin].toSorted(compareJalali)).toEqual([esfand, farvardin, mehr]);
     expect(compareJalali(mehr, { ...mehr })).toBe(0);
+  });
+});
+
+describe("jalaliMonthWeeks", () => {
+  test("1403/01 starts on a Wednesday: the first week begins on Saturday 1402/12/26", () => {
+    const weeks = jalaliMonthWeeks(1403, 1);
+    expect(weeks).toHaveLength(5);
+    expect(weeks[0]?.[0]).toEqual({ year: 1402, month: 12, day: 26 });
+    expect(weeks[0]?.[4]).toEqual({ year: 1403, month: 1, day: 1 });
+    // 4 filler days + 31 days = exactly 5 weeks
+    expect(weeks.at(-1)?.at(-1)).toEqual({ year: 1403, month: 1, day: 31 });
+  });
+
+  test("1403/02 starts on a Saturday and ends in a week filled with 1403/03", () => {
+    const weeks = jalaliMonthWeeks(1403, 2);
+    expect(weeks[0]?.[0]).toEqual({ year: 1403, month: 2, day: 1 });
+    expect(weeks.at(-1)?.at(-1)).toEqual({ year: 1403, month: 3, day: 4 });
+  });
+
+  test("every month of 1300–1500: whole weeks of consecutive days, Saturday first, month covered", () => {
+    for (let year = 1300; year <= 1500; year++) {
+      for (let month = 1; month <= 12; month++) {
+        const days = jalaliMonthWeeks(year, month).flat();
+        const first = jalaliToEpochDay(days[0]!);
+        const ok =
+          days.length % 7 === 0 &&
+          days.length >= 28 &&
+          days.length <= 42 &&
+          jalaliWeekday(days[0]!) === 0 &&
+          days.every((day, index) => jalaliToEpochDay(day) === first + index) &&
+          days.filter((day) => day.month === month).length === jalaliMonthLength(year, month) &&
+          // no week made only of neighbouring days
+          days.slice(0, 7).some((day) => day.month === month) &&
+          days.slice(-7).some((day) => day.month === month);
+        if (!ok) throw new Error(`bad grid for ${year}/${month}`);
+      }
+    }
+  });
+
+  test("throws only for the edge months of the supported range", () => {
+    expect(() => jalaliMonthWeeks(MIN_JALALI_YEAR, 1)).toThrow(RangeError);
+    expect(() => jalaliMonthWeeks(MAX_JALALI_YEAR, 12)).toThrow(RangeError);
+    expect(jalaliMonthWeeks(MIN_JALALI_YEAR, 2).length).toBeGreaterThan(3);
+    expect(jalaliMonthWeeks(MAX_JALALI_YEAR, 11).length).toBeGreaterThan(3);
+    expect(() => jalaliMonthWeeks(1403, 13)).toThrow(RangeError);
   });
 });

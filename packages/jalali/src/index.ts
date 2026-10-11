@@ -17,6 +17,7 @@ export {
   addJalaliMonths,
   compareJalali,
   differenceInJalaliDays,
+  jalaliMonthWeeks,
   jalaliWeekday,
 } from "./calendar";
 export { dateToJalali, jalaliToDate } from "./date";
@@ -24,6 +25,7 @@ export {
   formatJalali,
   JALALI_MONTH_NAMES,
   JALALI_WEEKDAY_NAMES,
+  JALALI_WEEKDAY_SHORT_NAMES,
   parseJalali,
   toLatinDigits,
   toPersianDigits,

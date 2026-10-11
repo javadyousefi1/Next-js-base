@@ -13,9 +13,9 @@
 - `convert` — `gregorianToJalali`, `jalaliToGregorian`, `isLeapJalaliYear`, `jalaliMonthLength`,
   `isValidJalaliDate`, `isValidGregorianDate`, `jalaliToEpochDay` / `epochDayToJalali`.
 - `calendar` — `jalaliWeekday` (0 = Saturday), `addJalaliDays`, `addJalaliMonths` (day clamped),
-  `differenceInJalaliDays`, `compareJalali`.
+  `differenceInJalaliDays`, `compareJalali`, `jalaliMonthWeeks` (Saturday-first month grid).
 - `date` — `dateToJalali(date, { timeZone })` (pass `"Asia/Tehran"` on the server so SSR and the
   browser agree), `jalaliToDate(date, { utc })` (midnight).
 - `format` — `formatJalali(date, "dddd D MMMM YYYY", { locale, digits })`, `parseJalali` (Persian
-  or Latin digits, `/ - .`), `toPersianDigits`, `toLatinDigits`, month and weekday names (fa/en).
+  or Latin digits, `/ - .`), `toPersianDigits`, `toLatinDigits`, month and weekday names (fa/en, full and short).
 - Import from `@repo/jalali`; app-agnostic (no i18n files, no env).
