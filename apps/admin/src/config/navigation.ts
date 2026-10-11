@@ -1,11 +1,17 @@
-import { LayoutDashboardIcon, SettingsIcon, UsersIcon, type LucideIcon } from "lucide-react";
+import {
+  CalendarDaysIcon,
+  LayoutDashboardIcon,
+  SettingsIcon,
+  UsersIcon,
+  type LucideIcon,
+} from "lucide-react";
 
 import { ROUTES, type AppRoute } from "./routes";
 
 export type NavItem = {
   href: AppRoute;
   /** Key in the `Nav` messages namespace. */
-  labelKey: "dashboard" | "users" | "settings";
+  labelKey: "dashboard" | "users" | "calendar" | "settings";
   icon: LucideIcon;
 };
 
@@ -13,5 +19,6 @@ export type NavItem = {
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: ROUTES.dashboard, labelKey: "dashboard", icon: LayoutDashboardIcon },
   { href: ROUTES.users, labelKey: "users", icon: UsersIcon },
+  { href: ROUTES.calendar, labelKey: "calendar", icon: CalendarDaysIcon },
   { href: ROUTES.settings, labelKey: "settings", icon: SettingsIcon },
 ];

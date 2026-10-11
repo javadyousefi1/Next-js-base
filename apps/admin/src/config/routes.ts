@@ -9,6 +9,7 @@ export const ROUTES = {
   dashboard: "/",
   login: "/login",
   users: "/users",
+  calendar: "/calendar",
   settings: "/settings",
   /** Fallback page precached by the service worker. */
   offline: "/offline",

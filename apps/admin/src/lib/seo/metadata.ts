@@ -58,7 +58,7 @@ export async function rootMetadata(locale: AppLocale): Promise<Metadata> {
   };
 }
 
-type PageNamespace = "Dashboard" | "Users" | "Settings" | "Auth" | "Offline";
+type PageNamespace = "Dashboard" | "Users" | "Calendar" | "Settings" | "Auth" | "Offline";
 
 /** Per-page title/description/canonical/hreflang from the page's i18n namespace. */
 export async function pageMetadata(

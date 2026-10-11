@@ -23,6 +23,7 @@
     "main": "Main",
     "dashboard": "Dashboard",
     "users": "Users",
+    "calendar": "Calendar",
     "settings": "Settings",
     "toggleSidebar": "Toggle sidebar",
     "breadcrumb": "Breadcrumb",
@@ -100,6 +101,31 @@
       "company": "Company"
     }
   },
+  "Calendar": {
+    "title": "Calendar",
+    "description": "Jalali (Solar Hijri) calendar, date picker and date range picker.",
+    "calendar": {
+      "title": "Calendar",
+      "description": "Pick a day. Jump with the month and year lists, or use the arrow keys."
+    },
+    "datePicker": {
+      "title": "Date picker",
+      "description": "One date in a popover.",
+      "label": "Date"
+    },
+    "rangePicker": {
+      "title": "Date range picker",
+      "description": "Pick the first day, then the last one.",
+      "label": "Range"
+    },
+    "today": "Today",
+    "jalali": "Jalali",
+    "gregorian": "Gregorian",
+    "length": "Length",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "empty": "Nothing picked yet.",
+    "clear": "Clear"
+  },
   "Settings": {
     "title": "Settings",
     "description": "Personal preferences are stored on this device.",
@@ -152,6 +178,14 @@
       "title": "No results",
       "description": "Try a different search or clear the filters."
     }
+  },
+  "DatePicker": {
+    "placeholder": "Pick a date",
+    "rangePlaceholder": "Pick a date range",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "month": "Month",
+    "year": "Year"
   },
   "Offline": {
     "title": "You are offline",

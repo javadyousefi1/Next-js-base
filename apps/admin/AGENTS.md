@@ -11,7 +11,7 @@ and skills in `.claude/skills/` (`add-feature`, `add-page`, `add-query`, `add-mu
 ```
 app/                    Routing only — thin pages/layouts, BFF route handlers, metadata routes
   [locale]/             Root layout (html, fonts, providers), not-found, error boundary
-    (app)/              Authenticated shell (sidebar): dashboard `/`, `/users`, `/settings`
+    (app)/              Authenticated shell (sidebar): `/`, `/users`, `/calendar`, `/settings`
     (auth)/login/       Public login page
     offline/            PWA offline fallback (public, precached by public/sw.js)
   api/auth/*            BFF: login · logout (the only place auth cookies are written)
@@ -83,6 +83,9 @@ fallback={…}>`: it runs the same fetchers on the server with the user's token 
   `<Can permission|role>`, `useAccess().can()`, `hasAccess()` in Server Actions; a guarded page
   shows "No access" and its nav link hides. Only `auth.backend.ts` maps the backend's roles. It
   hides UI — the backend still authorizes. Skill: `add-access`.
+- **Dates** — Jalali calendar/pickers from `@repo/ui` (`jalali-calendar`, `jalali-date-picker`,
+  `jalali-date-range-picker`) with `{...useJalaliPickerProps()}` (locale + translated labels);
+  values are `{ year, month, day }`, converted and formatted with `@repo/jalali`.
 - **Breadcrumbs** — one entry per page in `src/config/breadcrumbs.ts` (`"/users/[id]"` for a
   dynamic segment) + the `Nav` message; nested pages need nothing else. Skill: `add-page`.
 
