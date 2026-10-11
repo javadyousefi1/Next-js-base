@@ -14,3 +14,7 @@ Tailwind CSS 4 tokens (`src/styles/globals.css`), `cn()` and UI hooks. Repositor
   `@repo/ui/globals.css`; never redefine tokens in an app.
 - Base UI API differs from Radix: composition uses the `render` prop (not `asChild`), Select uses
   `items` + `value`/`onValueChange`, ToggleGroup values are arrays.
+- Own components (not from the CLI): `jalali-calendar`, `jalali-date-picker`,
+  `jalali-date-range-picker` on `@repo/jalali` (values `{ year, month, day }`). Their rules live
+  in `lib/jalali-calendar.ts` (unit-tested: `bun test`), state in `hooks/use-jalali-*`; the
+  components only render. Labels are props — the app passes translations.
