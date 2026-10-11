@@ -17,6 +17,7 @@ const config: UserConfig = {
         "query",
         "table",
         "hooks",
+        "jalali",
         "redis",
         "ui",
         "oxlint-plugin",

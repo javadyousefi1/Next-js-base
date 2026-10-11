@@ -60,6 +60,7 @@ packages/query/          React Query layer: createMakeQuery / makeMutation, inva
 packages/access/         Role-based access: grants, permission/role checks, route rules, <Can>
 packages/table/          Headless server-side tables: nuqs URL contract, useTableState, types
 packages/hooks/          Generic React hooks (debounce, interval, local storage, media query…)
+packages/jalali/         Gregorian ↔ Jalali dates (no deps): convert, date math, format/parse
 packages/redis/          Server-only Redis helpers: client, remember (cache-aside), rateLimit
 packages/ui/             Design system: shadcn components, Tailwind tokens, cn(), UI hooks
 packages/oxlint-plugin/  Project lint rules (`project/*`) + their tests
@@ -101,9 +102,8 @@ nuisance: fix the code, don't disable the rule. Disabling needs a comment with a
 
 - Hooks (Husky): **pre-commit** lint-staged (oxlint --fix + oxfmt on staged files) · **commit-msg**
   commitlint · **pre-push** `bun run check`, plus `bun run build` and e2e when pushing to `main`.
-- Scopes: `admin`, `access`, `http`, `query`, `table`, `hooks`, `redis`, `ui`, `oxlint-plugin`,
-  `typescript-config`, `deps`, `docker`, `ci`, `docs`,
-  `tooling`, `ai`. Example: `feat(admin): add user details page`.
+- Scopes: `admin`, `access`, `http`, `query`, `table`, `hooks`, `jalali`, `redis`, `ui`,
+  `oxlint-plugin`, `typescript-config`, `deps`, `docker`, `ci`, `docs`, `tooling`, `ai`. Example: `feat(admin): add user details page`.
 - Never bypass hooks (`--no-verify`) or force-push shared branches.
 
 <!-- BEGIN:turborepo-agent-rules -->

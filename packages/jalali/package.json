@@ -1,0 +1,20 @@
+{
+  "name": "@repo/jalali",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Gregorian ↔ Jalali (Solar Hijri) dates without dependencies: astronomical leap years, date arithmetic, Date bridges with time zones, Persian formatting and parsing.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "test": "bun test src",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "1.4.2",
+    "typescript": "7.0.2"
+  }
+}

@@ -28,6 +28,7 @@
         "@repo/access": "workspace:*",
         "@repo/hooks": "workspace:*",
         "@repo/http": "workspace:*",
+        "@repo/jalali": "workspace:*",
         "@repo/query": "workspace:*",
         "@repo/redis": "workspace:*",
         "@repo/table": "workspace:*",
@@ -107,6 +108,15 @@
       },
       "peerDependencies": {
         "zod": "^4.6.5",
+      },
+    },
+    "packages/jalali": {
+      "name": "@repo/jalali",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "@types/bun": "1.4.2",
+        "typescript": "7.0.2",
       },
     },
     "packages/oxlint-plugin": {
@@ -631,6 +641,8 @@
     "@repo/hooks": ["@repo/hooks@workspace:packages/hooks"],
 
     "@repo/http": ["@repo/http@workspace:packages/http"],
+
+    "@repo/jalali": ["@repo/jalali@workspace:packages/jalali"],
 
     "@repo/oxlint-plugin": ["@repo/oxlint-plugin@workspace:packages/oxlint-plugin"],
 

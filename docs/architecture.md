@@ -27,6 +27,7 @@ packages/query            makeQuery / makeMutation, related-key invalidation, Qu
 packages/access           role-based access: grants, permission/role checks, <Can>
 packages/table            headless tables: nuqs URL contract + useTableState
 packages/hooks            generic React hooks
+packages/jalali           Gregorian ↔ Jalali dates: convert, calendar math, format/parse
 packages/redis            server-only Redis: client, remember, rateLimit
 packages/ui               shadcn/ui (base-nova, Base UI) + Tailwind 4 tokens + cn()
 packages/oxlint-plugin    project lint rules (project/*)

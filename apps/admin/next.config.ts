@@ -56,6 +56,7 @@ const nextConfig: NextConfig = {
     "@repo/access",
     "@repo/hooks",
     "@repo/http",
+    "@repo/jalali",
     "@repo/query",
     "@repo/redis",
     "@repo/table",
