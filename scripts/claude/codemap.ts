@@ -62,7 +62,7 @@ function kindOf(declaration: Node | undefined, file: string, name: string): stri
 
 const files = (await Array.fromAsync(SOURCES.scan({ dot: false })))
   .filter((f) => !SKIP.test(f))
-  .sort();
+  .toSorted();
 const lines: string[] = [];
 const started = performance.now();
 
@@ -77,6 +77,8 @@ for (const file of files) {
     const node = statements.get(statement.start);
     for (const entry of statement.entries) {
       const local = entry.localName.name ?? undefined;
+      // `kind` is an ambient `declare const enum` that isolatedModules can't import; compare the string.
+      // oxlint-disable-next-line typescript/no-unsafe-enum-comparison
       const isDefault = entry.exportName.kind === "Default";
       const ownDeclaration = isDefault ? (node?.declaration as Node | undefined) : undefined;
       const target = local && !entry.moduleRequest ? declared.get(local) : undefined;
