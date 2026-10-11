@@ -9,8 +9,6 @@ Everything above (AGENTS.md) applies. This part is specific to Claude Code.
 - **Plan non-trivial work** (new feature, new pattern, cross-package change) before editing; list
   the files you will touch.
 - **Use the skills** below instead of improvising — they encode the exact steps and file layout.
-- Next.js 16 docs for the installed version: `node_modules/next/dist/docs/` (read them; APIs
-  changed: `proxy.ts`, Cache Components, `cacheLife`/`cacheTag`/`updateTag`, async params).
 - **Docs only where they are read.** `docs/REPORT.fa.md` (the Persian report) is updated only when
   the user asks — git log is the changelog. Keep `AGENTS.md` files short indexes; code examples
   belong in skills (loaded on demand) and path rules.
@@ -68,6 +66,10 @@ suggest `/spec` first.
   (`tsc --lsp`) gives diagnostics after edits and go-to-definition in local terminal sessions
   (cloud sessions don't start language servers). If Claude Code reports it isn't installed:
   `claude plugin install typescript-7-lsp@next-js-base --scope project`.
+- **Find code via the code map first.** At session start `scripts/claude/codemap.ts` (oxc-parser,
+  ~0.1 s) writes `.claude/codemap.md`: `name · kind · path:line · doc` for every export. Grep it
+  (path `.claude/codemap.md`) by name or by concept before searching the code; `bun run codemap`
+  refreshes it. `.ignore` keeps `bun.lock` and the Persian report out of searches.
 - Path-scoped rules in `.claude/rules/` load automatically when you work on matching files.
 - Secrets (`.env`, `.env.local`, …) are not readable; ask the user for values instead.
 

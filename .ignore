@@ -1,0 +1,5 @@
+# Search noise for ripgrep (Claude Code's Grep/Glob). These files stay in git and stay readable;
+# they are only skipped by repository-wide searches.
+bun.lock
+docs/REPORT.fa.md
+apps/admin/src/fonts/*.txt

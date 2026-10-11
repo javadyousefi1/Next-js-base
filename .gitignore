@@ -44,3 +44,6 @@ npm-debug.log*
 CLAUDE.local.md
 .claude/settings.local.json
 .claude/worktrees/
+
+# Claude Code: generated code map (scripts/claude/codemap.ts, at session start)
+.claude/codemap.md

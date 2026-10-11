@@ -29,7 +29,8 @@
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
     "test:e2e:install": "cd apps/admin && bunx playwright install --with-deps chromium",
-    "typecheck": "turbo run typecheck"
+    "typecheck": "turbo run typecheck",
+    "codemap": "bun scripts/claude/codemap.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.3",
@@ -38,6 +39,7 @@
     "@types/node": "24.19.1",
     "husky": "9.1.7",
     "lint-staged": "17.6.0",
+    "oxc-parser": "0.153.0",
     "oxfmt": "0.71.0",
     "oxlint": "1.86.0",
     "oxlint-tsgolint": "7.0.2003",
