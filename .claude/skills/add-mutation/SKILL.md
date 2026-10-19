@@ -1,6 +1,6 @@
 ---
 name: add-mutation
-description: Add a validated write operation in apps/admin — zod variables/response schemas, makeMutation with invalidation of related queries, form hook with react-hook-form, MSW mock. Use for create/update/delete actions and forms.
+description: Add a validated write operation in apps/sample — zod variables/response schemas, makeMutation with invalidation of related queries, form hook with react-hook-form, MSW mock. Use for create/update/delete actions and forms.
 ---
 
 # Add a mutation

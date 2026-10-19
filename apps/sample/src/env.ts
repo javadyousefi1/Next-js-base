@@ -19,7 +19,7 @@ export const env = createEnv({
     /** `enabled` → the upstream API is answered by MSW (`src/mocks`), no backend needed. */
     API_MOCKING: z.enum(["enabled", "disabled"]).default("disabled"),
     REDIS_URL: z.url(),
-    REDIS_KEY_PREFIX: z.string().min(1).default("admin:"),
+    REDIS_KEY_PREFIX: z.string().min(1).default("sample:"),
     /** Defaults to `true` in production (see `src/server/auth/cookies.ts`). */
     AUTH_COOKIE_SECURE: z.stringbool().optional(),
     AUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(900),

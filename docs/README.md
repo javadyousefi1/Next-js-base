@@ -1,13 +1,13 @@
 # Documentation
 
-| Document                                           | Read it when                                                           |
-| -------------------------------------------------- | ---------------------------------------------------------------------- |
-| [REPORT.fa.md](REPORT.fa.md)                       | گزارش کامل فارسی: همه‌ی کارهای انجام‌شده، چک‌لیست نیازمندی‌ها، هشدارها |
-| [architecture.md](architecture.md)                 | You need the big picture: request, auth, data and cache flows          |
-| [decisions.md](decisions.md)                       | You wonder _why_ something is built this way (ADRs + known caveats)    |
-| [operations.md](operations.md)                     | Tooling, tests, CI hooks, Docker, environment variables                |
-| [../AGENTS.md](../AGENTS.md)                       | Rules for everyone (humans and AI agents)                              |
-| [../apps/admin/AGENTS.md](../apps/admin/AGENTS.md) | How the admin app is organised and how to extend it                    |
+| Document                                             | Read it when                                                           |
+| ---------------------------------------------------- | ---------------------------------------------------------------------- |
+| [REPORT.fa.md](REPORT.fa.md)                         | گزارش کامل فارسی: همه‌ی کارهای انجام‌شده، چک‌لیست نیازمندی‌ها، هشدارها |
+| [architecture.md](architecture.md)                   | You need the big picture: request, auth, data and cache flows          |
+| [decisions.md](decisions.md)                         | You wonder _why_ something is built this way (ADRs + known caveats)    |
+| [operations.md](operations.md)                       | Tooling, tests, CI hooks, Docker, environment variables                |
+| [../AGENTS.md](../AGENTS.md)                         | Rules for everyone (humans and AI agents)                              |
+| [../apps/sample/AGENTS.md](../apps/sample/AGENTS.md) | How the sample app is organised and how to extend it                   |
 
 ## Quick start
 

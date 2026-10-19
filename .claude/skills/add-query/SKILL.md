@@ -1,6 +1,6 @@
 ---
 name: add-query
-description: Add a validated read endpoint in apps/admin — zod params/response schemas, endpoint constant, query key, service, makeQuery definition and MSW mock. Use whenever new server data must be displayed.
+description: Add a validated read endpoint in apps/sample — zod params/response schemas, endpoint constant, query key, service, makeQuery definition and MSW mock. Use whenever new server data must be displayed.
 ---
 
 # Add a query

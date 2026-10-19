@@ -21,7 +21,7 @@
 ## Monorepo
 
 ```
-apps/admin                Next.js 16 app (App Router, Cache Components, React Compiler)
+apps/sample                Next.js 16 app (App Router, Cache Components, React Compiler)
 packages/http             HttpClient (axios inside): data or ApiError out
 packages/query            makeQuery / makeMutation, related-key invalidation, QueryClient
 packages/access           role-based access: grants, permission/role checks, <Can>

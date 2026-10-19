@@ -1,11 +1,11 @@
 ---
 name: write-e2e-test
-description: Write Playwright end-to-end tests for apps/admin the way this repo does (production build + MSW mocks, role-based locators, URL assertions). Use when a user flow is added or changed, or when asked for e2e tests.
+description: Write Playwright end-to-end tests for apps/sample the way this repo does (production build + MSW mocks, role-based locators, URL assertions). Use when a user flow is added or changed, or when asked for e2e tests.
 ---
 
 # Write an e2e test
 
-- Location: `apps/admin/e2e/<area>.spec.ts`. Shared steps: `e2e/fixtures.ts` (`signIn(page, path, user?)`,
+- Location: `apps/sample/e2e/<area>.spec.ts`. Shared steps: `e2e/fixtures.ts` (`signIn(page, path, user?)`,
   `DEMO_USER` = admin, `MEMBER_USER` = no users access).
 - The suite runs against `next start` with `API_MOCKING=enabled` (MSW + Faker, seeded data), so
   data is deterministic — e.g. `admin@example.com` always exists.
@@ -33,5 +33,5 @@ test("filters users by role", async ({ page }) => {
 });
 ```
 
-Run: `bun run test:e2e` (root; builds first) or `cd apps/admin && bunx playwright test --ui`.
+Run: `bun run test:e2e` (root; builds first) or `cd apps/sample && bunx playwright test --ui`.
 Set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to use a preinstalled Chromium.

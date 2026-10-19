@@ -1,6 +1,6 @@
 ---
 name: add-table
-description: Add a server-driven table to apps/admin (search, filters drawer generated from config, sorting, pagination, URL state, server prefetch) or a filter to an existing table. Use whenever a list/table screen or a new filter is needed.
+description: Add a server-driven table to apps/sample (search, filters drawer generated from config, sorting, pagination, URL state, server prefetch) or a filter to an existing table. Use whenever a list/table screen or a new filter is needed.
 ---
 
 # Add a table (or a filter)

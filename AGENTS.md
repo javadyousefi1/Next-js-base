@@ -2,7 +2,7 @@
 
 Instructions for AI coding agents (Claude Code, Codex, Cursor, Copilot…) **and** humans working in
 this repository. Read this file completely before changing anything. App-specific rules live in
-[`apps/admin/AGENTS.md`](apps/admin/AGENTS.md); background and rationale in [`docs/`](docs/README.md).
+[`apps/sample/AGENTS.md`](apps/sample/AGENTS.md); background and rationale in [`docs/`](docs/README.md).
 
 ## 0. Working agreement
 
@@ -15,7 +15,7 @@ this repository. Read this file completely before changing anything. App-specifi
    MSW 3, Oxlint). Read the installed version: types in `node_modules/<pkg>`, Next.js docs in
    `node_modules/next/dist/docs/`, Turborepo docs in the installed `turbo` package (see the block
    at the end of this file). If you can't verify an API, say so.
-3. **Copy the closest existing pattern.** `apps/admin/src/features/users` is the reference feature
+3. **Copy the closest existing pattern.** `apps/sample/src/features/users` is the reference feature
    (schema → backend → service → query → hook → view). Match its names, folders, comments and size.
 4. **Keep it simple.** Small readable functions, no clever abstractions, no new dependency or new
    pattern without asking first.
@@ -37,24 +37,24 @@ Redis · MSW · Oxlint/Oxfmt · Playwright. Details and versions: `docs/architec
 
 ## 2. Commands (repo root)
 
-| Command                               | What it does                                                                          |
-| ------------------------------------- | ------------------------------------------------------------------------------------- |
-| `bun run setup`                       | Toolchain check, install, create `apps/admin/.env.local`, Playwright browser          |
-| `bun run dev`                         | All apps in dev mode (admin → http://localhost:3000, demo login `admin` / `admin123`) |
-| `bun run check`                       | lint + format check + typecheck + unit tests (what pre-push runs)                     |
-| `bun run build`                       | Production build (turbo-cached)                                                       |
-| `bun run test:e2e`                    | Builds, then Playwright against `next start` with the mocked API                      |
-| `bun run lint:fix` / `bun run format` | Auto-fix lint issues / format everything                                              |
-| `bun run docker:up`                   | Production stack (admin + Redis) with docker compose                                  |
-| `bun run doctor` / `bun run clean`    | Verify toolchain / remove build outputs and node_modules                              |
+| Command                               | What it does                                                                           |
+| ------------------------------------- | -------------------------------------------------------------------------------------- |
+| `bun run setup`                       | Toolchain check, install, create `apps/sample/.env.local`, Playwright browser          |
+| `bun run dev`                         | All apps in dev mode (sample → http://localhost:3000, demo login `admin` / `admin123`) |
+| `bun run check`                       | lint + format check + typecheck + unit tests (what pre-push runs)                      |
+| `bun run build`                       | Production build (turbo-cached)                                                        |
+| `bun run test:e2e`                    | Builds, then Playwright against `next start` with the mocked API                       |
+| `bun run lint:fix` / `bun run format` | Auto-fix lint issues / format everything                                               |
+| `bun run docker:up`                   | Production stack (admin + Redis) with docker compose                                   |
+| `bun run doctor` / `bun run clean`    | Verify toolchain / remove build outputs and node_modules                               |
 
-Add a dependency to one workspace: `bun add <pkg> --cwd apps/admin` (pin exact versions). Never
+Add a dependency to one workspace: `bun add <pkg> --cwd apps/sample` (pin exact versions). Never
 use npm/yarn/pnpm here (the root `devEngines` pins Bun).
 
 ## 3. Repository layout
 
 ```
-apps/admin/              Next.js admin panel (reference app) — see apps/admin/AGENTS.md
+apps/sample/             Next.js sample app: every package and feature in use — see apps/sample/AGENTS.md
 packages/http/           HttpClient (axios inside): data or ApiError out, zod-validated responses
 packages/query/          React Query layer: createMakeQuery / makeMutation, invalidation, QueryClient
 packages/access/         Role-based access: grants, permission/role checks, route rules, <Can>
@@ -102,8 +102,9 @@ nuisance: fix the code, don't disable the rule. Disabling needs a comment with a
 
 - Hooks (Husky): **pre-commit** lint-staged (oxlint --fix + oxfmt on staged files) · **commit-msg**
   commitlint · **pre-push** `bun run check`, plus `bun run build` and e2e when pushing to `main`.
-- Scopes: `admin`, `access`, `http`, `query`, `table`, `hooks`, `jalali`, `redis`, `ui`,
-  `oxlint-plugin`, `typescript-config`, `deps`, `docker`, `ci`, `docs`, `tooling`, `ai`. Example: `feat(admin): add user details page`.
+- Scopes: `sample`, `access`, `http`, `query`, `table`, `hooks`, `jalali`, `redis`, `ui`,
+  `oxlint-plugin`, `typescript-config`, `deps`, `docker`, `ci`, `docs`, `tooling`, `ai`.
+  Example: `feat(sample): add user details page`.
 - Never bypass hooks (`--no-verify`) or force-push shared branches.
 
 <!-- BEGIN:turborepo-agent-rules -->

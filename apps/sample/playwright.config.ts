@@ -9,7 +9,7 @@ const isCI = Boolean(process.env.CI);
  * MSW (`API_MOCKING=enabled`): no backend needed, and no Redis either (rate limiting fails open).
  *
  *   bun run test:e2e            # from the repo root: turbo builds first, then runs Playwright
- *   bunx playwright test --ui   # from apps/admin, interactive
+ *   bunx playwright test --ui   # from apps/sample, interactive
  *
  * PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: use a preinstalled Chromium instead of the downloaded one.
  */

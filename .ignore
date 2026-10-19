@@ -2,4 +2,4 @@
 # they are only skipped by repository-wide searches.
 bun.lock
 docs/REPORT.fa.md
-apps/admin/src/fonts/*.txt
+apps/sample/src/fonts/*.txt

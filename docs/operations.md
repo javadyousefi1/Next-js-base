@@ -39,14 +39,14 @@ shadcn code, mocks, scripts and tests.
 
 ## Tests
 
-- Unit: `bun test` in `apps/admin` and in the packages (`@repo/http` against a real local server,
+- Unit: `bun test` in `apps/sample` and in the packages (`@repo/http` against a real local server,
   `@repo/query` invalidation and validation).
 - Lint rules: `node --test` in `packages/oxlint-plugin` (38 cases).
-- E2E: 15 Playwright tests (`apps/admin/e2e`) against the production build with MSW:
+- E2E: 15 Playwright tests (`apps/sample/e2e`) against the production build with MSW:
   auth redirect/validation/errors/login/logout + httpOnly check, users table search/filter/sort/
   pagination/shared URL, RTL + language switch, dark mode, robots/hreflang/manifest/SW headers.
 
-## Environment variables (`apps/admin`)
+## Environment variables (`apps/sample`)
 
 | Variable                         | Side   | Default              | Notes                                            |
 | -------------------------------- | ------ | -------------------- | ------------------------------------------------ |
@@ -55,12 +55,12 @@ shadcn code, mocks, scripts and tests.
 | `API_BASE_URL`                   | server | —                    | Upstream REST API                                |
 | `API_MOCKING`                    | server | `disabled`           | `enabled` → MSW + Faker answer the upstream      |
 | `REDIS_URL`                      | server | —                    | `redis://host:6379`                              |
-| `REDIS_KEY_PREFIX`               | server | `admin:`             | Namespaces every key                             |
+| `REDIS_KEY_PREFIX`               | server | `sample:`            | Namespaces every key                             |
 | `AUTH_COOKIE_SECURE`             | server | `true` in production | `false` only for plain-http deployments          |
 | `AUTH_ACCESS_TOKEN_TTL_SECONDS`  | server | `900`                | Access cookie lifetime                           |
 | `AUTH_REFRESH_TOKEN_TTL_SECONDS` | server | `604800`             | Refresh cookie lifetime                          |
 
-All of them are declared in one file, `apps/admin/src/env.ts` (`server` and `client` objects of one
+All of them are declared in one file, `apps/sample/src/env.ts` (`server` and `client` objects of one
 `createEnv`). Validation runs at build (`next.config.ts`) and at boot (`instrumentation.ts`); a
 missing or invalid value stops the process with a readable zod error. Docker builds set
 `SKIP_ENV_VALIDATION=1` (secrets are not needed to build); the container validates every variable
@@ -68,14 +68,14 @@ when it starts, including the `NEXT_PUBLIC_*` values inlined at build.
 
 ## Docker
 
-`apps/admin/Dockerfile` (context = repo root):
+`apps/sample/Dockerfile` (context = repo root):
 
-1. `prune` — `turbo prune admin --docker` (only the app + workspace deps, pruned `bun.lock`).
-2. `builder` — `bun install --frozen-lockfile` (cached layer), then `turbo run build --filter=admin`
+1. `prune` — `turbo prune sample --docker` (only the app + workspace deps, pruned `bun.lock`).
+2. `builder` — `bun install --frozen-lockfile` (cached layer), then `turbo run build --filter=sample`
    with BuildKit cache mounts for Bun, `.next/cache` and `.turbo`.
 3. `runner` — `node:24-alpine`, non-root user, standalone server (~70 MB app), `HEALTHCHECK` on
    `/api/health`.
 
-`docker-compose.yml`: `admin` + `redis:8-alpine` (AOF persistence, LRU 256 MB, healthcheck,
+`docker-compose.yml`: `sample` + `redis:8-alpine` (AOF persistence, LRU 256 MB, healthcheck,
 localhost-only port). Demo defaults use the mocked API — set `API_MOCKING=disabled` and a real
 `API_BASE_URL` for production.

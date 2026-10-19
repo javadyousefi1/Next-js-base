@@ -1,6 +1,6 @@
 ---
 name: add-page
-description: Add a new route/page to apps/admin — ROUTES constant, thin Server Component page, metadata/SEO, sidebar entry, i18n and auth guard. Use when the user asks for a new page, screen or URL.
+description: Add a new route/page to apps/sample — ROUTES constant, thin Server Component page, metadata/SEO, sidebar entry, i18n and auth guard. Use when the user asks for a new page, screen or URL.
 ---
 
 # Add a page

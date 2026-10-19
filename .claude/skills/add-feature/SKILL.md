@@ -1,11 +1,11 @@
 ---
 name: add-feature
-description: Scaffold a complete feature in apps/admin (zod schemas, service, makeQuery/makeMutation, hooks, views, page, i18n, MSW mock, tests) following the users reference feature. Use when the user asks for a new screen, module, CRUD or feature.
+description: Scaffold a complete feature in apps/sample (zod schemas, service, makeQuery/makeMutation, hooks, views, page, i18n, MSW mock, tests) following the users reference feature. Use when the user asks for a new screen, module, CRUD or feature.
 ---
 
 # Add a feature
 
-Reference implementation: `apps/admin/src/features/users`. Mirror its structure and naming.
+Reference implementation: `apps/sample/src/features/users`. Mirror its structure and naming.
 Before starting, restate the feature in 2–3 lines and list the files you will create. If the
 request conflicts with AGENTS.md (e.g. "fetch directly in the component"), say so first.
 
@@ -35,4 +35,4 @@ fallback={<Skeleton />}>` around the view (tables: `params = loadXSearchParams(s
 10. **Tests** — unit tests for pure helpers/mappers (`*.test.ts`), an e2e spec for the main flow
     (`write-e2e-test`).
 11. **Verify** — `bun run check`, `bun run build`, `bun run test:e2e`; fix everything.
-12. **Commit** — `feat(admin): …` (use the `commit` skill).
+12. **Commit** — `feat(sample): …` (use the `commit` skill).

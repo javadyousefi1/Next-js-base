@@ -41,7 +41,7 @@ export default defineConfig({
     "**/playwright-report/**",
     "**/test-results/**",
     "**/next-env.d.ts",
-    "apps/admin/public/sw.js",
+    "apps/sample/public/sw.js",
   ],
   rules: {
     // ── Language & TypeScript ──────────────────────────────────────────────────────────────

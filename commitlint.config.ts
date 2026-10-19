@@ -1,7 +1,7 @@
 import type { UserConfig } from "@commitlint/types";
 
 /**
- * Conventional Commits: `type(scope): subject`, e.g. `feat(admin): add users export`.
+ * Conventional Commits: `type(scope): subject`, e.g. `feat(sample): add users export`.
  * Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert.
  */
 const config: UserConfig = {
@@ -11,7 +11,7 @@ const config: UserConfig = {
       2,
       "always",
       [
-        "admin",
+        "sample",
         "access",
         "http",
         "query",

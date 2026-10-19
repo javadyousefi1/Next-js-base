@@ -1,4 +1,4 @@
-# apps/admin — AGENTS.md
+# apps/sample — AGENTS.md
 
 The reference Next.js 16 app. Repository rules: [`../../AGENTS.md`](../../AGENTS.md). Details and
 code live where they are needed: path rules in `.claude/rules/` (load with the files they cover)

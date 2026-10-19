@@ -1,6 +1,6 @@
 # Next.js Base
 
-Production-ready Next.js 16 monorepo base (Turborepo + Bun) with a reference admin panel.
+Production-ready Next.js 16 monorepo base (Turborepo + Bun) with a sample app that uses every package and feature (the living example for developers and AI).
 
 **گزارش کامل فارسی:** [`docs/REPORT.fa.md`](docs/REPORT.fa.md) — everything that was built, why,
 a requirement-by-requirement checklist and the caveats.
@@ -37,4 +37,4 @@ bun run dev       # http://localhost:3000 — login: admin / admin123 (or member
 | `bun run docker:up` | admin + Redis with docker compose                    |
 
 Docs: [`docs/`](docs/README.md) · Rules: [`AGENTS.md`](AGENTS.md) · App guide:
-[`apps/admin/AGENTS.md`](apps/admin/AGENTS.md)
+[`apps/sample/AGENTS.md`](apps/sample/AGENTS.md)

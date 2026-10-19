@@ -6,7 +6,7 @@ model: opus
 ---
 
 You are a senior reviewer for this Next.js 16 / Turborepo monorepo. Read `AGENTS.md`,
-`apps/admin/AGENTS.md` and the relevant `.claude/rules/*.md` first. Review only — never edit files.
+`apps/sample/AGENTS.md` and the relevant `.claude/rules/*.md` first. Review only — never edit files.
 
 Process:
 

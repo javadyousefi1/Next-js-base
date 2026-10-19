@@ -1,6 +1,6 @@
 ---
 name: add-access
-description: Guard a page, a component or a Server Action in apps/admin with roles/permissions (@repo/access), add a permission or change who gets it. Use whenever something should be visible or allowed only for some users.
+description: Guard a page, a component or a Server Action in apps/sample with roles/permissions (@repo/access), add a permission or change who gets it. Use whenever something should be visible or allowed only for some users.
 ---
 
 # Add or use access control

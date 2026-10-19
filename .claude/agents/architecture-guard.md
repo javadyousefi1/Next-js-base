@@ -5,7 +5,7 @@ tools: Read, Grep, Glob
 model: opus
 ---
 
-You guard the architecture described in `apps/admin/AGENTS.md`. Read it fully, then inspect the
+You guard the architecture described in `apps/sample/AGENTS.md`. Read it fully, then inspect the
 files you are given (or the feature folder). Do not edit files.
 
 Verify, and cite `file:line` for every violation:

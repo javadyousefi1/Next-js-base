@@ -1,5 +1,5 @@
 /**
- * Regenerates the PWA PNG icons from `apps/admin/public/icons/icon.svg` with Playwright's
+ * Regenerates the PWA PNG icons from `apps/sample/public/icons/icon.svg` with Playwright's
  * Chromium (no image tooling needed). Run: `bun run icons` (root).
  *
  * Set PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH to use a preinstalled Chromium.
@@ -8,7 +8,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "../..");
-const iconsDir = path.join(root, "apps/admin/public/icons");
+const iconsDir = path.join(root, "apps/sample/public/icons");
 /** The tiny slice of the Playwright API this script uses. */
 type Page = {
   setViewportSize(size: { width: number; height: number }): Promise<void>;
@@ -24,9 +24,9 @@ type Playwright = {
   };
 };
 
-// @playwright/test is a dependency of the admin app: resolve it from there.
+// @playwright/test is a dependency of the sample app: resolve it from there.
 const { chromium } = (await import(
-  Bun.resolveSync("@playwright/test", path.join(root, "apps/admin"))
+  Bun.resolveSync("@playwright/test", path.join(root, "apps/sample"))
 )) as Playwright;
 
 const svg = await readFile(path.join(iconsDir, "icon.svg"), "utf8");

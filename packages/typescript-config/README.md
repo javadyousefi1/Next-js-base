@@ -5,7 +5,7 @@ Shared `tsconfig` presets. Every workspace extends exactly one of them:
 | Preset               | Used by                                  |
 | -------------------- | ---------------------------------------- |
 | `base.json`          | Strict defaults shared by all presets    |
-| `nextjs.json`        | Next.js apps (`apps/admin`)              |
+| `nextjs.json`        | Next.js apps (`apps/sample`)             |
 | `react-library.json` | React packages (`packages/ui`)           |
 | `bun.json`           | Bun/Node code (`apps/mock-api`, tooling) |
 

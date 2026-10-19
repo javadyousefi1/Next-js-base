@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 #
-# Production image for apps/admin. Build context = repository root:
-#   docker build -f apps/admin/Dockerfile -t next-js-base/admin .
+# Production image for apps/sample. Build context = repository root:
+#   docker build -f apps/sample/Dockerfile -t next-js-base/sample .
 #   (or: bun run docker:build → docker compose build)
 #
 # Stages: prune (turbo) → builder (bun install + next build, both cached) → runner (node, non-root)
@@ -20,11 +20,11 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1 \
     HUSKY=0
 
-# ── 1. prune: only apps/admin + the workspace packages it depends on ───────────────────────────
+# ── 1. prune: only apps/sample + the workspace packages it depends on ───────────────────────────
 FROM base AS prune
 ARG TURBO_VERSION
 COPY . .
-RUN bunx turbo@${TURBO_VERSION} prune admin --docker
+RUN bunx turbo@${TURBO_VERSION} prune sample --docker
 
 # ── 2. builder ──────────────────────────────────────────────────────────────────────────────────
 FROM base AS builder
@@ -44,9 +44,9 @@ ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL} \
     NEXT_PUBLIC_SITE_INDEXABLE=${NEXT_PUBLIC_SITE_INDEXABLE} \
     SKIP_ENV_VALIDATION=1
 
-RUN --mount=type=cache,id=next-cache,target=/app/apps/admin/.next/cache \
+RUN --mount=type=cache,id=next-cache,target=/app/apps/sample/.next/cache \
     --mount=type=cache,id=turbo-cache,target=/app/.turbo/cache \
-    node_modules/.bin/turbo run build --filter=admin
+    node_modules/.bin/turbo run build --filter=sample
 
 # ── 3. runner: minimal Node image with the standalone server ────────────────────────────────────
 FROM node:${NODE_VERSION}-alpine AS runner
@@ -58,9 +58,9 @@ ENV NODE_ENV=production \
 
 RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
 
-COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/.next/static ./apps/admin/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/admin/public ./apps/admin/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/sample/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/sample/.next/static ./apps/sample/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/sample/public ./apps/sample/public
 
 USER nextjs
 EXPOSE 3000
@@ -68,4 +68,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/api/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
-CMD ["node", "apps/admin/server.js"]
+CMD ["node", "apps/sample/server.js"]

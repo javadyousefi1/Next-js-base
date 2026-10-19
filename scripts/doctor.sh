@@ -25,6 +25,6 @@ else
 fi
 if command -v docker >/dev/null; then echo "  ✔ docker $(docker --version | cut -d' ' -f3 | tr -d ,)"; else echo "  • docker not found (only needed for Redis/compose)"; fi
 
-[[ -f apps/admin/.env.local ]] && echo "  ✔ apps/admin/.env.local" || echo "  • apps/admin/.env.local missing (bun run setup creates it)"
+[[ -f apps/sample/.env.local ]] && echo "  ✔ apps/sample/.env.local" || echo "  • apps/sample/.env.local missing (bun run setup creates it)"
 
 exit "$fail"
