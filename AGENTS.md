@@ -15,8 +15,9 @@ this repository. Read this file completely before changing anything. App-specifi
    MSW 3, Oxlint). Read the installed version: types in `node_modules/<pkg>`, Next.js docs in
    `node_modules/next/dist/docs/`, Turborepo docs in the installed `turbo` package (see the block
    at the end of this file). If you can't verify an API, say so.
-3. **Copy the closest existing pattern.** `apps/sample/src/features/users` is the reference feature
-   (schema → backend → service → query → hook → view). Match its names, folders, comments and size.
+3. **Copy the closest existing pattern.** `apps/sample` uses every package and feature (§6);
+   `features/users` (read) and `features/tasks` (CRUD) are the reference features. Match their
+   names, folders, comments and size.
 4. **Keep it simple.** Small readable functions, no clever abstractions, no new dependency or new
    pattern without asking first.
 5. **Cover the whole request.** Re-read the request before finishing; list anything you didn't do
@@ -76,7 +77,7 @@ i18n; the app binds them (HTTP instances in `src/lib/http` + `src/server/http`,
 They are Just-in-Time packages: `exports` point at the TypeScript source and the app transpiles
 them (`transpilePackages` in `next.config.ts`). New shared code → `packages/<name>/` with
 `package.json` (`exports`, `typecheck`/`test` scripts), `tsconfig.json`, `AGENTS.md`; add it to the
-app's dependencies (`workspace:*`), to `transpilePackages` and as a commit scope.
+app's dependencies (`workspace:*`), to `transpilePackages`, as a commit scope and to §6.
 
 ## 4. Golden rules
 
@@ -106,6 +107,13 @@ nuisance: fix the code, don't disable the rule. Disabling needs a comment with a
   `oxlint-plugin`, `typescript-config`, `deps`, `docker`, `ci`, `docs`, `tooling`, `ai`.
   Example: `feat(sample): add user details page`.
 - Never bypass hooks (`--no-verify`) or force-push shared branches.
+
+## 6. Samples
+
+`apps/sample` is the living example of everything here — read it before writing similar code.
+Anything new (a package, an export, a cross-cutting feature like `modal`) ships with a working
+example page, listed in `apps/sample/src/config/examples.ts`. `bun run check` fails otherwise
+(`scripts/check-examples.ts`; pure plumbing exports go in its `PLUMBING` list with a reason).
 
 <!-- BEGIN:turborepo-agent-rules -->
 

@@ -22,4 +22,6 @@ description: Add a shadcn/ui component to the shared design system (packages/ui)
    `items`/`value`/`onValueChange`; ToggleGroup values are arrays. Read the component file.
 6. App-specific variants or compositions go in the app (`src/components/`), not in the generated
    file. Edit generated files only to fix bugs, and say so in the commit.
-7. Verify: `bun run typecheck`, `bun run lint`, check light/dark and `/fa` (RTL).
+7. **Sample** — show it in the UI gallery (`apps/sample/src/features/examples/components/ui-*-tab.tsx`);
+   `bun run check` (`check-examples`) fails until the sample app imports the new component.
+8. Verify: `bun run typecheck`, `bun run lint`, check light/dark and `/fa` (RTL).

@@ -29,7 +29,7 @@ type AppSidebarProps = {
 
 export function AppSidebar({ side }: AppSidebarProps) {
   const t = useTranslations();
-  const items = useNavItems();
+  const groups = useNavItems();
 
   return (
     <Sidebar side={side} collapsible="icon">
@@ -48,25 +48,27 @@ export function AppSidebar({ side }: AppSidebarProps) {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>{t("Nav.main")}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    isActive={item.isActive}
-                    tooltip={t(`Nav.${item.labelKey}`)}
-                    render={<Link href={item.href} />}
-                  >
-                    <item.icon />
-                    <span>{t(`Nav.${item.labelKey}`)}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groups.map((group) => (
+          <SidebarGroup key={group.labelKey}>
+            <SidebarGroupLabel>{t(`Nav.${group.labelKey}`)}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      isActive={item.isActive}
+                      tooltip={t(`Nav.${item.labelKey}`)}
+                      render={<Link href={item.href} />}
+                    >
+                      <item.icon />
+                      <span>{t(`Nav.${item.labelKey}`)}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter>

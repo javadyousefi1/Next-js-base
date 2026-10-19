@@ -93,6 +93,16 @@
         "!**/test-results/**"
       ],
       "outputs": []
+    },
+    "//#check:examples": {
+      "description": "Fails when a workspace package, public module or index export has no example in apps/sample (scripts/check-examples.ts).",
+      "inputs": [
+        "scripts/check-examples.ts",
+        "apps/sample/src/**",
+        "packages/*/package.json",
+        "packages/*/src/**"
+      ],
+      "outputs": []
     }
   }
 }

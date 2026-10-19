@@ -19,11 +19,16 @@
       "network": "Network error. Check your connection and try again."
     }
   },
+  "Modal": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "close": "Close"
+  },
   "Nav": {
     "main": "Main",
     "dashboard": "Dashboard",
     "users": "Users",
-    "calendar": "Calendar",
     "settings": "Settings",
     "toggleSidebar": "Toggle sidebar",
     "breadcrumb": "Breadcrumb",
@@ -31,7 +36,15 @@
     "logout": "Log out",
     "skipToContent": "Skip to content",
     "language": "Language",
-    "theme": "Theme"
+    "theme": "Theme",
+    "examples": "Examples",
+    "data": "Data (CRUD)",
+    "modal": "Modals",
+    "ui": "UI components",
+    "jalali": "Jalali dates",
+    "hooks": "Hooks",
+    "access": "Access",
+    "redis": "Redis"
   },
   "Auth": {
     "title": "Sign in",
@@ -101,30 +114,416 @@
       "company": "Company"
     }
   },
-  "Calendar": {
-    "title": "Calendar",
-    "description": "Jalali (Solar Hijri) calendar, date picker and date range picker.",
-    "calendar": {
-      "title": "Calendar",
-      "description": "Pick a day. Jump with the month and year lists, or use the arrow keys."
+  "Examples": {
+    "title": "Examples",
+    "description": "Every package and feature of this base in a working example: copy the code from apps/sample.",
+    "packages": "Packages",
+    "open": "Open",
+    "result": "Result",
+    "nothingYet": "Nothing yet.",
+    "data": {
+      "title": "Data (CRUD)",
+      "description": "A tasks list: server table, create/edit form in a modal, delete with confirm, mutations and invalidation.",
+      "searchPlaceholder": "Search tasks…",
+      "statusFilter": "Status",
+      "status": {
+        "todo": "To do",
+        "doing": "In progress",
+        "done": "Done"
+      },
+      "columns": {
+        "done": "Done",
+        "title": "Title",
+        "status": "Status",
+        "dueDate": "Due date",
+        "createdAt": "Created",
+        "actions": "Actions"
+      },
+      "newTask": "New task",
+      "refresh": "Refresh",
+      "toggleDone": "Mark “{title}” as done",
+      "edit": "Edit “{title}”",
+      "form": {
+        "createTitle": "New task",
+        "editTitle": "Edit task",
+        "title": "Title",
+        "status": "Status",
+        "dueDate": "Due date",
+        "clearDate": "No date",
+        "create": "Create",
+        "save": "Save",
+        "error": "Could not save: {message}"
+      },
+      "validation": {
+        "titleMin": "Use at least {min} characters.",
+        "titleMax": "Use at most {max} characters."
+      },
+      "delete": {
+        "label": "Delete “{title}”",
+        "title": "Delete task",
+        "text": "Delete <b>{title}</b>? This cannot be undone.",
+        "action": "Delete",
+        "inProgress": "A task in progress cannot be deleted. Finish it or move it back to “To do” first."
+      },
+      "toast": {
+        "created": "“{title}” was created.",
+        "updated": "“{title}” was saved.",
+        "deleted": "“{title}” was deleted."
+      }
     },
-    "datePicker": {
-      "title": "Date picker",
-      "description": "One date in a popover.",
-      "label": "Date"
+    "modal": {
+      "title": "Modals",
+      "description": "modal.confirm, alert, prompt and open — awaited from anywhere, no page state.",
+      "confirmCard": {
+        "title": "Confirm",
+        "description": "await modal.confirm(content, options) resolves \"yes\" or \"no\"."
+      },
+      "variants": {
+        "default": "Default",
+        "info": "Info",
+        "success": "Success",
+        "warning": "Warning",
+        "destructive": "Destructive"
+      },
+      "confirmTitle": "{variant} question",
+      "confirmText": "Do you want to continue?",
+      "delete": {
+        "button": "Delete a group",
+        "title": "Delete Trading Group",
+        "text": "Delete <b>{name}</b> trading group?",
+        "action": "Delete"
+      },
+      "asyncCard": {
+        "title": "Async action",
+        "description": "onAction runs the request: the buttons wait, an error keeps the modal open."
+      },
+      "trial": {
+        "button": "Activate free trial",
+        "failButton": "Activate (fails once)",
+        "title": "Activate Free Trial",
+        "text": "Are you sure you want to activate a free trial?<br></br>This will give you access to all the features of the scale plan for free.",
+        "action": "Activate Free Trial",
+        "failed": "The payment service did not answer. Try again."
+      },
+      "otherCard": {
+        "title": "Alert and prompt",
+        "description": "modal.alert(content) and modal.prompt(content, options) with validate → the text or null."
+      },
+      "alert": {
+        "button": "Show an alert",
+        "title": "Saved",
+        "text": "Your changes were saved."
+      },
+      "prompt": {
+        "button": "Rename",
+        "title": "Rename group",
+        "text": "Choose a new name for the group.",
+        "label": "Name",
+        "action": "Rename",
+        "tooShort": "Use at least 3 characters."
+      },
+      "customCard": {
+        "title": "Custom content",
+        "description": "modal.open(form) resolves the value the form passes to close(value). Modals stack."
+      },
+      "open": {
+        "button": "Choose a plan",
+        "title": "Choose a plan",
+        "description": "Any content: this form closes the modal with the chosen plan.",
+        "help": "Help",
+        "helpTitle": "Plans",
+        "helpText": "Free is for trying, Pro for one team, Team for many teams.",
+        "choose": "Choose"
+      },
+      "plans": {
+        "free": "Free",
+        "pro": "Pro",
+        "team": "Team"
+      },
+      "answered": "Answer: {answer}",
+      "deleted": "Deleted.",
+      "closed": "The alert was closed.",
+      "renamed": "Renamed to “{name}”.",
+      "picked": "Picked plan: {plan}.",
+      "cancelled": "Cancelled."
     },
-    "rangePicker": {
-      "title": "Date range picker",
-      "description": "Pick the first day, then the last one.",
-      "label": "Range"
+    "ui": {
+      "title": "UI components",
+      "description": "Every component of the design system (@repo/ui) in one place.",
+      "tabs": {
+        "actions": "Actions",
+        "forms": "Forms",
+        "feedback": "Feedback",
+        "overlays": "Overlays",
+        "display": "Display"
+      },
+      "buttons": "Buttons",
+      "badges": "Badges",
+      "toggles": "Toggles",
+      "menu": "Menu",
+      "loading": "Loading",
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "shortcut": "Search with",
+      "menuItems": {
+        "profile": "Profile",
+        "settings": "Settings",
+        "logout": "Log out",
+        "notifications": "Email notifications"
+      },
+      "form": {
+        "email": "Email",
+        "emailHint": "We never share it.",
+        "website": "Website",
+        "bio": "Bio",
+        "plan": "Plan",
+        "terms": "I accept the terms",
+        "notifications": "Notifications",
+        "notificationsOn": "On",
+        "notificationsOff": "Off",
+        "invalid": "This field has an error."
+      },
+      "plans": {
+        "free": "Free",
+        "pro": "Pro",
+        "team": "Team"
+      },
+      "alerts": {
+        "infoTitle": "Heads up",
+        "info": "Alerts show short messages inside the page.",
+        "errorTitle": "Something failed",
+        "error": "A destructive alert for errors."
+      },
+      "toasts": {
+        "title": "Toasts (sonner)",
+        "success": "Success toast",
+        "error": "Error toast",
+        "info": "Info toast",
+        "successText": "Saved successfully.",
+        "errorText": "Could not save.",
+        "infoText": "A new version is available."
+      },
+      "empty": {
+        "title": "No projects yet",
+        "description": "Empty shows a friendly state when a list has no items.",
+        "action": "Create project"
+      },
+      "overlays": {
+        "dialog": "Dialog",
+        "dialogTitle": "Declarative dialog",
+        "dialogText": "The classic way: a trigger and content in the page. For questions, prefer modal.confirm.",
+        "alertDialog": "Alert dialog",
+        "alertTitle": "Are you sure?",
+        "alertText": "AlertDialog needs an explicit answer: no outside click closes it.",
+        "sheet": "Sheet",
+        "sheetTitle": "A side sheet",
+        "sheetText": "Sheets slide in from a side (the filters drawer uses one).",
+        "popover": "Popover",
+        "popoverTitle": "Popover",
+        "popoverText": "Floating content anchored to its trigger.",
+        "tooltip": "Hover me",
+        "tooltipText": "A short hint",
+        "close": "Close",
+        "continue": "Continue"
+      },
+      "display": {
+        "avatars": "Avatars",
+        "breadcrumb": "Breadcrumb",
+        "home": "Home",
+        "library": "Library",
+        "data": "Data",
+        "table": "Table",
+        "name": "Name",
+        "status": "Status",
+        "pagination": "Pagination",
+        "page": "Page {page}",
+        "previous": "Previous",
+        "next": "Next",
+        "skeleton": "Skeleton"
+      },
+      "statusActive": "Active",
+      "statusPaused": "Paused"
     },
-    "today": "Today",
-    "jalali": "Jalali",
-    "gregorian": "Gregorian",
-    "length": "Length",
-    "days": "{count, plural, one {# day} other {# days}}",
-    "empty": "Nothing picked yet.",
-    "clear": "Clear"
+    "jalali": {
+      "title": "Jalali dates",
+      "description": "Conversion, date math, formatting and parsing (@repo/jalali) with the calendar and date pickers.",
+      "calendar": {
+        "title": "Calendar",
+        "description": "Pick a day. Jump with the month and year lists, or use the arrow keys."
+      },
+      "datePicker": {
+        "title": "Date picker",
+        "description": "One date in a popover.",
+        "label": "Date"
+      },
+      "rangePicker": {
+        "title": "Date range picker",
+        "description": "Pick the first day, then the last one.",
+        "label": "Range"
+      },
+      "today": "Today",
+      "jalali": "Jalali",
+      "gregorian": "Gregorian",
+      "length": "Length",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "empty": "Nothing picked yet.",
+      "clear": "Clear",
+      "converter": {
+        "title": "Converter",
+        "description": "gregorianToJalali / jalaliToGregorian, with validation and calendar facts.",
+        "gregorian": "Gregorian date",
+        "jalaliInput": "Jalali date (Persian or Latin digits)",
+        "invalid": "Not a valid date.",
+        "weekday": "Weekday",
+        "leap": "Leap year",
+        "monthLength": "Days in month",
+        "epochDay": "Epoch day",
+        "yes": "Yes",
+        "no": "No",
+        "range": "Supported years: {min} to {max}"
+      },
+      "math": {
+        "title": "Date math",
+        "description": "addJalaliDays, addJalaliMonths, compareJalali and epoch days, from the Jalali date above.",
+        "days": "Days to add",
+        "months": "Months to add",
+        "plusDays": "+ days",
+        "plusMonths": "+ months (day clamped)",
+        "order": "Order of the two dates",
+        "before": "The Jalali date is before the Gregorian one",
+        "same": "Both are the same day",
+        "after": "The Jalali date is after the Gregorian one",
+        "fromEpoch": "epochDayToJalali(epoch day + 1000)"
+      },
+      "format": {
+        "title": "Format and digits",
+        "description": "formatJalali patterns, toPersianDigits and toLatinDigits.",
+        "pattern": "Pattern",
+        "persian": "Persian",
+        "english": "English",
+        "digits": "Any text with digits",
+        "toPersian": "Persian digits",
+        "toLatin": "Latin digits"
+      },
+      "grid": {
+        "title": "Month grid",
+        "description": "jalaliMonthWeeks: the Saturday-first weeks JalaliCalendar renders."
+      }
+    },
+    "hooks": {
+      "title": "Hooks",
+      "description": "The generic React hooks of @repo/hooks, each in a small demo.",
+      "debounce": {
+        "title": "useDebouncedValue · useDebouncedCallback",
+        "description": "Type fast: the value and the callback follow 500 ms after the last key.",
+        "label": "Search",
+        "typed": "Typed",
+        "debounced": "Debounced value",
+        "calls": "Callback runs",
+        "placeholder": "Type something…"
+      },
+      "interval": {
+        "title": "useInterval · usePrevious",
+        "description": "A counter ticking every second (null delay pauses it) and its previous value.",
+        "count": "Count",
+        "previous": "Previous",
+        "pause": "Pause",
+        "resume": "Resume"
+      },
+      "storage": {
+        "title": "useLocalStorage",
+        "description": "A note saved in this browser, validated with zod and synced across tabs.",
+        "label": "Note",
+        "placeholder": "Write a note, then reload the page…",
+        "clear": "Clear",
+        "saved": "{count, plural, =0 {Nothing saved} one {# character saved} other {# characters saved}}"
+      },
+      "disclosure": {
+        "title": "useDisclosure",
+        "description": "open / close / toggle state, here driving a Collapsible.",
+        "toggle": "Show details",
+        "hide": "Hide details",
+        "content": "useDisclosure returns isOpen, open, close, toggle and setIsOpen."
+      },
+      "clipboard": {
+        "title": "useCopyToClipboard",
+        "description": "Copies a text and reports it for two seconds.",
+        "copy": "Copy the install command",
+        "copied": "Copied!"
+      },
+      "environment": {
+        "title": "useMediaQuery · useIsClient · useEventListener",
+        "description": "Browser facts: viewport, client rendering and the last key pressed on the page.",
+        "wide": "Wide screen (≥ 1024px)",
+        "client": "Rendered in the browser",
+        "lastKey": "Last key",
+        "pressAKey": "press a key",
+        "yes": "Yes",
+        "no": "No"
+      }
+    },
+    "access": {
+      "title": "Access",
+      "description": "Roles and permissions (@repo/access): the Can component, useAccess() and guarded routes.",
+      "hint": "Sign in as member / member123 (role “user”) to see the same page with fewer rights.",
+      "yours": {
+        "title": "Your access",
+        "description": "useAccess().can() for every role and permission of the app.",
+        "roles": "Roles",
+        "permissions": "Permissions",
+        "none": "None",
+        "loading": "Loading the session…"
+      },
+      "can": {
+        "title": "Can",
+        "description": "Show or hide UI by permission or role, with an optional fallback.",
+        "usersRead": "You can read users (permission users.read).",
+        "noUsersRead": "Hidden: you lack users.read.",
+        "admin": "Only admins see this (role admin).",
+        "noAdmin": "Hidden: you are not an admin.",
+        "staff": "Admins and moderators see this (any of two roles).",
+        "noStaff": "Hidden: you are neither admin nor moderator."
+      },
+      "policy": {
+        "title": "Policy",
+        "description": "ACCESS_POLICY grants, expanded with permissionsOf().",
+        "role": "Role",
+        "grants": "Grants",
+        "permissions": "Permissions"
+      },
+      "routes": {
+        "title": "Routes",
+        "description": "ruleForPath(ROUTE_ACCESS, path): the rule a page needs, and whether you may open it.",
+        "path": "Path",
+        "rule": "Rule",
+        "allowed": "You",
+        "sessionOnly": "a session",
+        "yes": "Allowed",
+        "no": "Denied"
+      }
+    },
+    "redis": {
+      "title": "Redis",
+      "description": "Cache-aside with remember() and rate limiting with rateLimit() (@repo/redis), on the server.",
+      "cache": {
+        "title": "remember()",
+        "description": "Cache-aside: the value is computed once and read from Redis for 20 seconds, by every server instance.",
+        "computedAt": "Computed at",
+        "value": "Value",
+        "reload": "Reload the page",
+        "connected": "Redis is connected: reload within 20 s and the value stays the same.",
+        "disconnected": "Redis is not reachable: remember() falls back to computing on every request."
+      },
+      "rateLimit": {
+        "title": "rateLimit()",
+        "description": "A Server Action allowed 3 times per 30 seconds per user (fixed window).",
+        "press": "Press me",
+        "allowed": "Allowed — {remaining} left in this window.",
+        "blocked": "Rate limited — try again in {seconds} s.",
+        "failOpen": "Redis is not reachable: rateLimit() fails open and always allows."
+      }
+    }
   },
   "Settings": {
     "title": "Settings",

@@ -5,8 +5,8 @@ import { signIn } from "./fixtures";
 // "Today" in the browser is 2024-03-20 = Wednesday 1 Farvardin 1403.
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date("2024-03-20T08:00:00Z"));
-  await signIn(page, "/en/calendar");
-  await expect(page.getByRole("heading", { name: "Calendar", level: 1 })).toBeVisible();
+  await signIn(page, "/en/examples/jalali");
+  await expect(page.getByRole("heading", { name: "Jalali dates", level: 1 })).toBeVisible();
 });
 
 test("the calendar selects a day by click and with the keyboard", async ({ page }) => {
@@ -64,7 +64,7 @@ test("the range picker reports the range only after the second day", async ({ pa
 test("Persian: Persian digits, and the left arrow moves to the next day (RTL)", async ({
   page,
 }) => {
-  await page.goto("/fa/calendar");
+  await page.goto("/fa/examples/jalali");
   const today = page
     .getByRole("grid", { name: "فروردین ۱۴۰۳" })
     .getByRole("button", { name: "چهارشنبه ۱ فروردین ۱۴۰۳" });

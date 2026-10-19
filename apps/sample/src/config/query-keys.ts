@@ -1,5 +1,6 @@
 import type { QueryKey } from "@tanstack/react-query";
 
+import type { TasksListParams } from "@/features/tasks/schemas/task.schema";
 import type { UsersListParams } from "@/features/users/schemas/user.schema";
 
 /**
@@ -13,6 +14,7 @@ import type { UsersListParams } from "@/features/users/schemas/user.schema";
 const authRoot = ["auth"] as const;
 const usersRoot = ["users"] as const;
 const dashboardRoot = ["dashboard"] as const;
+const tasksRoot = ["tasks"] as const;
 
 export const QUERY_KEYS = {
   auth: {
@@ -30,6 +32,11 @@ export const QUERY_KEYS = {
     all: dashboardRoot,
     stats: () => [...dashboardRoot, "stats"] as const,
   },
+  tasks: {
+    all: tasksRoot,
+    lists: () => [...tasksRoot, "list"] as const,
+    list: (params: TasksListParams) => [...tasksRoot, "list", params] as const,
+  },
 } as const;
 
 /** Mutation keys (devtools, `useIsMutating`). Same registry rule as query keys. */
@@ -42,5 +49,10 @@ export const MUTATION_KEYS = {
     create: ["users", "create"],
     update: ["users", "update"],
     remove: ["users", "remove"],
+  },
+  tasks: {
+    create: ["tasks", "create"],
+    update: ["tasks", "update"],
+    remove: ["tasks", "remove"],
   },
 } as const satisfies Record<string, Record<string, QueryKey>>;

@@ -5,7 +5,9 @@ description: Scaffold a complete feature in apps/sample (zod schemas, service, m
 
 # Add a feature
 
-Reference implementation: `apps/sample/src/features/users`. Mirror its structure and naming.
+Reference implementations: `apps/sample/src/features/users` (read-only table) and
+`features/tasks` (CRUD: form in `modal.open`, delete with `modal.confirm` + `onAction`). Mirror
+their structure and naming.
 Before starting, restate the feature in 2–3 lines and list the files you will create. If the
 request conflicts with AGENTS.md (e.g. "fetch directly in the component"), say so first.
 

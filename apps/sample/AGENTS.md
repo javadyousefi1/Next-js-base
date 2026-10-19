@@ -1,8 +1,9 @@
 # apps/sample — AGENTS.md
 
-The reference Next.js 16 app. Repository rules: [`../../AGENTS.md`](../../AGENTS.md). Details and
-code live where they are needed: path rules in `.claude/rules/` (load with the files they cover)
-and skills in `.claude/skills/` (`add-feature`, `add-page`, `add-query`, `add-mutation`,
+The sample app: a Next.js 16 admin panel that uses every package and feature of this base, so
+humans and AI copy working code (root `AGENTS.md` §6). Repository rules:
+[`../../AGENTS.md`](../../AGENTS.md). Path rules in `.claude/rules/` load with the files they
+cover; skills in `.claude/skills/` (`add-feature`, `add-page`, `add-query`, `add-mutation`,
 `add-table`, `add-access`, `add-translation`, `add-env-var`, `write-e2e-test`). Next.js docs for
 **this exact version**: `node_modules/next/dist/docs/` (App Router in `01-app/`).
 
@@ -11,7 +12,7 @@ and skills in `.claude/skills/` (`add-feature`, `add-page`, `add-query`, `add-mu
 ```
 app/                    Routing only — thin pages/layouts, BFF route handlers, metadata routes
   [locale]/             Root layout (html, fonts, providers), not-found, error boundary
-    (app)/              Authenticated shell (sidebar): `/`, `/users`, `/calendar`, `/settings`
+    (app)/              Authenticated shell (sidebar): `/`, `/users`, `/settings`, `/examples/*`
     (auth)/login/       Public login page
     offline/            PWA offline fallback (public, precached by public/sw.js)
   api/auth/*            BFF: login · logout (the only place auth cookies are written)
@@ -32,9 +33,10 @@ proxy.ts                Next 16 proxy (formerly middleware): i18n routing + opti
 ```
 
 App-agnostic building blocks come from workspace packages: `@repo/http`, `@repo/query`,
-`@repo/table`, `@repo/access`, `@repo/hooks`, `@repo/redis`, `@repo/ui` (root `AGENTS.md` §3).
+`@repo/table`, `@repo/access`, `@repo/hooks`, `@repo/jalali`, `@repo/redis`, `@repo/ui` (root
+`AGENTS.md` §3).
 
-## Feature anatomy — copy `features/users`
+## Feature anatomy — copy `features/users` (read) or `features/tasks` (CRUD)
 
 ```
 schemas/<f>.schema.ts     domain types + params schema (the app's own shapes)
@@ -74,7 +76,7 @@ when no app knowledge is involved.
 fallback={…}>`: it runs the same fetchers on the server with the user's token and hydrates
   the cache; no session → the client fetches.
 
-## Tables · access · breadcrumbs
+## Tables · access · examples · modals · dates · breadcrumbs
 
 - **Tables** — URL state (nuqs) + `useTableState` + `<DataTableProvider>` with prop-less
   toolbar/table/pagination; filters come from a config (`select` · `multiSelect` · `text`) and
@@ -83,6 +85,13 @@ fallback={…}>`: it runs the same fetchers on the server with the user's token 
   `<Can permission|role>`, `useAccess().can()`, `hasAccess()` in Server Actions; a guarded page
   shows "No access" and its nav link hides. Only `auth.backend.ts` maps the backend's roles. It
   hides UI — the backend still authorizes. Skill: `add-access`.
+- **Examples** — `src/config/examples.ts` lists the example pages (`/examples/<key>`, sidebar
+  group "Examples"); demos live in `features/examples/`, the CRUD demo in `features/tasks/`. New
+  package/export/feature → add its example (`bun run check` enforces it).
+- **Modals** — no `open` state: `await modal.confirm(content, { variant, title, actionButton,
+onAction })` → `"yes" | "no"`, also `alert`, `prompt`, `open(<Form />)` (+ `useModalClose()`)
+  from `@repo/ui/lib/modal`; `<AppModalHost />` is mounted in the providers. See
+  `features/examples` (modal) and `features/tasks` (form in a modal, delete with `onAction`).
 - **Dates** — Jalali calendar/pickers from `@repo/ui` (`jalali-calendar`, `jalali-date-picker`,
   `jalali-date-range-picker`) with `{...useJalaliPickerProps()}` (locale + translated labels);
   values are `{ year, month, day }`, converted and formatted with `@repo/jalali`.

@@ -11,5 +11,9 @@ export const API_ENDPOINTS = {
   users: {
     list: "/users",
   },
+  tasks: {
+    list: "/tasks",
+    detail: (id: number) => `/tasks/${id}`,
+  },
   stats: "/stats",
 } as const;

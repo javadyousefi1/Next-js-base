@@ -15,13 +15,14 @@ import { JalaliDateRangePicker } from "@repo/ui/components/jalali-date-range-pic
 import { Label } from "@repo/ui/components/label";
 import { useTranslations } from "next-intl";
 
-import { useCalendarShowcase } from "../hooks/use-calendar-showcase";
+import { useJalaliPickersExample } from "../hooks/use-jalali-pickers-example";
 import { PickedDate } from "./picked-date";
 
-export function CalendarShowcase() {
-  const t = useTranslations("Calendar");
+/** Calendar, date picker and range picker (`@repo/ui`) on `@repo/jalali` dates. */
+export function JalaliPickersExample() {
+  const t = useTranslations("Examples.jalali");
   const tPicker = useTranslations("DatePicker");
-  const { pickerProps, ...showcase } = useCalendarShowcase();
+  const { pickerProps, ...showcase } = useJalaliPickersExample();
 
   return (
     <div className="grid items-start gap-4 lg:grid-cols-2">

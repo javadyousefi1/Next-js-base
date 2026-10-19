@@ -9,18 +9,14 @@ Everything above (AGENTS.md) applies. This part is specific to Claude Code.
 - **Plan non-trivial work** (new feature, new pattern, cross-package change) before editing; list
   the files you will touch.
 - **Use the skills** below instead of improvising — they encode the exact steps and file layout.
-- **Docs only where they are read.** `docs/REPORT.fa.md` (the Persian report) is updated only when
-  the user asks — git log is the changelog. Keep `AGENTS.md` files short indexes; code examples
-  belong in skills (loaded on demand) and path rules.
-- Check/test/build commands are filtered by a hook (below); run them plainly. Filter other noisy
-  output yourself (`grep`, `tail`).
+- **Docs only where they are read.** `docs/REPORT.fa.md` changes only when the user asks. Keep
+  `AGENTS.md` files short indexes; working code lives in `apps/sample` (AGENTS.md §6).
+- Check/test/build output is filtered by a hook (below); filter other noisy output yourself.
 
 ## Model routing (token budget)
 
-Opus decides, Haiku reads, Sonnet types. Run the main session on Opus for design and multi-step
-work, on Sonnet (`/model sonnet`) for routine tasks a skill already covers (a page, a translation,
-a simple fix) — the main model can't be set from this file. Subagents have their model fixed in
-their frontmatter:
+Opus decides, Haiku reads, Sonnet types: main session on Opus for design, on Sonnet (`/model
+sonnet`) for routine tasks a skill covers. Subagents have their model fixed in their frontmatter:
 
 | Step         | Who                    | Does                                                                                                        |
 | ------------ | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
@@ -43,8 +39,7 @@ their frontmatter:
   turn: ending a turn with half-done work fires the environment's "commit and push" stop hook and
   wastes a turn. Background only for truly independent work.
 - One task (or a group of related tasks) per session; after it is pushed, start fresh (`/clear`).
-- Don't read many files in the main session; ask `explorer`. Read yourself only the few lines a
-  decision depends on (Haiku summaries can miss details).
+- Don't read many files in the main session; ask `explorer` (read only the lines a decision needs).
 - Heavy change or a different flow (§0.7) → tell the user in step 3, before `implementer` starts.
 
 ## Skills and subagents
@@ -62,14 +57,11 @@ suggest `/spec` first.
   (`bun run` check, test, test:e2e, build, typecheck, lint, and `bun test`) through
   `quiet-run.sh`: only problem lines (with log line numbers), the summary and the exit code come
   back, plus the full log's path — read ranges of it (`sed -n 'A,Bp'`) when you need more.
-- Plugin `typescript-7-lsp` (repo marketplace `.claude/marketplace`): the project's TypeScript 7
-  (`tsc --lsp`) gives diagnostics after edits and go-to-definition in local terminal sessions
-  (cloud sessions don't start language servers). If Claude Code reports it isn't installed:
-  `claude plugin install typescript-7-lsp@next-js-base --scope project`.
-- **Find code via the code map first.** At session start `scripts/claude/codemap.ts` (oxc-parser,
-  ~0.1 s) writes `.claude/codemap.md`: `name · kind · path:line · doc` for every export. Grep it
-  (path `.claude/codemap.md`) by name or by concept before searching the code; `bun run codemap`
-  refreshes it. `.ignore` keeps `bun.lock` and the Persian report out of searches.
+- Plugin `typescript-7-lsp` (`.claude/marketplace`): TS 7 diagnostics + go-to-definition in local
+  sessions. Not installed? `claude plugin install typescript-7-lsp@next-js-base --scope project`.
+- **Find code via the code map first**: `.claude/codemap.md` (`name · kind · path:line · doc` per
+  export, written at session start; `bun run codemap` refreshes it). For "how is X used", open the
+  example page of X in `apps/sample` (`src/config/examples.ts`).
 - Path-scoped rules in `.claude/rules/` load automatically when you work on matching files.
 - Secrets (`.env`, `.env.local`, …) are not readable; ask the user for values instead.
 

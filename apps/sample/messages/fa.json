@@ -19,11 +19,16 @@
       "network": "خطای شبکه. اتصال خود را بررسی و دوباره تلاش کنید."
     }
   },
+  "Modal": {
+    "confirm": "تأیید",
+    "cancel": "انصراف",
+    "ok": "باشه",
+    "close": "بستن"
+  },
   "Nav": {
     "main": "منوی اصلی",
     "dashboard": "داشبورد",
     "users": "کاربران",
-    "calendar": "تقویم",
     "settings": "تنظیمات",
     "toggleSidebar": "باز و بسته کردن منو",
     "breadcrumb": "مسیر صفحه",
@@ -31,7 +36,15 @@
     "logout": "خروج",
     "skipToContent": "رفتن به محتوا",
     "language": "زبان",
-    "theme": "پوسته"
+    "theme": "پوسته",
+    "examples": "نمونه‌ها",
+    "data": "داده (CRUD)",
+    "modal": "مدال‌ها",
+    "ui": "کامپوننت‌ها",
+    "jalali": "تاریخ شمسی",
+    "hooks": "هوک‌ها",
+    "access": "دسترسی",
+    "redis": "Redis"
   },
   "Auth": {
     "title": "ورود",
@@ -101,30 +114,416 @@
       "company": "شرکت"
     }
   },
-  "Calendar": {
-    "title": "تقویم",
-    "description": "تقویم شمسی، انتخاب تاریخ و انتخاب بازه‌ی تاریخ.",
-    "calendar": {
-      "title": "تقویم",
-      "description": "یک روز را انتخاب کنید. با فهرست ماه و سال جابه‌جا شوید یا از کلیدهای جهت‌نما استفاده کنید."
+  "Examples": {
+    "title": "نمونه‌ها",
+    "description": "هر پکیج و قابلیت این بیس در یک نمونه‌ی واقعی؛ کدش را از apps/sample بردارید.",
+    "packages": "پکیج‌ها",
+    "open": "باز کردن",
+    "result": "نتیجه",
+    "nothingYet": "هنوز چیزی نیست.",
+    "data": {
+      "title": "داده (CRUD)",
+      "description": "فهرست کارها: جدول سمت سرور، فرم ساخت و ویرایش در مدال، حذف با تأیید، mutation و invalidation.",
+      "searchPlaceholder": "جست‌وجوی کارها…",
+      "statusFilter": "وضعیت",
+      "status": {
+        "todo": "انجام‌نشده",
+        "doing": "در حال انجام",
+        "done": "انجام‌شده"
+      },
+      "columns": {
+        "done": "انجام",
+        "title": "عنوان",
+        "status": "وضعیت",
+        "dueDate": "سررسید",
+        "createdAt": "ایجاد",
+        "actions": "عملیات"
+      },
+      "newTask": "کار تازه",
+      "refresh": "به‌روزرسانی",
+      "toggleDone": "«{title}» انجام شد",
+      "edit": "ویرایش «{title}»",
+      "form": {
+        "createTitle": "کار تازه",
+        "editTitle": "ویرایش کار",
+        "title": "عنوان",
+        "status": "وضعیت",
+        "dueDate": "سررسید",
+        "clearDate": "بدون تاریخ",
+        "create": "ایجاد",
+        "save": "ذخیره",
+        "error": "ذخیره نشد: {message}"
+      },
+      "validation": {
+        "titleMin": "دست‌کم {min, number} حرف بنویسید.",
+        "titleMax": "حداکثر {max, number} حرف بنویسید."
+      },
+      "delete": {
+        "label": "حذف «{title}»",
+        "title": "حذف کار",
+        "text": "<b>{title}</b> حذف شود؟ این کار برگشت‌پذیر نیست.",
+        "action": "حذف",
+        "inProgress": "کار در حال انجام را نمی‌شود حذف کرد. اول آن را تمام کنید یا به «انجام‌نشده» برگردانید."
+      },
+      "toast": {
+        "created": "«{title}» ساخته شد.",
+        "updated": "«{title}» ذخیره شد.",
+        "deleted": "«{title}» حذف شد."
+      }
     },
-    "datePicker": {
-      "title": "انتخاب تاریخ",
-      "description": "یک تاریخ در پنجره‌ی بازشو.",
-      "label": "تاریخ"
+    "modal": {
+      "title": "مدال‌ها",
+      "description": "modal.confirm، alert، prompt و open؛ از هر جا با await و بدون state در صفحه.",
+      "confirmCard": {
+        "title": "تأیید",
+        "description": "await modal.confirm(content, options) با \"yes\" یا \"no\" تمام می‌شود."
+      },
+      "variants": {
+        "default": "پیش‌فرض",
+        "info": "اطلاع",
+        "success": "موفق",
+        "warning": "هشدار",
+        "destructive": "خطرناک"
+      },
+      "confirmTitle": "سؤال {variant}",
+      "confirmText": "ادامه می‌دهید؟",
+      "delete": {
+        "button": "حذف یک گروه",
+        "title": "حذف گروه معاملاتی",
+        "text": "گروه معاملاتی <b>{name}</b> حذف شود؟",
+        "action": "حذف"
+      },
+      "asyncCard": {
+        "title": "عملیات ناهمگام",
+        "description": "onAction درخواست را اجرا می‌کند: دکمه‌ها منتظر می‌مانند و با خطا مدال باز می‌ماند."
+      },
+      "trial": {
+        "button": "فعال‌سازی نسخه‌ی آزمایشی",
+        "failButton": "فعال‌سازی (یک بار خطا)",
+        "title": "فعال‌سازی نسخه‌ی آزمایشی",
+        "text": "مطمئنید که می‌خواهید نسخه‌ی آزمایشی را فعال کنید؟<br></br>با این کار همه‌ی امکانات پلن Scale رایگان در اختیار شما قرار می‌گیرد.",
+        "action": "فعال‌سازی",
+        "failed": "سرویس پرداخت پاسخ نداد. دوباره تلاش کنید."
+      },
+      "otherCard": {
+        "title": "پیام و پرسش",
+        "description": "modal.alert(content) و modal.prompt(content, options) با validate → متن یا null."
+      },
+      "alert": {
+        "button": "نمایش پیام",
+        "title": "ذخیره شد",
+        "text": "تغییرات شما ذخیره شد."
+      },
+      "prompt": {
+        "button": "تغییر نام",
+        "title": "تغییر نام گروه",
+        "text": "یک نام تازه برای گروه انتخاب کنید.",
+        "label": "نام",
+        "action": "تغییر نام",
+        "tooShort": "دست‌کم ۳ حرف بنویسید."
+      },
+      "customCard": {
+        "title": "محتوای دلخواه",
+        "description": "modal.open(form) با مقداری که فرم به close(value) می‌دهد تمام می‌شود. مدال‌ها روی هم باز می‌شوند."
+      },
+      "open": {
+        "button": "انتخاب پلن",
+        "title": "انتخاب پلن",
+        "description": "هر محتوایی: این فرم مدال را با پلن انتخاب‌شده می‌بندد.",
+        "help": "راهنما",
+        "helpTitle": "پلن‌ها",
+        "helpText": "Free برای امتحان، Pro برای یک تیم و Team برای چند تیم است.",
+        "choose": "انتخاب"
+      },
+      "plans": {
+        "free": "Free",
+        "pro": "Pro",
+        "team": "Team"
+      },
+      "answered": "پاسخ: {answer}",
+      "deleted": "حذف شد.",
+      "closed": "پیام بسته شد.",
+      "renamed": "نام به «{name}» تغییر کرد.",
+      "picked": "پلن انتخاب‌شده: {plan}.",
+      "cancelled": "لغو شد."
     },
-    "rangePicker": {
-      "title": "انتخاب بازه",
-      "description": "اول روز شروع و بعد روز پایان را انتخاب کنید.",
-      "label": "بازه"
+    "ui": {
+      "title": "کامپوننت‌ها",
+      "description": "همه‌ی کامپوننت‌های دیزاین‌سیستم (@repo/ui) در یک جا.",
+      "tabs": {
+        "actions": "عملیات",
+        "forms": "فرم‌ها",
+        "feedback": "بازخورد",
+        "overlays": "لایه‌ها",
+        "display": "نمایش"
+      },
+      "buttons": "دکمه‌ها",
+      "badges": "نشان‌ها",
+      "toggles": "سوئیچ‌ها",
+      "menu": "منو",
+      "loading": "در حال بارگذاری",
+      "bold": "پررنگ",
+      "italic": "کج",
+      "underline": "زیرخط",
+      "shortcut": "جست‌وجو با",
+      "menuItems": {
+        "profile": "پروفایل",
+        "settings": "تنظیمات",
+        "logout": "خروج",
+        "notifications": "اعلان ایمیلی"
+      },
+      "form": {
+        "email": "ایمیل",
+        "emailHint": "هرگز آن را به کسی نمی‌دهیم.",
+        "website": "وب‌سایت",
+        "bio": "درباره‌ی من",
+        "plan": "پلن",
+        "terms": "قوانین را می‌پذیرم",
+        "notifications": "اعلان‌ها",
+        "notificationsOn": "روشن",
+        "notificationsOff": "خاموش",
+        "invalid": "این فیلد خطا دارد."
+      },
+      "plans": {
+        "free": "Free",
+        "pro": "Pro",
+        "team": "Team"
+      },
+      "alerts": {
+        "infoTitle": "توجه",
+        "info": "Alert پیام کوتاهی داخل صفحه نشان می‌دهد.",
+        "errorTitle": "خطا رخ داد",
+        "error": "Alert از نوع destructive برای خطاها."
+      },
+      "toasts": {
+        "title": "اعلان‌ها (sonner)",
+        "success": "اعلان موفق",
+        "error": "اعلان خطا",
+        "info": "اعلان اطلاع",
+        "successText": "با موفقیت ذخیره شد.",
+        "errorText": "ذخیره نشد.",
+        "infoText": "نسخه‌ی تازه آماده است."
+      },
+      "empty": {
+        "title": "هنوز پروژه‌ای نیست",
+        "description": "Empty حالت خالی یک فهرست را دوستانه نشان می‌دهد.",
+        "action": "ساخت پروژه"
+      },
+      "overlays": {
+        "dialog": "Dialog",
+        "dialogTitle": "Dialog اعلانی",
+        "dialogText": "روش کلاسیک: trigger و محتوا در خود صفحه. برای پرسش، modal.confirm بهتر است.",
+        "alertDialog": "Alert dialog",
+        "alertTitle": "مطمئنید؟",
+        "alertText": "AlertDialog پاسخ صریح می‌خواهد: کلیک بیرون آن را نمی‌بندد.",
+        "sheet": "Sheet",
+        "sheetTitle": "یک کشوی کناری",
+        "sheetText": "Sheet از کنار صفحه باز می‌شود (کشوی فیلترها هم همین است).",
+        "popover": "Popover",
+        "popoverTitle": "Popover",
+        "popoverText": "محتوای شناور که به trigger خودش چسبیده.",
+        "tooltip": "نشانگر را بیاورید",
+        "tooltipText": "یک راهنمای کوتاه",
+        "close": "بستن",
+        "continue": "ادامه"
+      },
+      "display": {
+        "avatars": "آواتارها",
+        "breadcrumb": "مسیر صفحه",
+        "home": "خانه",
+        "library": "کتابخانه",
+        "data": "داده",
+        "table": "جدول",
+        "name": "نام",
+        "status": "وضعیت",
+        "pagination": "صفحه‌بندی",
+        "page": "صفحه‌ی {page, number}",
+        "previous": "قبلی",
+        "next": "بعدی",
+        "skeleton": "Skeleton"
+      },
+      "statusActive": "فعال",
+      "statusPaused": "متوقف"
     },
-    "today": "امروز",
-    "jalali": "شمسی",
-    "gregorian": "میلادی",
-    "length": "طول بازه",
-    "days": "{count, number} روز",
-    "empty": "هنوز چیزی انتخاب نشده.",
-    "clear": "پاک کردن"
+    "jalali": {
+      "title": "تاریخ شمسی",
+      "description": "تبدیل، محاسبه، قالب‌بندی و خواندن تاریخ (@repo/jalali) همراه تقویم و انتخاب تاریخ.",
+      "calendar": {
+        "title": "تقویم",
+        "description": "یک روز را انتخاب کنید. با فهرست ماه و سال جابه‌جا شوید یا از کلیدهای جهت‌نما استفاده کنید."
+      },
+      "datePicker": {
+        "title": "انتخاب تاریخ",
+        "description": "یک تاریخ در پنجره‌ی بازشو.",
+        "label": "تاریخ"
+      },
+      "rangePicker": {
+        "title": "انتخاب بازه",
+        "description": "اول روز شروع و بعد روز پایان را انتخاب کنید.",
+        "label": "بازه"
+      },
+      "today": "امروز",
+      "jalali": "شمسی",
+      "gregorian": "میلادی",
+      "length": "طول بازه",
+      "days": "{count, number} روز",
+      "empty": "هنوز چیزی انتخاب نشده.",
+      "clear": "پاک کردن",
+      "converter": {
+        "title": "مبدل",
+        "description": "gregorianToJalali و jalaliToGregorian، با اعتبارسنجی و اطلاعات تقویم.",
+        "gregorian": "تاریخ میلادی",
+        "jalaliInput": "تاریخ شمسی (رقم فارسی یا لاتین)",
+        "invalid": "تاریخ معتبر نیست.",
+        "weekday": "روز هفته",
+        "leap": "سال کبیسه",
+        "monthLength": "روزهای ماه",
+        "epochDay": "روز epoch",
+        "yes": "بله",
+        "no": "خیر",
+        "range": "سال‌های پشتیبانی‌شده: {min} تا {max}"
+      },
+      "math": {
+        "title": "محاسبه‌ی تاریخ",
+        "description": "addJalaliDays، addJalaliMonths، compareJalali و روز epoch، از تاریخ شمسی بالا.",
+        "days": "تعداد روز",
+        "months": "تعداد ماه",
+        "plusDays": "+ روز",
+        "plusMonths": "+ ماه (روز محدود به طول ماه)",
+        "order": "ترتیب دو تاریخ",
+        "before": "تاریخ شمسی قبل از تاریخ میلادی است",
+        "same": "هر دو یک روزند",
+        "after": "تاریخ شمسی بعد از تاریخ میلادی است",
+        "fromEpoch": "epochDayToJalali(روز epoch + ۱۰۰۰)"
+      },
+      "format": {
+        "title": "قالب و رقم",
+        "description": "الگوهای formatJalali، toPersianDigits و toLatinDigits.",
+        "pattern": "الگو",
+        "persian": "فارسی",
+        "english": "انگلیسی",
+        "digits": "یک متن با عدد",
+        "toPersian": "رقم فارسی",
+        "toLatin": "رقم لاتین"
+      },
+      "grid": {
+        "title": "جدول ماه",
+        "description": "jalaliMonthWeeks: هفته‌های شنبه‌شروعی که JalaliCalendar نمایش می‌دهد."
+      }
+    },
+    "hooks": {
+      "title": "هوک‌ها",
+      "description": "هوک‌های عمومی @repo/hooks، هر کدام در یک نمونه‌ی کوچک.",
+      "debounce": {
+        "title": "useDebouncedValue · useDebouncedCallback",
+        "description": "سریع تایپ کنید: مقدار و callback ۵۰۰ میلی‌ثانیه بعد از آخرین کلید به‌روز می‌شوند.",
+        "label": "جست‌وجو",
+        "typed": "تایپ‌شده",
+        "debounced": "مقدار debounce شده",
+        "calls": "اجرای callback",
+        "placeholder": "چیزی بنویسید…"
+      },
+      "interval": {
+        "title": "useInterval · usePrevious",
+        "description": "شمارنده‌ای که هر ثانیه زیاد می‌شود (تأخیر null متوقفش می‌کند) و مقدار قبلی آن.",
+        "count": "شمارش",
+        "previous": "قبلی",
+        "pause": "توقف",
+        "resume": "ادامه"
+      },
+      "storage": {
+        "title": "useLocalStorage",
+        "description": "یادداشتی که در همین مرورگر ذخیره می‌شود، با zod اعتبارسنجی و بین تب‌ها هماهنگ می‌شود.",
+        "label": "یادداشت",
+        "placeholder": "یادداشتی بنویسید و صفحه را دوباره باز کنید…",
+        "clear": "پاک کردن",
+        "saved": "{count, plural, =0 {چیزی ذخیره نشده} other {# نویسه ذخیره شد}}"
+      },
+      "disclosure": {
+        "title": "useDisclosure",
+        "description": "وضعیت باز و بسته (open / close / toggle)، اینجا برای یک Collapsible.",
+        "toggle": "نمایش جزئیات",
+        "hide": "پنهان کردن جزئیات",
+        "content": "useDisclosure مقدارهای isOpen، open، close، toggle و setIsOpen را برمی‌گرداند."
+      },
+      "clipboard": {
+        "title": "useCopyToClipboard",
+        "description": "متنی را کپی می‌کند و تا دو ثانیه نتیجه را نشان می‌دهد.",
+        "copy": "کپی دستور نصب",
+        "copied": "کپی شد!"
+      },
+      "environment": {
+        "title": "useMediaQuery · useIsClient · useEventListener",
+        "description": "اطلاعات مرورگر: اندازه‌ی صفحه، رندر سمت کاربر و آخرین کلیدی که فشار داده شد.",
+        "wide": "صفحه‌ی عریض (≥ ۱۰۲۴px)",
+        "client": "رندر در مرورگر",
+        "lastKey": "آخرین کلید",
+        "pressAKey": "یک کلید بزنید",
+        "yes": "بله",
+        "no": "خیر"
+      }
+    },
+    "access": {
+      "title": "دسترسی",
+      "description": "نقش‌ها و مجوزها (@repo/access): کامپوننت Can، useAccess() و مسیرهای محافظت‌شده.",
+      "hint": "با member / member123 (نقش «user») وارد شوید تا همین صفحه را با دسترسی کمتر ببینید.",
+      "yours": {
+        "title": "دسترسی شما",
+        "description": "useAccess().can() برای همه‌ی نقش‌ها و مجوزهای اپ.",
+        "roles": "نقش‌ها",
+        "permissions": "مجوزها",
+        "none": "هیچ",
+        "loading": "در حال بارگذاری نشست…"
+      },
+      "can": {
+        "title": "Can",
+        "description": "نمایش یا پنهان کردن بخشی از صفحه بر اساس مجوز یا نقش، با fallback اختیاری.",
+        "usersRead": "شما کاربران را می‌بینید (مجوز users.read).",
+        "noUsersRead": "پنهان: مجوز users.read ندارید.",
+        "admin": "فقط مدیرها این را می‌بینند (نقش admin).",
+        "noAdmin": "پنهان: شما مدیر نیستید.",
+        "staff": "مدیرها و ناظرها این را می‌بینند (یکی از دو نقش).",
+        "noStaff": "پنهان: نه مدیر هستید نه ناظر."
+      },
+      "policy": {
+        "title": "سیاست دسترسی",
+        "description": "مجوزهای ACCESS_POLICY که با permissionsOf() باز می‌شوند.",
+        "role": "نقش",
+        "grants": "اعطا",
+        "permissions": "مجوزها"
+      },
+      "routes": {
+        "title": "مسیرها",
+        "description": "ruleForPath(ROUTE_ACCESS, path): قاعده‌ای که صفحه لازم دارد و اینکه شما می‌توانید بازش کنید یا نه.",
+        "path": "مسیر",
+        "rule": "قاعده",
+        "allowed": "شما",
+        "sessionOnly": "فقط نشست",
+        "yes": "مجاز",
+        "no": "غیرمجاز"
+      }
+    },
+    "redis": {
+      "title": "Redis",
+      "description": "کش با remember() و محدودیت نرخ با rateLimit() (@repo/redis)، سمت سرور.",
+      "cache": {
+        "title": "remember()",
+        "description": "کش کنار: مقدار یک بار محاسبه و تا ۲۰ ثانیه برای همه‌ی سرورها از Redis خوانده می‌شود.",
+        "computedAt": "زمان محاسبه",
+        "value": "مقدار",
+        "reload": "بارگذاری دوباره‌ی صفحه",
+        "connected": "Redis وصل است: اگر تا ۲۰ ثانیه صفحه را دوباره باز کنید مقدار عوض نمی‌شود.",
+        "disconnected": "Redis در دسترس نیست: remember() در هر درخواست دوباره محاسبه می‌کند."
+      },
+      "rateLimit": {
+        "title": "rateLimit()",
+        "description": "یک Server Action که هر کاربر در هر ۳۰ ثانیه ۳ بار می‌تواند اجرا کند (پنجره‌ی ثابت).",
+        "press": "بزن",
+        "allowed": "مجاز — {remaining, number} بار دیگر در این پنجره.",
+        "blocked": "محدود شد — {seconds, number} ثانیه‌ی دیگر دوباره امتحان کنید.",
+        "failOpen": "Redis در دسترس نیست: rateLimit() همیشه اجازه می‌دهد (fail open)."
+      }
+    }
   },
   "Settings": {
     "title": "تنظیمات",

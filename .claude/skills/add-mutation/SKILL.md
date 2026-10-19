@@ -31,7 +31,10 @@ toBackend<X>Body(variables))` (also `put`/`patch`/`delete`; resolves to the raw 
 5. **Form hook** (`hooks/use-<x>-form.ts`): `useForm({ resolver: zodResolver(schema) })`,
    `mutation = create<X>Mutation.useMutation({ onSuccess })`, return `register`, `errors`
    (translated), `onSubmit: (e) => void submit(e)`, `isSubmitting`, `formError`. Copy
-   `features/auth/hooks/use-login-form.ts` (`"use no memo"` for react-hook-form).
+   `features/tasks/hooks/use-task-form.ts` (a form inside `modal.open`, closes with the saved
+   item; `useWatch`, not `watch`) or `features/auth/hooks/use-login-form.ts` (`"use no memo"`).
+   Deletes: `modal.confirm(…, { onAction: () => mutation.mutateAsync(…) })` — the modal waits and
+   shows the error (`features/tasks/hooks/use-task-actions.tsx`).
 6. **Server-side cache** — if the change affects `'use cache'` data, also call `updateTag(tag)` in
    a Server Action (`*.actions.ts`).
 7. **Mock** — MSW handler that mutates `db` in `src/mocks/db.ts`.

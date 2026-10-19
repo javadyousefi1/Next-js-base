@@ -76,6 +76,8 @@ export default defineConfig({
     // `axios.create()` is axios' documented API; Base UI relies on ARIA roles.
     "import/no-named-as-default-member": "off",
     "jsx-a11y/prefer-tag-over-role": "off",
+    // Only DOM elements have ARIA roles; `<Can role="admin">` (@repo/access) is a prop.
+    "jsx-a11y/aria-role": ["error", { ignoreNonDOM: true }],
     "oxc/no-map-spread": "off",
     "promise/no-promise-in-callback": "off",
 

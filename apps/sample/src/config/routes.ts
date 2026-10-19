@@ -9,8 +9,16 @@ export const ROUTES = {
   dashboard: "/",
   login: "/login",
   users: "/users",
-  calendar: "/calendar",
   settings: "/settings",
+  /** The sample app's showcase: one page per package/feature (`src/config/examples.ts`). */
+  examples: "/examples",
+  examplesData: "/examples/data",
+  examplesModal: "/examples/modal",
+  examplesUi: "/examples/ui",
+  examplesJalali: "/examples/jalali",
+  examplesHooks: "/examples/hooks",
+  examplesAccess: "/examples/access",
+  examplesRedis: "/examples/redis",
   /** Fallback page precached by the service worker. */
   offline: "/offline",
 } as const;

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
+import type { Example } from "@/config/examples";
 import { ROUTES, type AppRoute } from "@/config/routes";
 import { SITE } from "@/config/site";
 import { env } from "@/env";
@@ -58,7 +59,14 @@ export async function rootMetadata(locale: AppLocale): Promise<Metadata> {
   };
 }
 
-type PageNamespace = "Dashboard" | "Users" | "Calendar" | "Settings" | "Auth" | "Offline";
+type PageNamespace =
+  | "Dashboard"
+  | "Users"
+  | "Settings"
+  | "Auth"
+  | "Offline"
+  | "Examples"
+  | `Examples.${Example["key"]}`;
 
 /** Per-page title/description/canonical/hreflang from the page's i18n namespace. */
 export async function pageMetadata(

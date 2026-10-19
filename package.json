@@ -10,8 +10,10 @@
   "type": "module",
   "scripts": {
     "build": "turbo run build",
-    "check": "turbo run lint format:check typecheck test",
+    "check": "turbo run lint format:check typecheck test check:examples",
+    "check:examples": "bun scripts/check-examples.ts",
     "clean": "bash scripts/clean.sh",
+    "codemap": "bun scripts/claude/codemap.ts",
     "dev": "turbo run dev",
     "docker:build": "docker compose build",
     "docker:down": "docker compose down",
@@ -29,8 +31,7 @@
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
     "test:e2e:install": "cd apps/sample && bunx playwright install --with-deps chromium",
-    "typecheck": "turbo run typecheck",
-    "codemap": "bun scripts/claude/codemap.ts"
+    "typecheck": "turbo run typecheck"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.3",

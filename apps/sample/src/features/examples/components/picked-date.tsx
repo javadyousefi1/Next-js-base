@@ -6,7 +6,7 @@ type PickedDateProps = {
 };
 
 export function PickedDate({ value }: PickedDateProps) {
-  const t = useTranslations("Calendar");
+  const t = useTranslations("Examples.jalali");
   if (!value) return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
 
   return (

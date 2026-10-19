@@ -13,10 +13,10 @@ import { useState } from "react";
 
 import { useJalaliPickerProps } from "@/hooks/use-jalali-picker-props";
 
-/** State of the calendar page demos and the texts that describe the picked values. */
-export function useCalendarShowcase() {
+/** State of the Jalali calendar/picker demos and the texts that describe the picked values. */
+export function useJalaliPickersExample() {
   const locale = useLocale();
-  const t = useTranslations("Calendar");
+  const t = useTranslations("Examples.jalali");
   const format = useFormatter();
   const pickerProps = useJalaliPickerProps();
   const [day, setDay] = useState<JalaliDate>();

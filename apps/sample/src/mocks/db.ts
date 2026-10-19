@@ -72,6 +72,39 @@ const memberUser: MockUser = {
   company: { name: "Acme", title: "Support" },
 };
 
+export const TASK_STATUSES = ["todo", "doing", "done"] as const;
+
+/** Backend shape (snake_case) of the tasks example API. */
+export type MockTask = {
+  id: number;
+  title: string;
+  status: (typeof TASK_STATUSES)[number];
+  due_date: string | null;
+  created_at: string;
+};
+
+/** Fixed dates (not "now") keep the seeded tasks identical on every run. */
+const TASKS_EPOCH = Date.UTC(2026, 0, 1);
+const DAY_MS = 86_400_000;
+
+function createTask(id: number): MockTask {
+  const verb = faker.hacker.verb();
+  const dueInDays = faker.number.int({ min: -20, max: 120 });
+  return {
+    id,
+    title: `${verb[0]?.toUpperCase()}${verb.slice(1)} the ${faker.hacker.adjective()} ${faker.hacker.noun()}`,
+    status: faker.helpers.weightedArrayElement([
+      { weight: 3, value: "todo" },
+      { weight: 2, value: "doing" },
+      { weight: 2, value: "done" },
+    ]),
+    due_date: faker.datatype.boolean({ probability: 0.8 })
+      ? new Date(TASKS_EPOCH + dueInDays * DAY_MS).toISOString().slice(0, 10)
+      : null,
+    created_at: new Date(TASKS_EPOCH - id * DAY_MS).toISOString(),
+  };
+}
+
 type Session = { userId: number; expiresAt: number };
 
 export const db = {
@@ -80,6 +113,7 @@ export const db = {
     memberUser,
     ...Array.from({ length: 56 }, (_, index) => createUser(index + 3)),
   ],
+  tasks: Array.from({ length: 26 }, (_, index) => createTask(index + 1)),
   accessTokens: new Map<string, Session>(),
   refreshTokens: new Map<string, Session>(),
 };
