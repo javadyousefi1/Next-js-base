@@ -25,6 +25,7 @@ apps/sample                Next.js 16 sample app: every package/feature in use (
 packages/http             HttpClient (axios inside): data or ApiError out
 packages/query            makeQuery / makeMutation, related-key invalidation, QueryClient
 packages/access           role-based access: grants, permission/role checks, <Can>
+packages/chat             headless chat: ChatTransport (WebSocket/REST), store, timeline, virtual scroll
 packages/table            headless tables: nuqs URL contract + useTableState
 packages/hooks            generic React hooks
 packages/jalali           Gregorian ↔ Jalali dates: convert, calendar math, format/parse

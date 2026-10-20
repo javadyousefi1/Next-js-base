@@ -13,6 +13,7 @@ const config: UserConfig = {
       [
         "sample",
         "access",
+        "chat",
         "http",
         "query",
         "table",

@@ -1,0 +1,28 @@
+{
+  "name": "@repo/chat",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Headless chat: transport contract (WebSocket, REST polling, anything), store with optimistic sending, typing and read receipts, timeline building and a virtualized-scroll hook. No UI.",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "test": "bun test src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-virtual": "3.14.21"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/bun": "1.4.2",
+    "@types/react": "19.3.0",
+    "react": "19.3.0",
+    "typescript": "7.0.2"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  }
+}

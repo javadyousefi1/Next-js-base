@@ -59,6 +59,7 @@ apps/sample/             Next.js sample app: every package and feature in use �
 packages/http/           HttpClient (axios inside): data or ApiError out, zod-validated responses
 packages/query/          React Query layer: createMakeQuery / makeMutation, invalidation, QueryClient
 packages/access/         Role-based access: grants, permission/role checks, route rules, <Can>
+packages/chat/           Headless chat: transport contract (WebSocket/REST), store, timeline, virtual scroll
 packages/table/          Headless server-side tables: nuqs URL contract, useTableState, types
 packages/hooks/          Generic React hooks (debounce, interval, local storage, media query…)
 packages/jalali/         Gregorian ↔ Jalali dates (no deps): convert, date math, format/parse
@@ -97,15 +98,14 @@ nuisance: fix the code, don't disable the rule. Disabling needs a comment with a
 | 9   | HTTP only through `HttpClient` instances (data or `ApiError` out): `src/lib/http` (browser → BFF) and `src/server/http` (server → upstream)                                                        | `no-restricted-imports` (axios, `HttpClient`)                       |
 | 10  | Every user-facing string in `messages/en.json` **and** `messages/fa.json` (same keys); layouts must work in RTL (logical classes `ms-*`, `ps-*`, `start-*`)                                        | review                                                              |
 | 11  | File names kebab-case; one component/hook per file; named exports (default only where Next requires it)                                                                                            | `unicorn/filename-case`                                             |
-| 12  | Conventional Commits: `type(scope): subject`                                                                                                                                                       | commitlint (commit-msg hook)                                        |
+| 12  | Conventional Commits: `type(scope): subject` (`feat(sample): add user page`)                                                                                                                       | commitlint (commit-msg hook)                                        |
 
 ## 5. Git workflow
 
 - Hooks (Husky): **pre-commit** lint-staged (oxlint --fix + oxfmt on staged files) · **commit-msg**
   commitlint · **pre-push** `bun run check`, plus `bun run build` and e2e when pushing to `main`.
-- Scopes: `sample`, `access`, `http`, `query`, `table`, `hooks`, `jalali`, `redis`, `ui`,
-  `oxlint-plugin`, `typescript-config`, `deps`, `docker`, `ci`, `docs`, `tooling`, `ai`.
-  Example: `feat(sample): add user details page`.
+- Scopes: `sample`, `access`, `chat`, `http`, `query`, `table`, `hooks`, `jalali`, `redis`,
+  `ui`, `oxlint-plugin`, `typescript-config`, `deps`, `docker`, `ci`, `docs`, `tooling`, `ai`.
 - Never bypass hooks (`--no-verify`) or force-push shared branches.
 
 ## 6. Samples
