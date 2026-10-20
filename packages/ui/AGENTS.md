@@ -24,3 +24,6 @@ Tailwind CSS 4 tokens (`src/styles/globals.css`), `cn()` and UI hooks. Repositor
   `jalali-date-range-picker` on `@repo/jalali` (values `{ year, month, day }`). Their rules live
   in `lib/jalali-calendar.ts` (unit-tested: `bun test`), state in `hooks/use-jalali-*`; the
   components only render. Labels are props — the app passes translations.
+- Chat components `message`, `bubble`, `marker` follow the shadcn chat registry (base-nova) by
+  hand: the registry was unreachable, so they were copied from the shadcn-ui/ui source with the
+  nova styles inlined and RTL logical classes. Usage: `.claude/skills/shadcn/rules/chat.md`.
