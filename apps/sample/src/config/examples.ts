@@ -2,6 +2,7 @@ import {
   BlocksIcon,
   CalendarDaysIcon,
   DatabaseIcon,
+  MessagesSquareIcon,
   LayersIcon,
   MessageSquareIcon,
   ServerIcon,
@@ -14,7 +15,7 @@ import { ROUTES, type AppRoute } from "./routes";
 
 export type Example = {
   /** Key in the `Nav` messages and the `Examples.<key>` namespace (title, description, texts). */
-  key: "data" | "modal" | "ui" | "jalali" | "hooks" | "access" | "redis";
+  key: "data" | "chat" | "modal" | "ui" | "jalali" | "hooks" | "access" | "redis";
   href: AppRoute;
   icon: LucideIcon;
   /** Workspace packages the page demonstrates. */
@@ -34,6 +35,12 @@ export const EXAMPLES: readonly Example[] = [
     href: ROUTES.examplesData,
     icon: DatabaseIcon,
     packages: ["@repo/http", "@repo/query", "@repo/table"],
+  },
+  {
+    key: "chat",
+    href: ROUTES.examplesChat,
+    icon: MessagesSquareIcon,
+    packages: ["@repo/chat", "@repo/ui"],
   },
   { key: "modal", href: ROUTES.examplesModal, icon: MessageSquareIcon, packages: ["@repo/ui"] },
   { key: "ui", href: ROUTES.examplesUi, icon: BlocksIcon, packages: ["@repo/ui"] },

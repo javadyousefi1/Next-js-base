@@ -15,5 +15,12 @@ export const API_ENDPOINTS = {
     list: "/tasks",
     detail: (id: number) => `/tasks/${id}`,
   },
+  chat: {
+    messages: "/chat/messages",
+    message: (id: string) => `/chat/messages/${id}`,
+    read: "/chat/read",
+    typing: "/chat/typing",
+    events: "/chat/events",
+  },
   stats: "/stats",
 } as const;

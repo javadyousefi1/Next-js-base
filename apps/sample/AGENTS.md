@@ -33,8 +33,8 @@ proxy.ts                Next 16 proxy (formerly middleware): i18n routing + opti
 ```
 
 App-agnostic building blocks come from workspace packages: `@repo/http`, `@repo/query`,
-`@repo/table`, `@repo/access`, `@repo/hooks`, `@repo/jalali`, `@repo/redis`, `@repo/ui` (root
-`AGENTS.md` §3).
+`@repo/table`, `@repo/access`, `@repo/chat`, `@repo/hooks`, `@repo/jalali`, `@repo/redis`,
+`@repo/ui` (root `AGENTS.md` §3).
 
 ## Feature anatomy — copy `features/users` (read) or `features/tasks` (CRUD)
 
@@ -76,7 +76,7 @@ when no app knowledge is involved.
 fallback={…}>`: it runs the same fetchers on the server with the user's token and hydrates
   the cache; no session → the client fetches.
 
-## Tables · access · examples · modals · dates · breadcrumbs
+## Tables · access · examples · modals · dates · chat · breadcrumbs
 
 - **Tables** — URL state (nuqs) + `useTableState` + `<DataTableProvider>` with prop-less
   toolbar/table/pagination; filters come from a config (`select` · `multiSelect` · `text`) and
@@ -95,6 +95,11 @@ onAction })` → `"yes" | "no"`, also `alert`, `prompt`, `open(<Form />)` (+ `us
 - **Dates** — Jalali calendar/pickers from `@repo/ui` (`jalali-calendar`, `jalali-date-picker`,
   `jalali-date-range-picker`) with `{...useJalaliPickerProps()}` (locale + translated labels);
   values are `{ year, month, day }`, converted and formatted with `@repo/jalali`.
+- **Chat** — `@repo/chat` (headless) + `@repo/ui` `message`/`bubble`/`marker`; example in
+  `features/chat`: `useChatRoom()` holds the logic, the views render. A backend = a
+  `ChatTransport`: REST (`api/chat-rest-transport.ts`, polling through the BFF, MSW in
+  `mocks/chat-handlers.ts`) or a WebSocket (`createWebSocketTransport`; the demo uses an
+  in-browser `mock/mock-chat-socket.ts`). Chat UI: `.claude/skills/shadcn` (rules/chat.md).
 - **Breadcrumbs** — one entry per page in `src/config/breadcrumbs.ts` (`"/users/[id]"` for a
   dynamic segment) + the `Nav` message; nested pages need nothing else. Skill: `add-page`.
 

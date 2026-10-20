@@ -20,6 +20,7 @@ export const BREADCRUMBS: Readonly<Record<string, BreadcrumbLabelKey>> = {
   [ROUTES.settings]: "settings",
   [ROUTES.examples]: "examples",
   [ROUTES.examplesData]: "data",
+  [ROUTES.examplesChat]: "chat",
   [ROUTES.examplesModal]: "modal",
   [ROUTES.examplesUi]: "ui",
   [ROUTES.examplesJalali]: "jalali",

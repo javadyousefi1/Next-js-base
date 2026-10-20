@@ -5,6 +5,7 @@ import { MEMBER_USER, signIn } from "./fixtures";
 /** Every example page (`src/config/examples.ts`) with its heading. */
 const EXAMPLE_PAGES = [
   ["/en/examples/data", "Data (CRUD)"],
+  ["/en/examples/chat", "Chat"],
   ["/en/examples/modal", "Modals"],
   ["/en/examples/ui", "UI components"],
   ["/en/examples/jalali", "Jalali dates"],

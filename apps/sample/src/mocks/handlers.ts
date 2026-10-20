@@ -4,6 +4,7 @@ import { delay } from "msw/utils/delay";
 import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { env } from "@/env";
 
+import { createChatHandlers } from "./chat-handlers";
 import { db, DEMO_ACCOUNTS, TASK_STATUSES, USER_ROLES, type MockTask, type MockUser } from "./db";
 
 /**
@@ -48,6 +49,7 @@ const unauthorized = () =>
   HttpResponse.json({ message: "Invalid or expired token" }, { status: 401 });
 
 export const handlers = [
+  ...createChatHandlers({ url, currentUser, unauthorized }),
   http.post(url(API_ENDPOINTS.auth.login), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const body = (await request.json()) as { username?: string; password?: string };

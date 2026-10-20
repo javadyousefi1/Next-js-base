@@ -13,6 +13,7 @@ export const ROUTES = {
   /** The sample app's showcase: one page per package/feature (`src/config/examples.ts`). */
   examples: "/examples",
   examplesData: "/examples/data",
+  examplesChat: "/examples/chat",
   examplesModal: "/examples/modal",
   examplesUi: "/examples/ui",
   examplesJalali: "/examples/jalali",
