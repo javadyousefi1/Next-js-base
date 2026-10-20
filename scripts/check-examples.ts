@@ -98,7 +98,7 @@ for (const [barrel, target] of barrels) {
 }
 const examplesConfig = await Bun.file(EXAMPLES_CONFIG).text();
 
-for (const name of readdirSync("packages").sort()) {
+for (const name of readdirSync("packages").toSorted()) {
   if (TOOLING.has(name) || !existsSync(`packages/${name}/package.json`)) continue;
   const pkg = `@repo/${name}`;
   const { exports } = (await Bun.file(`packages/${name}/package.json`).json()) as {

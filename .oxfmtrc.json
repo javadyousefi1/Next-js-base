@@ -15,6 +15,7 @@
     "**/playwright-report",
     "**/test-results",
     "bun.lock",
-    "**/next-env.d.ts"
+    "**/next-env.d.ts",
+    ".claude/skills/shadcn"
   ]
 }

@@ -42,6 +42,8 @@ export default defineConfig({
     "**/test-results/**",
     "**/next-env.d.ts",
     "apps/sample/public/sw.js",
+    // Vendored from shadcn-ui/ui as is (update by copying it again).
+    ".claude/skills/shadcn/**",
   ],
   rules: {
     // ── Language & TypeScript ──────────────────────────────────────────────────────────────
