@@ -1,0 +1,19 @@
+/*
+ * App stylesheet: design tokens + Tailwind come from @repo/ui. Only app-level overrides here.
+ * The Vazirmatn font is loaded with next/font in `app/layout.tsx` (CSS variable on <html>).
+ */
+@import "@repo/ui/globals.css";
+
+@theme inline {
+  --font-sans: var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+  /* Brand palette (chocolate shop). */
+  --color-cocoa: #3b1f12;
+  --color-cream: #fff4e6;
+  --color-gold: #e6b655;
+}
+
+body {
+  background:
+    radial-gradient(60rem 40rem at 85% -10%, #ffe3c4 0%, transparent 60%),
+    radial-gradient(50rem 36rem at 0% 110%, #f9d3d9 0%, transparent 55%), #fff7ee;
+}

@@ -12,6 +12,7 @@ const config: UserConfig = {
       "always",
       [
         "sample",
+        "shokolet",
         "access",
         "chat",
         "http",
