@@ -22,6 +22,7 @@
 
 ```
 apps/sample                Next.js 16 sample app: every package/feature in use (`/examples/*`)
+apps/shokolet              Persian chocolate gift-box builder, live 3D preview (React Three Fiber + GSAP)
 packages/http             HttpClient (axios inside): data or ApiError out
 packages/query            makeQuery / makeMutation, related-key invalidation, QueryClient
 packages/access           role-based access: grants, permission/role checks, <Can>
