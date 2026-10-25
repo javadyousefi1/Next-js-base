@@ -12,7 +12,7 @@ import { routing } from "@/i18n/routing";
 
 const handleI18nRouting = createMiddleware(routing);
 
-/** `/fa/settings` → `{ locale: "fa", pathname: "/users" }` */
+/** `/fa/settings` → `{ locale: "fa", pathname: "/settings" }` */
 function splitLocale(pathname: string) {
   const [, maybeLocale = "", ...rest] = pathname.split("/");
   const locale = routing.locales.find((candidate) => candidate === maybeLocale);

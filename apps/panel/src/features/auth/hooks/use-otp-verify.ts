@@ -35,7 +35,11 @@ export function useOtpVerify(phoneNumber: string) {
 
   const verify = otpVerifyMutation.useMutation({ onSuccess: onSignedIn });
   const resend = otpResendMutation.useMutation({
-    onSuccess: () => setSecondsLeft(OTP_RESEND_SECONDS),
+    onSuccess: () => {
+      // A new code is on its way: the previous "wrong code" error no longer applies.
+      verify.reset();
+      setSecondsLeft(OTP_RESEND_SECONDS);
+    },
   });
 
   // The code was just sent: count down once per second until "Resend" is available.
@@ -47,7 +51,9 @@ export function useOtpVerify(phoneNumber: string) {
     register: form.register,
     onSubmit: (event: FormEvent<HTMLFormElement>) => void submit(event),
     codeError: messages.fieldError(form.formState.errors.code?.message),
-    formError: messages.formError(verify.error ?? resend.error, "invalidCode"),
+    formError: verify.error
+      ? messages.formError(verify.error, "invalidCode")
+      : messages.formError(resend.error),
     isSubmitting: verify.isPending || verify.isSuccess,
     secondsLeft,
     canResend: secondsLeft <= 0 && !resend.isPending,

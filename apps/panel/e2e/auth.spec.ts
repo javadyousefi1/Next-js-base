@@ -85,7 +85,9 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
 
     await page.getByRole("textbox", { name: "First name" }).fill("Sara");
     await page.getByRole("textbox", { name: "Last name" }).fill("Ahmadi");
-    await page.getByRole("textbox", { name: "Phone number" }).fill("09351112233");
+    // The mock DB lives as long as the server: a fresh number per run keeps reruns green.
+    const phoneNumber = `0935${String(Date.now()).slice(-7)}`;
+    await page.getByRole("textbox", { name: "Phone number" }).fill(phoneNumber);
     await page.getByRole("button", { name: "Create account" }).click();
 
     await page.getByRole("textbox", { name: "Verification code" }).fill(OTP_CODE);

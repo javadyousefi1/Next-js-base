@@ -7,7 +7,7 @@ import { getAccessToken } from "@/server/auth/cookies";
 import { upstreamFor } from "@/server/http/upstream";
 
 type PrefetchBoundaryProps = {
-  /** e.g. `[usersListQuery.with(usersTable.loadParams(searchParams))]` */
+  /** e.g. `[sessionQuery.with()]` — the queries the wrapped view reads. */
   queries: PrefetchItem[];
   /** Rendered while the server fetches (usually the view's skeleton). */
   fallback: ReactNode;
@@ -17,8 +17,8 @@ type PrefetchBoundaryProps = {
 /**
  * Server prefetch + hydration in one element:
  *
- *   <PrefetchBoundary queries={[usersListQuery.with(params)]} fallback={<Skeleton />}>
- *     <UsersTable />   ← its `usersListQuery.useQuery(...)` renders with data immediately
+ *   <PrefetchBoundary queries={[itemsQuery.with(params)]} fallback={<Skeleton />}>
+ *     <ItemsList />   ← its `itemsQuery.useQuery(...)` renders with data immediately
  *   </PrefetchBoundary>
  *
  * Runs at request time inside its own <Suspense> (it reads the auth cookie), calls the upstream
