@@ -1,8 +1,8 @@
 {
-  "name": "panel",
+  "name": "golden_pen",
   "version": "0.0.0",
   "private": true,
-  "description": "Admin panel: phone-number auth (password, OTP, register) against the back-office API. Lean copy of apps/sample (Next.js 16, BFF auth, React Query, i18n).",
+  "description": "Golden Pen admin panel (Persian only): phone-number auth (password, OTP, register) against the back-office API. Lean copy of apps/sample (Next.js 16, BFF auth, React Query, i18n).",
   "type": "module",
   "scripts": {
     "build": "next build",
