@@ -1,4 +1,4 @@
-import type messages from "../../messages/en.json";
+import type messages from "../../messages/fa.json";
 import { ROUTES } from "./routes";
 
 /** A label from the `Nav` messages. */

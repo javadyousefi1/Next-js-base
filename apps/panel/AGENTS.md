@@ -6,6 +6,9 @@ repository rules: [`../../AGENTS.md`](../../AGENTS.md), app conventions:
 [`../sample/AGENTS.md`](../sample/AGENTS.md). It has no examples, tables, chat, PWA, Redis or
 access control (yet). Dev/start port **3002**.
 
+**Persian only** (RTL, `messages/fa.json`): one locale, no URL prefix (`/settings`; next-intl
+rewrites to `[locale]` internally), no language switcher. Don't add English strings.
+
 ## Back-office API
 
 - Every upstream request sends the header `back-office: true` (`backOfficeHeader` in
@@ -39,4 +42,4 @@ unverified until its code is verified. Set `API_MOCKING=disabled` to use the rea
 ## Tests
 
 Unit: `bun test` (`*.test.ts` next to the code). E2E: `e2e/*.spec.ts` (Playwright against
-`next start` + MSW, English URLs `/en/...`). Skill: `write-e2e-test`.
+`next start` + MSW, Persian labels, plain URLs like `/login`). Skill: `write-e2e-test`.

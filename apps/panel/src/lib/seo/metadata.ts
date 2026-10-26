@@ -5,22 +5,7 @@ import { ROUTES, type AppRoute } from "@/config/routes";
 import { SITE } from "@/config/site";
 import { env } from "@/env";
 import { LOCALE_META } from "@/i18n/locales";
-import { routing, type AppLocale } from "@/i18n/routing";
-
-/** `/` + `fa` → `/fa`, `/users` + `en` → `/en/users` */
-export function localizedPath(locale: AppLocale, route: AppRoute): string {
-  return route === ROUTES.dashboard ? `/${locale}` : `/${locale}${route}`;
-}
-
-/** hreflang alternates for a route (+ `x-default`). */
-function languageAlternates(route: AppRoute) {
-  return {
-    ...Object.fromEntries(
-      routing.locales.map((locale) => [LOCALE_META[locale].htmlLang, localizedPath(locale, route)]),
-    ),
-    "x-default": localizedPath(routing.defaultLocale, route),
-  };
-}
+import type { AppLocale } from "@/i18n/routing";
 
 /** An admin panel is never indexed — see also `app/robots.ts`. */
 const robots: Metadata["robots"] = {
@@ -39,7 +24,7 @@ export async function rootMetadata(locale: AppLocale): Promise<Metadata> {
     description: t("description"),
     applicationName: SITE.name,
     robots,
-    alternates: { canonical: localizedPath(locale, ROUTES.dashboard) },
+    alternates: { canonical: ROUTES.dashboard },
     openGraph: {
       type: "website",
       siteName: SITE.name,
@@ -54,7 +39,7 @@ export async function rootMetadata(locale: AppLocale): Promise<Metadata> {
 
 type PageNamespace = "Dashboard" | "Settings" | "Auth" | "Register";
 
-/** Per-page title/description/canonical/hreflang from the page's i18n namespace. */
+/** Per-page title/description/canonical from the page's i18n namespace. */
 export async function pageMetadata(
   locale: AppLocale,
   namespace: PageNamespace,
@@ -65,6 +50,6 @@ export async function pageMetadata(
   return {
     title: t("title"),
     description: t("description"),
-    alternates: { canonical: localizedPath(locale, route), languages: languageAlternates(route) },
+    alternates: { canonical: route },
   };
 }

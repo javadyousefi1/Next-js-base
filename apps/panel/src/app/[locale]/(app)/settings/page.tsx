@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { ROUTES } from "@/config/routes";
-import { AppearanceCard, LanguageCard } from "@/features/preferences/components/preferences-cards";
+import { AppearanceCard } from "@/features/preferences/components/preferences-cards";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
 
@@ -21,7 +21,6 @@ export default async function SettingsPage() {
       <PageHeader title={t("title")} description={t("description")} />
       <div className="grid gap-4 lg:grid-cols-2">
         <AppearanceCard />
-        <LanguageCard />
       </div>
     </>
   );

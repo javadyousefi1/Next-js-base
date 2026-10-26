@@ -22,7 +22,6 @@
     "account": "حساب کاربری",
     "logout": "خروج",
     "skipToContent": "رفتن به محتوا",
-    "language": "زبان",
     "theme": "پوسته"
   },
   "Auth": {
@@ -87,10 +86,6 @@
     "appearance": {
       "title": "ظاهر",
       "description": "حالت روشن، تیره یا هماهنگ با سیستم را انتخاب کنید."
-    },
-    "language": {
-      "title": "زبان",
-      "description": "زبان رابط کاربری و جهت نوشتار."
     }
   },
   "Errors": {

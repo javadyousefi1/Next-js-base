@@ -56,7 +56,7 @@ use npm/yarn/pnpm here (the root `devEngines` pins Bun).
 
 ```
 apps/sample/             Next.js sample app: every package and feature in use — see apps/sample/AGENTS.md
-apps/panel/              Admin panel: phone-number auth (password, OTP, register), lean copy of sample — see apps/panel/AGENTS.md
+apps/panel/              Persian-only admin panel: phone-number auth (password, OTP, register), lean copy of sample — see apps/panel/AGENTS.md
 apps/shokolet/           Persian chocolate gift-box builder with a live 3D preview (R3F + GSAP) — see apps/shokolet/AGENTS.md
 packages/http/           HttpClient (axios inside): data or ApiError out, zod-validated responses
 packages/query/          React Query layer: createMakeQuery / makeMutation, invalidation, QueryClient

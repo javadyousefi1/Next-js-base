@@ -12,41 +12,28 @@ import { routing } from "@/i18n/routing";
 
 const handleI18nRouting = createMiddleware(routing);
 
-/** `/fa/settings` → `{ locale: "fa", pathname: "/settings" }` */
-function splitLocale(pathname: string) {
-  const [, maybeLocale = "", ...rest] = pathname.split("/");
-  const locale = routing.locales.find((candidate) => candidate === maybeLocale);
-  return locale
-    ? { locale, pathname: `/${rest.join("/")}` }
-    : { locale: routing.defaultLocale, pathname };
-}
-
-function localized(locale: string, pathname: string, request: NextRequest) {
-  return new URL(`/${locale}${pathname === "/" ? "" : pathname}`, request.url);
-}
-
 /**
  * Runs before every page request (Next.js 16 `proxy`, formerly `middleware`):
- * 1. i18n routing (locale prefix, cookie, hreflang `Link` header) via next-intl
+ * 1. i18n routing via next-intl (one language, no URL prefix: rewrites to `/[locale]` internally)
  * 2. route guard: pages need the auth cookie; `/login` and `/register` are skipped when already
  *    signed in.
  *    This is an optimistic check only — the BFF validates the token on every API call.
  */
 export function proxy(request: NextRequest) {
   const response = handleI18nRouting(request);
-  if (response.headers.has("location")) return response; // next-intl redirect (e.g. "/" → "/en")
+  if (response.headers.has("location")) return response; // next-intl redirect (e.g. "/fa/login" → "/login")
 
-  const { locale, pathname } = splitLocale(request.nextUrl.pathname);
+  const { pathname } = request.nextUrl;
   const hasSession = request.cookies.has(AUTH_COOKIES.accessToken);
 
   if (!hasSession && !isPublicRoute(pathname)) {
-    const loginUrl = localized(locale, ROUTES.login, request);
+    const loginUrl = new URL(ROUTES.login, request.url);
     loginUrl.searchParams.set(CALLBACK_URL_PARAM, `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(loginUrl);
   }
 
   if (hasSession && (pathname === ROUTES.login || pathname === ROUTES.register)) {
-    return NextResponse.redirect(localized(locale, DEFAULT_AUTHENTICATED_ROUTE, request));
+    return NextResponse.redirect(new URL(DEFAULT_AUTHENTICATED_ROUTE, request.url));
   }
 
   return response;

@@ -24,7 +24,7 @@ export default defineConfig({
     : [["list"], ["html", { open: "never" }]],
   use: {
     baseURL,
-    locale: "en-US",
+    locale: "fa-IR",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },

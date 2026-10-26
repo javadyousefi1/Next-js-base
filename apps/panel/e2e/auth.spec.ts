@@ -4,115 +4,113 @@ import { DEMO_USER, OTP_CODE, signIn } from "./fixtures";
 
 test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
   test("protected pages redirect to login with a callback URL", async ({ page }) => {
-    await page.goto("/en/settings");
-    await expect(page).toHaveURL(/\/en\/login\?callbackUrl=%2Fsettings$/);
-    await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+    await page.goto("/settings");
+    await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fsettings$/);
+    await expect(page.getByRole("heading", { name: "ورود" })).toBeVisible();
   });
 
-  test.describe("a browser language we don't ship", () => {
-    // next-intl follows `Accept-Language`; an unknown language falls back to the default (fa).
-    test.use({ locale: "de-DE" });
-
-    test("gets the default language, Persian", async ({ page }) => {
-      await page.goto("/");
-      await expect(page).toHaveURL(/\/fa\/login/);
-    });
+  test("the only language is Persian, without a locale prefix", async ({ page }) => {
+    await page.goto("/fa/login");
+    await expect(page).toHaveURL(/\/login$/);
+    expect(new URL(page.url()).pathname).toBe("/login");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await expect(page.locator("html")).toHaveAttribute("lang", "fa-IR");
   });
 
   test("validates the form with the shared zod schema", async ({ page }) => {
-    await page.goto("/en/login");
-    await page.getByRole("button", { name: "Sign in" }).click();
-    await expect(page.getByText("Enter a valid mobile number, like 09123456789.")).toBeVisible();
-    await expect(page.getByText("Password is required.")).toBeVisible();
+    await page.goto("/login");
+    await page.getByRole("button", { name: "ورود" }).click();
+    await expect(page.getByText("شماره موبایل معتبر وارد کنید، مثل 09123456789.")).toBeVisible();
+    await expect(page.getByText("رمز عبور را وارد کنید.")).toBeVisible();
   });
 
   test("rejects a wrong password", async ({ page }) => {
-    await page.goto("/en/login");
-    await page.getByRole("textbox", { name: "Phone number" }).fill(DEMO_USER.phoneNumber);
-    await page.getByRole("textbox", { name: "Password" }).fill("wrong-password");
-    await page.getByRole("button", { name: "Sign in" }).click();
-    await expect(page.getByText("Invalid phone number or password.")).toBeVisible();
+    await page.goto("/login");
+    await page.getByRole("textbox", { name: "شماره موبایل" }).fill(DEMO_USER.phoneNumber);
+    await page.getByRole("textbox", { name: "رمز عبور" }).fill("wrong-password");
+    await page.getByRole("button", { name: "ورود" }).click();
+    await expect(page.getByText("شماره موبایل یا رمز عبور اشتباه است.")).toBeVisible();
   });
 
   test("signs in with a password, sees the name, and signs out", async ({ page, context }) => {
-    await signIn(page, "/en");
-    await expect(page).toHaveURL(/\/en$/);
-    await expect(page.getByText("Welcome, مدیر سیستم")).toBeVisible();
+    await signIn(page, "/");
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByText("مدیر سیستم، خوش آمدید")).toBeVisible();
 
     // The token is httpOnly: invisible to JavaScript.
     const cookies = await context.cookies();
     expect(cookies.find((cookie) => cookie.name === "access_token")?.httpOnly).toBe(true);
     expect(await page.evaluate(() => document.cookie)).not.toContain("access_token");
 
-    await page.getByRole("button", { name: "Account" }).click();
-    await page.getByRole("menuitem", { name: "Log out" }).click();
-    await expect(page).toHaveURL(/\/en\/login$/);
+    await page.getByRole("button", { name: "حساب کاربری" }).click();
+    await page.getByRole("menuitem", { name: "خروج" }).click();
+    await expect(page).toHaveURL(/\/login$/);
   });
 
   test("signs in with an SMS code", async ({ page }) => {
-    await page.goto("/en/login");
-    await page.getByRole("tab", { name: "SMS code" }).click();
-    await page.getByRole("textbox", { name: "Phone number" }).fill(DEMO_USER.phoneNumber);
-    await page.getByRole("button", { name: "Send code" }).click();
+    await page.goto("/login");
+    await page.getByRole("tab", { name: "کد پیامکی" }).click();
+    await page.getByRole("textbox", { name: "شماره موبایل" }).fill(DEMO_USER.phoneNumber);
+    await page.getByRole("button", { name: "ارسال کد" }).click();
 
-    await expect(page.getByRole("textbox", { name: "Verification code" })).toBeVisible();
-    await page.getByRole("textbox", { name: "Verification code" }).fill(OTP_CODE);
-    await page.getByRole("button", { name: "Verify and sign in" }).click();
+    await expect(page.getByRole("textbox", { name: "کد تأیید" })).toBeVisible();
+    await page.getByRole("textbox", { name: "کد تأیید" }).fill(OTP_CODE);
+    await page.getByRole("button", { name: "تأیید و ورود" }).click();
 
-    await expect(page).toHaveURL(/\/en$/);
-    await expect(page.getByText("Welcome, مدیر سیستم")).toBeVisible();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByText("مدیر سیستم، خوش آمدید")).toBeVisible();
   });
 
   test("rejects a wrong SMS code and an unknown number", async ({ page }) => {
-    await page.goto("/en/login");
-    await page.getByRole("tab", { name: "SMS code" }).click();
-    await page.getByRole("textbox", { name: "Phone number" }).fill("09129999999");
-    await page.getByRole("button", { name: "Send code" }).click();
-    await expect(page.getByText("No account exists with this phone number.")).toBeVisible();
+    await page.goto("/login");
+    await page.getByRole("tab", { name: "کد پیامکی" }).click();
+    await page.getByRole("textbox", { name: "شماره موبایل" }).fill("09129999999");
+    await page.getByRole("button", { name: "ارسال کد" }).click();
+    await expect(page.getByText("حسابی با این شماره موبایل وجود ندارد.")).toBeVisible();
 
-    await page.getByRole("textbox", { name: "Phone number" }).fill(DEMO_USER.phoneNumber);
-    await page.getByRole("button", { name: "Send code" }).click();
-    await page.getByRole("textbox", { name: "Verification code" }).fill("111111");
-    await page.getByRole("button", { name: "Verify and sign in" }).click();
-    await expect(page.getByText("The code is wrong or has expired.")).toBeVisible();
+    await page.getByRole("textbox", { name: "شماره موبایل" }).fill(DEMO_USER.phoneNumber);
+    await page.getByRole("button", { name: "ارسال کد" }).click();
+    await page.getByRole("textbox", { name: "کد تأیید" }).fill("111111");
+    await page.getByRole("button", { name: "تأیید و ورود" }).click();
+    await expect(page.getByText("کد واردشده اشتباه است یا منقضی شده است.")).toBeVisible();
   });
 
   test("registers a new number, confirms the code and lands signed in", async ({ page }) => {
-    await page.goto("/en/login");
-    await page.getByRole("link", { name: "Register" }).click();
-    await expect(page).toHaveURL(/\/en\/register$/);
-    await expect(page.getByRole("heading", { name: "Create an account" })).toBeVisible();
+    await page.goto("/login");
+    await page.getByRole("link", { name: "ثبت‌نام" }).click();
+    await expect(page).toHaveURL(/\/register$/);
+    await expect(page.getByRole("heading", { name: "ایجاد حساب" })).toBeVisible();
 
-    await page.getByRole("textbox", { name: "First name" }).fill("Sara");
-    await page.getByRole("textbox", { name: "Last name" }).fill("Ahmadi");
+    await page.getByRole("textbox", { name: "نام", exact: true }).fill("سارا");
+    await page.getByRole("textbox", { name: "نام خانوادگی" }).fill("احمدی");
     // The mock DB lives as long as the server: a fresh number per run keeps reruns green.
     const phoneNumber = `0935${String(Date.now()).slice(-7)}`;
-    await page.getByRole("textbox", { name: "Phone number" }).fill(phoneNumber);
-    await page.getByRole("button", { name: "Create account" }).click();
+    await page.getByRole("textbox", { name: "شماره موبایل" }).fill(phoneNumber);
+    await page.getByRole("button", { name: "ایجاد حساب" }).click();
 
-    await page.getByRole("textbox", { name: "Verification code" }).fill(OTP_CODE);
-    await page.getByRole("button", { name: "Verify and sign in" }).click();
+    await page.getByRole("textbox", { name: "کد تأیید" }).fill(OTP_CODE);
+    await page.getByRole("button", { name: "تأیید و ورود" }).click();
 
-    await expect(page).toHaveURL(/\/en$/);
-    await expect(page.getByText("Welcome, Sara Ahmadi")).toBeVisible();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.getByText("سارا احمدی، خوش آمدید")).toBeVisible();
   });
 
   test("a registered number cannot register again", async ({ page }) => {
-    await page.goto("/en/register");
-    await page.getByRole("textbox", { name: "First name" }).fill("Admin");
-    await page.getByRole("textbox", { name: "Last name" }).fill("Again");
-    await page.getByRole("textbox", { name: "Phone number" }).fill(DEMO_USER.phoneNumber);
-    await page.getByRole("button", { name: "Create account" }).click();
-    await expect(page.getByText("This phone number is already registered.")).toBeVisible();
+    await page.goto("/register");
+    await page.getByRole("textbox", { name: "نام", exact: true }).fill("مدیر");
+    await page.getByRole("textbox", { name: "نام خانوادگی" }).fill("تکراری");
+    await page.getByRole("textbox", { name: "شماره موبایل" }).fill(DEMO_USER.phoneNumber);
+    await page.getByRole("button", { name: "ایجاد حساب" }).click();
+    await expect(page.getByText("این شماره موبایل قبلاً ثبت‌نام کرده است.")).toBeVisible();
   });
 
   test("a request without a session sends the user back to login", async ({ page, context }) => {
-    await signIn(page, "/en/settings");
-    await expect(page).toHaveURL(/\/en\/settings$/);
+    await signIn(page, "/settings");
+    await expect(page).toHaveURL(/\/settings$/);
 
     // No cookie → the proxy sends the next page request back to login.
     await context.clearCookies();
     await page.reload();
-    await expect(page).toHaveURL(/\/en\/login\?callbackUrl=%2Fsettings$/);
+    await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fsettings$/);
   });
 });
