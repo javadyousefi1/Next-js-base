@@ -46,5 +46,6 @@ Unit: `bun test` (`*.test.ts` next to the code). E2E: `e2e/*.spec.ts` (Playwrigh
 
 ## Deploy
 
-`bun run docker:image golden_pen` (repo root) builds the image for `linux/amd64` and saves it to
-`docker-images/`; it prints the `scp` / `docker load` / `docker run` commands for the server.
+`bun run docker:image` (repo root) first asks for the app, builds its image for `linux/amd64` and
+saves it to `docker-images/`; it prints the `scp` / `docker load` / `docker run` commands for the
+server. Production `NEXT_PUBLIC_*` values (baked in at build time) go in `.env.production` here.

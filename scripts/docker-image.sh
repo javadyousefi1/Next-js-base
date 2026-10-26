@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # Builds the production Docker image of ONE app and saves it as a file you can copy to a server.
 #
-#   bun run docker:image               → asks which app (only apps with a Dockerfile are listed)
+#   bun run docker:image               → first asks which app (only apps with a Dockerfile are listed)
 #   bun run docker:image golden_pen    → no question
 #   PLATFORM=linux/arm64 bun run docker:image   → for an ARM server (default: linux/amd64)
+#
+# NEXT_PUBLIC_* build values come from `apps/<app>/.env.production` when it exists (gitignored),
+# else from the Dockerfile's defaults. The app is the only question.
 #
 # Output: docker-images/<app>_<date>_<commit>_<os>-<arch>.tar.gz (git- and docker-ignored).
 # On the server: `docker load -i <file>` — the script prints the exact commands at the end.
@@ -20,10 +23,6 @@ fail() {
   echo "✖ $*" >&2
   exit 1
 }
-
-command -v docker >/dev/null || fail "Docker is not installed."
-docker info >/dev/null 2>&1 || fail "Docker is not running. Start Docker and try again."
-docker buildx version >/dev/null 2>&1 || fail "docker buildx is missing (it ships with Docker Desktop / docker-buildx-plugin)."
 
 # ── 1. which app ────────────────────────────────────────────────────────────────────────────────
 apps=()
@@ -44,21 +43,25 @@ fi
 [[ -f "apps/$app/Dockerfile" ]] || fail "Unknown app '$app'. Apps with a Dockerfile: ${apps[*]}"
 dockerfile="apps/$app/Dockerfile"
 
+command -v docker >/dev/null || fail "Docker is not installed."
+docker info >/dev/null 2>&1 || fail "Docker is not running. Start Docker and try again."
+docker buildx version >/dev/null 2>&1 || fail "docker buildx is missing (it ships with Docker Desktop / docker-buildx-plugin)."
+
 # ── 2. build arguments ──────────────────────────────────────────────────────────────────────────
-# NEXT_PUBLIC_* values are baked into the browser bundle at BUILD time: ask for each one the
-# Dockerfile declares (Enter keeps the default shown). Set them in the environment to skip it.
+# NEXT_PUBLIC_* values are baked into the browser bundle at BUILD time. For each one the Dockerfile
+# declares: the shell environment wins, then apps/<app>/.env.production, then the Dockerfile default.
+env_file="apps/$app/.env.production"
 build_args=()
 while IFS='=' read -r name default; do
-  if [[ -n "${!name:-}" ]]; then
-    value="${!name}"
-  elif [[ -t 0 ]]; then
-    read -r -p "$name [$default]: " value
-    value="${value:-$default}"
-  else
-    value="$default"
+  value="${!name:-}"
+  if [[ -z "$value" && -f "$env_file" ]]; then
+    value="$(sed -n "s/^$name=//p" "$env_file" | tail -n 1)"
   fi
+  value="${value:-$default}"
+  echo "  $name=$value"
   build_args+=(--build-arg "$name=$value")
 done < <(sed -n 's/^ARG \(NEXT_PUBLIC_[A-Z0-9_]*\)=\(.*\)$/\1=\2/p' "$dockerfile")
+[[ -f "$env_file" ]] || echo "  (defaults — put production values in $env_file)"
 
 # ── 3. build for the server's platform ──────────────────────────────────────────────────────────
 commit="$(git rev-parse --short HEAD)"
