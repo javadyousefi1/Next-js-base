@@ -13,6 +13,7 @@ const config: UserConfig = {
       [
         "sample",
         "shokolet",
+        "panel",
         "access",
         "chat",
         "http",

@@ -1,7 +1,8 @@
-# Production-like stack: sample (Next.js standalone) + Redis.
+# Production-like stack: sample (Next.js standalone) + Redis, and the panel (no Redis).
 #   bun run docker:up      → docker compose up -d   (http://localhost:3000)
 #   bun run docker:redis   → only Redis, for `bun run dev`
-# Values come from the shell or a root `.env` file (see apps/sample/.env.example).
+# Values come from the shell or a root `.env` file (see apps/sample/.env.example; the panel
+# reads `PANEL_*` overrides, defaults in its service below — http://localhost:3002).
 name: next-js-base
 
 services:
@@ -28,6 +29,25 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+
+  panel:
+    build:
+      context: .
+      dockerfile: apps/panel/Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${PANEL_SITE_URL:-http://localhost:3002}
+    image: next-js-base/panel:latest
+    restart: unless-stopped
+    ports:
+      - "${PANEL_PORT:-3002}:3002"
+    environment:
+      API_BASE_URL: ${PANEL_API_BASE_URL:-http://5.159.49.104:5001}
+      # Real API by default. PANEL_API_MOCKING=enabled answers it with the built-in MSW mock
+      # (demo mode: 09120000000 / admin123, SMS code 123456).
+      API_MOCKING: ${PANEL_API_MOCKING:-disabled}
+      AUTH_TOKEN_TTL_SECONDS: ${AUTH_TOKEN_TTL_SECONDS:-86400}
     security_opt:
       - no-new-privileges:true
 
