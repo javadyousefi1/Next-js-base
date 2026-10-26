@@ -47,6 +47,7 @@ Redis · MSW · Oxlint/Oxfmt · Playwright. Details and versions: `docs/architec
 | `bun run test:e2e`                    | Builds, then Playwright against `next start` with the mocked API                       |
 | `bun run lint:fix` / `bun run format` | Auto-fix lint issues / format everything                                               |
 | `bun run docker:up`                   | Production stack (admin + Redis) with docker compose                                   |
+| `bun run docker:image [app]`          | Build one app's image for a Linux server (`linux/amd64`) → `docker-images/*.tar.gz`    |
 | `bun run doctor` / `bun run clean`    | Verify toolchain / remove build outputs and node_modules                               |
 
 Add a dependency to one workspace: `bun add <pkg> --cwd apps/sample` (pin exact versions). Never
@@ -56,7 +57,7 @@ use npm/yarn/pnpm here (the root `devEngines` pins Bun).
 
 ```
 apps/sample/             Next.js sample app: every package and feature in use — see apps/sample/AGENTS.md
-apps/panel/              Persian-only admin panel: phone-number auth (password, OTP, register), lean copy of sample — see apps/panel/AGENTS.md
+apps/golden_pen/         Golden Pen: Persian-only admin panel: phone-number auth (password, OTP, register), lean copy of sample — see apps/golden_pen/AGENTS.md
 apps/shokolet/           Persian chocolate gift-box builder with a live 3D preview (R3F + GSAP) — see apps/shokolet/AGENTS.md
 packages/http/           HttpClient (axios inside): data or ApiError out, zod-validated responses
 packages/query/          React Query layer: createMakeQuery / makeMutation, invalidation, QueryClient
@@ -106,7 +107,7 @@ nuisance: fix the code, don't disable the rule. Disabling needs a comment with a
 
 - Hooks (Husky): **pre-commit** lint-staged (oxlint --fix + oxfmt on staged files) · **commit-msg**
   commitlint · **pre-push** `bun run check`, plus `bun run build` and e2e when pushing to `main`.
-- Scopes: `sample`, `shokolet`, `panel`, `access`, `chat`, `http`, `query`, `table`, `hooks`, `jalali`, `redis`,
+- Scopes: `sample`, `shokolet`, `golden_pen`, `access`, `chat`, `http`, `query`, `table`, `hooks`, `jalali`, `redis`,
   `ui`, `oxlint-plugin`, `typescript-config`, `deps`, `docker`, `ci`, `docs`, `tooling`, `ai`.
 - Never bypass hooks (`--no-verify`) or force-push shared branches.
 

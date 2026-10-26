@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 #
-# Production image for apps/panel. Build context = repository root:
-#   docker build -f apps/panel/Dockerfile -t next-js-base/panel .
+# Production image for apps/golden_pen. Build context = repository root:
+#   docker build -f apps/golden_pen/Dockerfile -t next-js-base/golden_pen .
 #   (or: bun run docker:build → docker compose build)
 #
 # Stages: prune (turbo) → builder (bun install + next build, both cached) → runner (node, non-root)
@@ -20,11 +20,11 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1 \
     HUSKY=0
 
-# ── 1. prune: only apps/panel + the workspace packages it depends on ───────────────────────────
+# ── 1. prune: only apps/golden_pen + the workspace packages it depends on ───────────────────────────
 FROM base AS prune
 ARG TURBO_VERSION
 COPY . .
-RUN bunx turbo@${TURBO_VERSION} prune panel --docker
+RUN bunx turbo@${TURBO_VERSION} prune golden_pen --docker
 
 # ── 2. builder ──────────────────────────────────────────────────────────────────────────────────
 FROM base AS builder
@@ -42,9 +42,9 @@ ARG NEXT_PUBLIC_SITE_URL=http://localhost:3002
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL} \
     SKIP_ENV_VALIDATION=1
 
-RUN --mount=type=cache,id=next-cache,target=/app/apps/panel/.next/cache \
+RUN --mount=type=cache,id=next-cache,target=/app/apps/golden_pen/.next/cache \
     --mount=type=cache,id=turbo-cache,target=/app/.turbo/cache \
-    node_modules/.bin/turbo run build --filter=panel
+    node_modules/.bin/turbo run build --filter=golden_pen
 
 # ── 3. runner: minimal Node image with the standalone server ────────────────────────────────────
 FROM node:${NODE_VERSION}-alpine AS runner
@@ -56,8 +56,8 @@ ENV NODE_ENV=production \
 
 RUN addgroup -S -g 1001 nodejs && adduser -S -u 1001 -G nodejs nextjs
 
-COPY --from=builder --chown=nextjs:nodejs /app/apps/panel/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/panel/.next/static ./apps/panel/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/golden_pen/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/golden_pen/.next/static ./apps/golden_pen/.next/static
 
 USER nextjs
 EXPOSE 3002
@@ -65,4 +65,4 @@ EXPOSE 3002
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3002) + '/api/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
-CMD ["node", "apps/panel/server.js"]
+CMD ["node", "apps/golden_pen/server.js"]

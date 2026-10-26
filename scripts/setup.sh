@@ -15,9 +15,9 @@ if [[ ! -f apps/sample/.env.local ]]; then
   echo "▶ Created apps/sample/.env.local from .env.example (API mocked with MSW)"
 fi
 
-if [[ ! -f apps/panel/.env.local ]]; then
-  cp apps/panel/.env.example apps/panel/.env.local
-  echo "▶ Created apps/panel/.env.local from .env.example (API mocked with MSW)"
+if [[ ! -f apps/golden_pen/.env.local ]]; then
+  cp apps/golden_pen/.env.example apps/golden_pen/.env.local
+  echo "▶ Created apps/golden_pen/.env.local from .env.example (API mocked with MSW)"
 fi
 
 if [[ "${SKIP_BROWSERS:-0}" != "1" ]]; then

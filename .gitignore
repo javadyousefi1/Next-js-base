@@ -47,3 +47,6 @@ CLAUDE.local.md
 
 # Claude Code: generated code map (scripts/claude/codemap.ts, at session start)
 .claude/codemap.md
+
+# Saved Docker images (scripts/docker-image.sh)
+docker-images/

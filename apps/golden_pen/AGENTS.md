@@ -1,6 +1,6 @@
-# apps/panel — AGENTS.md
+# apps/golden_pen — AGENTS.md
 
-The admin panel: a lean copy of `apps/sample` (same structure, rules and tooling) with phone-number
+Golden Pen, the admin panel: a lean copy of `apps/sample` (same structure, rules and tooling) with phone-number
 auth against the back-office API. **Copy patterns from `apps/sample`** (names, folders, comments);
 repository rules: [`../../AGENTS.md`](../../AGENTS.md), app conventions:
 [`../sample/AGENTS.md`](../sample/AGENTS.md). It has no examples, tables, chat, PWA, Redis or
@@ -43,3 +43,8 @@ unverified until its code is verified. Set `API_MOCKING=disabled` to use the rea
 
 Unit: `bun test` (`*.test.ts` next to the code). E2E: `e2e/*.spec.ts` (Playwright against
 `next start` + MSW, Persian labels, plain URLs like `/login`). Skill: `write-e2e-test`.
+
+## Deploy
+
+`bun run docker:image golden_pen` (repo root) builds the image for `linux/amd64` and saves it to
+`docker-images/`; it prints the `scp` / `docker load` / `docker run` commands for the server.
