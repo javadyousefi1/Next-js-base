@@ -27,6 +27,7 @@ playwright/.cache/
 .env.*
 !.env.example
 !.env.test
+!apps/golden_pen/.env.production
 
 # logs
 *.log
