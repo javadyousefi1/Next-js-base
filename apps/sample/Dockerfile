@@ -24,7 +24,7 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
 FROM base AS prune
 ARG TURBO_VERSION
 COPY . .
-RUN bunx turbo@${TURBO_VERSION} prune sample --docker
+RUN bun x turbo@${TURBO_VERSION} prune sample --docker
 
 # ── 2. builder ──────────────────────────────────────────────────────────────────────────────────
 FROM base AS builder
