@@ -1,103 +1,105 @@
 #!/usr/bin/env bash
-# Builds the production Docker image of ONE app and saves it as a file you can copy to a server.
+# Builds ONE app's Docker image for the server (linux/amd64) and saves it as a .tar.gz.
 #
-#   bun run docker:image               → first asks which app (only apps with a Dockerfile are listed)
-#   bun run docker:image golden_pen    → no question
-#   PLATFORM=linux/arm64 bun run docker:image   → for an ARM server (default: linux/amd64)
+#   bun run docker:image              → first asks which project (apps with a Dockerfile)
+#   bun run docker:image golden_pen   → no question
+#   PLATFORM=linux/arm64 bun run docker:image   → for an ARM server
 #
-# NEXT_PUBLIC_* build values come from `apps/<app>/.env.production` when it exists (gitignored),
-# else from the Dockerfile's defaults. The app is the only question.
-#
-# Output: docker-images/<app>_<date>_<commit>_<os>-<arch>.tar.gz (git- and docker-ignored).
-# On the server: `docker load -i <file>` — the script prints the exact commands at the end.
-set -euo pipefail
+# Output: docker-images/<app>_<date>_<os>-<arch>.tar.gz (git- and docker-ignored).
+# NEXT_PUBLIC_* build values come from apps/<app>/.env.production when it exists.
+
+set -eo pipefail
 cd "$(dirname "$0")/.."
 
-# Ubuntu servers are almost always x86-64. The image must match the SERVER, not this machine
-# (an image built on an Apple Silicon Mac is arm64 unless told otherwise).
 PLATFORM="${PLATFORM:-linux/amd64}"
 OUT_DIR="docker-images"
-IMAGE_PREFIX="next-js-base"
 
-fail() {
-  echo "✖ $*" >&2
+log() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
+
+error() {
+  echo "❌ ERROR: $1"
   exit 1
 }
 
-# ── 1. which app ────────────────────────────────────────────────────────────────────────────────
-apps=()
+# ── Which project ────────────────────────────────────────────────────────────────────────────────
+APPS=()
 for dockerfile in apps/*/Dockerfile; do
-  [[ -f "$dockerfile" ]] && apps+=("$(basename "$(dirname "$dockerfile")")")
+  [ -f "$dockerfile" ] && APPS+=("$(basename "$(dirname "$dockerfile")")")
 done
-((${#apps[@]})) || fail "No app has a Dockerfile (apps/<name>/Dockerfile)."
+[ ${#APPS[@]} -gt 0 ] || error "No app has a Dockerfile (apps/<name>/Dockerfile)"
 
-app="${1:-}"
-if [[ -z "$app" ]]; then
-  echo "Which app do you want an image for?"
+APP="${1:-}"
+if [ -z "$APP" ]; then
+  echo "Which project do you want to build?"
   PS3="Number: "
-  select choice in "${apps[@]}"; do
-    [[ -n "$choice" ]] && app="$choice" && break
+  select choice in "${APPS[@]}"; do
+    [ -n "$choice" ] && APP="$choice" && break
     echo "Pick a number from the list."
   done
 fi
-[[ -f "apps/$app/Dockerfile" ]] || fail "Unknown app '$app'. Apps with a Dockerfile: ${apps[*]}"
-dockerfile="apps/$app/Dockerfile"
+[ -f "apps/$APP/Dockerfile" ] || error "Unknown project '$APP'. Projects: ${APPS[*]}"
 
-command -v docker >/dev/null || fail "Docker is not installed."
-docker info >/dev/null 2>&1 || fail "Docker is not running. Start Docker and try again."
-docker buildx version >/dev/null 2>&1 || fail "docker buildx is missing (it ships with Docker Desktop / docker-buildx-plugin)."
+IMAGE_NAME="$APP"
+IMAGE_TAG="latest"
+OUTPUT_NAME="$OUT_DIR/${APP}_$(date '+%Y%m%d-%H%M')_${PLATFORM//\//-}.tar.gz"
 
-# ── 2. build arguments ──────────────────────────────────────────────────────────────────────────
-# NEXT_PUBLIC_* values are baked into the browser bundle at BUILD time. For each one the Dockerfile
-# declares: the shell environment wins, then apps/<app>/.env.production, then the Dockerfile default.
-env_file="apps/$app/.env.production"
-build_args=()
+log "🚀 Starting build & export process for: $APP"
+
+# Check docker
+if ! command -v docker >/dev/null 2>&1; then
+  error "Docker is not installed or not in PATH"
+fi
+docker info >/dev/null 2>&1 || error "Docker is not running"
+
+# Show system arch
+ARCH=$(uname -m)
+log "🖥️  Detected system architecture: $ARCH"
+
+# NEXT_PUBLIC_* values are baked into the browser code at build time
+BUILD_ARGS=()
+ENV_FILE="apps/$APP/.env.production"
 while IFS='=' read -r name default; do
-  value="${!name:-}"
-  if [[ -z "$value" && -f "$env_file" ]]; then
-    value="$(sed -n "s/^$name=//p" "$env_file" | tail -n 1)"
-  fi
+  value=""
+  [ -f "$ENV_FILE" ] && value="$(sed -n "s/^$name=//p" "$ENV_FILE" | tail -n 1)"
   value="${value:-$default}"
-  echo "  $name=$value"
-  build_args+=(--build-arg "$name=$value")
-done < <(sed -n 's/^ARG \(NEXT_PUBLIC_[A-Z0-9_]*\)=\(.*\)$/\1=\2/p' "$dockerfile")
-[[ -f "$env_file" ]] || echo "  (defaults — put production values in $env_file)"
+  log "🔧 $name=$value"
+  BUILD_ARGS+=(--build-arg "$name=$value")
+done < <(sed -n 's/^ARG \(NEXT_PUBLIC_[A-Z0-9_]*\)=\(.*\)$/\1=\2/p' "apps/$APP/Dockerfile")
+[ -f "$ENV_FILE" ] || log "⚠️  $ENV_FILE not found: using the Dockerfile defaults"
 
-# ── 3. build for the server's platform ──────────────────────────────────────────────────────────
-commit="$(git rev-parse --short HEAD)"
-git diff --quiet HEAD -- || commit="$commit-dirty" # uncommitted changes are in the image too
-tag="$(date +%Y%m%d-%H%M)-$commit"
-image="$IMAGE_PREFIX/$app"
+# Build image (build context = repo root: the Dockerfile prunes the monorepo itself)
+log "🐳 Building Docker image for platform: $PLATFORM"
+log "📦 Image: ${IMAGE_NAME}:${IMAGE_TAG}"
 
-echo "▶ Building $image:$tag for $PLATFORM (first build takes a few minutes)…"
 docker buildx build \
   --platform "$PLATFORM" \
-  --file "$dockerfile" \
-  --tag "$image:$tag" \
-  --tag "$image:latest" \
-  ${build_args[@]+"${build_args[@]}"} \
+  -f "apps/$APP/Dockerfile" \
+  -t "${IMAGE_NAME}:${IMAGE_TAG}" \
+  ${BUILD_ARGS[@]+"${BUILD_ARGS[@]}"} \
   --load \
-  . || fail "Build failed (see the error above). An 'exec format error' means the CPU emulation is missing: Docker Desktop has it built in; on Linux run 'docker run --privileged --rm tonistiigi/binfmt --install all'."
+  . || error "Docker build failed"
 
-# ── 4. save to a file ───────────────────────────────────────────────────────────────────────────
+log "✅ Build finished successfully"
+
+# Check image exists
+docker image inspect "${IMAGE_NAME}:${IMAGE_TAG}" >/dev/null 2>&1 || error "Image was not found after build"
+
+# Export + compress
 mkdir -p "$OUT_DIR"
-file="$OUT_DIR/${app}_${tag}_${PLATFORM//\//-}.tar.gz"
-echo "▶ Saving to $file…"
-docker save "$image:$tag" "$image:latest" | gzip >"$file"
+log "💾 Saving and compressing image to $OUTPUT_NAME"
+docker save "${IMAGE_NAME}:${IMAGE_TAG}" | gzip >"$OUTPUT_NAME" || error "docker save failed"
 
-port="$(sed -n 's/^EXPOSE \([0-9]*\).*/\1/p' "$dockerfile" | head -n 1)"
-port="${port:-3000}"
+# Final check
+[ -s "$OUTPUT_NAME" ] || error "Output file not found after compression"
 
-cat <<EOF
+FILE_SIZE=$(du -h "$OUTPUT_NAME" | cut -f1)
+PORT=$(sed -n 's/^EXPOSE \([0-9]*\).*/\1/p' "apps/$APP/Dockerfile" | head -n 1)
 
-✔ Done: $file ($(du -h "$file" | cut -f1))
-
-On the server (Ubuntu):
-  scp $file user@server:~/
-  ssh user@server
-  docker load -i ~/$(basename "$file")
-  docker run -d --name $app --restart unless-stopped -p $port:$port --env-file .env $image:$tag
-
-The .env file holds the runtime variables (see apps/$app/.env.example); NEXT_PUBLIC_* values are
-already in the image.
-EOF
+log "🎉 Done!"
+log "📁 Output file: $(pwd)/${OUTPUT_NAME}"
+log "📏 File size: ${FILE_SIZE}"
+log "➡️  Copy this file to your server and run:"
+log "    docker load < $(basename "$OUTPUT_NAME")"
+log "    docker run -d --name $APP --restart unless-stopped -p ${PORT:-3000}:${PORT:-3000} --env-file .env ${IMAGE_NAME}:${IMAGE_TAG}"
