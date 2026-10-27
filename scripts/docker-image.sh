@@ -100,6 +100,14 @@ PORT=$(sed -n 's/^EXPOSE \([0-9]*\).*/\1/p' "apps/$APP/Dockerfile" | head -n 1)
 log "🎉 Done!"
 log "📁 Output file: $(pwd)/${OUTPUT_NAME}"
 log "📏 File size: ${FILE_SIZE}"
-log "➡️  Copy this file to your server and run:"
+log "➡️  Copy these two files to the same folder on your server:"
+log "    $(pwd)/${OUTPUT_NAME}"
+if [ -f "$ENV_FILE" ]; then
+  log "    $(pwd)/${ENV_FILE}   (runtime variables)"
+else
+  log "    a .env.production with the runtime variables (see apps/$APP/.env.example)"
+fi
+log "➡️  Then, in that folder on the server, run:"
 log "    docker load < $(basename "$OUTPUT_NAME")"
-log "    docker run -d --name $APP --restart unless-stopped -p ${PORT:-3000}:${PORT:-3000} --env-file .env ${IMAGE_NAME}:${IMAGE_TAG}"
+log "    docker rm -f $APP 2>/dev/null || true"
+log "    docker run -d --name $APP --restart unless-stopped -p ${PORT:-3000}:${PORT:-3000} --env-file .env.production ${IMAGE_NAME}:${IMAGE_TAG}"
