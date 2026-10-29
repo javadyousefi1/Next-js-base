@@ -1,11 +1,11 @@
-import { LayoutDashboardIcon, SettingsIcon, type LucideIcon } from "lucide-react";
+import { LayoutDashboardIcon, SettingsIcon, UsersIcon, type LucideIcon } from "lucide-react";
 
 import { ROUTES, type AppRoute } from "./routes";
 
 export type NavItem = {
   href: AppRoute;
   /** Key in the `Nav` messages namespace. */
-  labelKey: "dashboard" | "settings";
+  labelKey: "dashboard" | "users" | "settings";
   icon: LucideIcon;
 };
 
@@ -21,6 +21,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     labelKey: "main",
     items: [
       { href: ROUTES.dashboard, labelKey: "dashboard", icon: LayoutDashboardIcon },
+      { href: ROUTES.users, labelKey: "users", icon: UsersIcon },
       { href: ROUTES.settings, labelKey: "settings", icon: SettingsIcon },
     ],
   },

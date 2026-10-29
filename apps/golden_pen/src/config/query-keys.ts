@@ -1,5 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 
+import type { UsersListParams } from "@/features/users/schemas/user.schema";
+
 /**
  * Query-key registry. Every React Query key MUST be created here
  * (lint: `project/no-inline-query-keys`).
@@ -9,11 +11,17 @@ import type { QueryKey } from "@tanstack/react-query";
  * across features.
  */
 const authRoot = ["auth"] as const;
+const usersRoot = ["users"] as const;
 
 export const QUERY_KEYS = {
   auth: {
     all: authRoot,
     session: () => [...authRoot, "session"] as const,
+  },
+  users: {
+    all: usersRoot,
+    lists: () => [...usersRoot, "list"] as const,
+    list: (params: UsersListParams) => [...usersRoot, "list", params] as const,
   },
 } as const;
 

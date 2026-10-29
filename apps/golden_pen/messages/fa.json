@@ -17,6 +17,7 @@
   "Nav": {
     "main": "منوی اصلی",
     "dashboard": "داشبورد",
+    "users": "کاربران",
     "settings": "تنظیمات",
     "toggleSidebar": "باز و بسته کردن منو",
     "breadcrumb": "مسیر صفحه",
@@ -81,12 +82,72 @@
     "welcomeDescription": "شما وارد پنل مدیریت شده‌اید.",
     "phone": "شماره موبایل"
   },
+  "Users": {
+    "title": "کاربران",
+    "description": "جستجو، فیلتر و صفحه‌بندی کاربران. هر تغییر در نشانی صفحه ذخیره می‌شود.",
+    "searchPlaceholder": "جستجوی نام کامل…",
+    "phoneNumberFilter": "شماره موبایل",
+    "phoneNumberPlaceholder": "09123456789",
+    "roleFilter": "نقش",
+    "identityStatusFilter": "وضعیت هویت",
+    "roles": {
+      "super-admin": "مدیر کل",
+      "lawyer": "وکیل",
+      "intern": "کارآموز",
+      "operator": "اپراتور"
+    },
+    "identityStatuses": {
+      "0": "بدون هویت",
+      "1": "درخواست شده",
+      "2": "در انتظار بررسی",
+      "3": "تأیید شده",
+      "4": "رد شده",
+      "5": "لغو شده"
+    },
+    "status": {
+      "active": "فعال",
+      "inactive": "غیرفعال"
+    },
+    "yes": "بله",
+    "no": "خیر",
+    "columns": {
+      "fullName": "نام کامل",
+      "phoneNumber": "شماره موبایل",
+      "email": "ایمیل",
+      "username": "نام کاربری",
+      "roles": "نقش‌ها",
+      "identityStatus": "وضعیت هویت",
+      "status": "وضعیت",
+      "phoneVerified": "تأیید موبایل",
+      "createdAt": "تاریخ ایجاد"
+    }
+  },
   "Settings": {
     "title": "تنظیمات",
     "description": "تنظیمات شخصی روی همین دستگاه ذخیره می‌شوند.",
     "appearance": {
       "title": "ظاهر",
       "description": "حالت روشن، تیره یا هماهنگ با سیستم را انتخاب کنید."
+    }
+  },
+  "DataTable": {
+    "total": "{total, plural, =0 {بدون نتیجه} other {# نتیجه}}",
+    "rowsPerPage": "تعداد در هر صفحه",
+    "summary": "صفحه {page} از {pageCount}",
+    "first": "صفحه اول",
+    "previous": "صفحه قبل",
+    "next": "صفحه بعد",
+    "last": "صفحه آخر",
+    "filters": "فیلترها",
+    "filtersDescription": "با تغییر هر فیلتر، نتایج بلافاصله به‌روز می‌شوند.",
+    "filtersButton": "{count, plural, =0 {فیلترها} other {فیلترها، # فعال}}",
+    "clearAll": "پاک کردن همه",
+    "close": "بستن",
+    "all": "همه",
+    "resetFilters": "پاک کردن فیلترها",
+    "empty": {
+      "title": "نتیجه‌ای پیدا نشد",
+      "description": "جستجوی دیگری امتحان کنید یا فیلترها را پاک کنید."
     }
   },
   "Errors": {

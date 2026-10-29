@@ -3,8 +3,10 @@ import { delay } from "msw/utils/delay";
 
 import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { env } from "@/env";
+import { PAGE_INDEX_BASE } from "@/features/users/api/users.backend";
 
 import { db, MOCK_OTP_CODE, type MockUser } from "./db";
+import { mockListedUsers } from "./users-data";
 
 /**
  * MSW handlers that imitate the back-office API (Authentication + User). They answer the
@@ -143,5 +145,38 @@ export const handlers = [
       },
       identity: null,
     });
+  }),
+
+  http.get(url(API_ENDPOINTS.users.list), async ({ request }) => {
+    await delay(RESPONSE_DELAY_MS);
+    const rejected = missingBackOffice(request);
+    if (rejected) return rejected;
+
+    const token = request.headers.get("authorization")?.replace("Bearer ", "");
+    if (!userOf(token)) return new HttpResponse(null, { status: 401 });
+
+    const query = new URL(request.url).searchParams;
+    const fullName = query.get("FullName");
+    const phoneNumber = query.get("PhoneNumber");
+    const role = query.get("Role");
+    const identityStatus = query.get("IdentityStatus");
+    const includeIdentity = query.get("IncludeIdentity") === "true";
+    const pageIndex = Number(query.get("PageIndex") ?? PAGE_INDEX_BASE);
+    const pageSize = Number(query.get("PageSize") ?? 10);
+
+    const matches = mockListedUsers.filter(
+      (user) =>
+        (!fullName || user.fullName.includes(fullName)) &&
+        (!phoneNumber || user.phoneNumber.includes(phoneNumber)) &&
+        (!role || user.roles.includes(role)) &&
+        (identityStatus === null ||
+          (user.identity !== null && user.identity.statusType === Number(identityStatus))),
+    );
+    const start = (pageIndex - PAGE_INDEX_BASE) * pageSize;
+    const items = matches
+      .slice(start, start + pageSize)
+      .map((user) => ({ ...user, identity: includeIdentity ? user.identity : null }));
+
+    return HttpResponse.json({ items, totalCount: matches.length });
   }),
 ];

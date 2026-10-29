@@ -54,6 +54,7 @@ const nextConfig: NextConfig = {
     "@repo/hooks",
     "@repo/http",
     "@repo/query",
+    "@repo/table",
     "@repo/ui",
     "@t3-oss/env-nextjs",
     "@t3-oss/env-core",

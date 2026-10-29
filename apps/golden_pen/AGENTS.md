@@ -39,6 +39,13 @@ MSW in `src/mocks` imitates the API and requires the `back-office: true` header.
 `09120000000` / `admin123`; the SMS code of every phone is `123456`; a registered phone is stored
 unverified until its code is verified.
 
+## Users table
+
+`/users`: `GET /User/GetAll` (`features/users`, `users.backend.ts` is the only file that knows the API).
+The toolbar search is `FullName`; the Filters drawer has `PhoneNumber`, `Role` (`USER_ROLES`, ids 1-4,
+sent as the role name) and `IdentityStatus` (0-5); `IncludeIdentity=true` is always sent; no sorting.
+`PAGE_INDEX_BASE` (`users.backend.ts`, now 1) is a guess: set 0 if the API's `PageIndex` is 0-based.
+
 ## Tests
 
 Unit: `bun test` (`*.test.ts` next to the code). E2E: `e2e/*.spec.ts` (Playwright against

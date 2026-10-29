@@ -9,6 +9,7 @@ export const ROUTES = {
   dashboard: "/",
   login: "/login",
   register: "/register",
+  users: "/users",
   settings: "/settings",
 } as const;
 

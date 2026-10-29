@@ -37,7 +37,7 @@ export async function rootMetadata(locale: AppLocale): Promise<Metadata> {
   };
 }
 
-type PageNamespace = "Dashboard" | "Settings" | "Auth" | "Register";
+type PageNamespace = "Dashboard" | "Users" | "Settings" | "Auth" | "Register";
 
 /** Per-page title/description/canonical from the page's i18n namespace. */
 export async function pageMetadata(
