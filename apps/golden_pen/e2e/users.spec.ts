@@ -49,9 +49,36 @@ test.describe("users table (URL state + React Query)", () => {
     await page.keyboard.press("Escape");
     await expect(page.getByText("۳ نتیجه")).toBeVisible();
 
-    await page.getByRole("button", { name: "پاک کردن فیلترها" }).first().click();
+    await page.getByRole("button", { name: "حذف فیلتر وضعیت هویت" }).click();
     await expect(page).not.toHaveURL(/identityStatus=/);
     await expect(page.getByText("۲۷ نتیجه")).toBeVisible();
+  });
+
+  test("shows a removable badge per active filter", async ({ page }) => {
+    await page.getByRole("button", { name: "فیلترها", exact: true }).click();
+    await page.getByRole("combobox", { name: "نقش" }).click();
+    await page.getByRole("option", { name: "کارآموز" }).click();
+    await expect(page).toHaveURL(/role=intern/);
+    await page.keyboard.press("Escape");
+    await expect(page.getByText("نقش: کارآموز")).toBeVisible();
+    await expect(page.getByText("۸ نتیجه")).toBeVisible();
+
+    await page.getByRole("button", { name: "حذف فیلتر نقش" }).click();
+    await expect(page).not.toHaveURL(/role=/);
+    await expect(page.getByText("۲۷ نتیجه")).toBeVisible();
+    await expect(page.getByRole("row")).toHaveCount(11);
+  });
+
+  test("shows the no-results state and resets from it", async ({ page }) => {
+    await page.getByRole("searchbox").fill("zzzzنامعتبر");
+    await expect(page.getByText("نتیجه‌ای پیدا نشد")).toBeVisible();
+    await expect(page.getByText("جستجو: zzzzنامعتبر")).toBeVisible();
+
+    await page.getByRole("button", { name: "پاک کردن فیلترها" }).click();
+    await expect(page).not.toHaveURL(/q=/);
+    await expect(page.getByText("نتیجه‌ای پیدا نشد")).toHaveCount(0);
+    await expect(page.getByText("۲۷ نتیجه")).toBeVisible();
+    await expect(page.getByRole("searchbox")).toHaveValue("");
   });
 
   test("paginates on the server", async ({ page }) => {

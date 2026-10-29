@@ -53,6 +53,7 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     "@repo/hooks",
     "@repo/http",
+    "@repo/jalali",
     "@repo/query",
     "@repo/table",
     "@repo/ui",

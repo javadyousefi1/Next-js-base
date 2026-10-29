@@ -4,7 +4,7 @@ import type { DataTableColumn } from "@repo/table/types";
 import { Badge } from "@repo/ui/components/badge";
 import { useTranslations } from "next-intl";
 
-import { formatPersianDate } from "@/features/users/format-date";
+import { formatJalaliDate } from "@/lib/format-date";
 
 import type { InviteLink, InviteLinkStatus } from "../schemas/invite-link.schema";
 import { CopyLinkButton } from "./copy-link-button";
@@ -56,17 +56,17 @@ export function useInviteLinksColumns(): DataTableColumn<InviteLink>[] {
     {
       id: "expiresAt",
       header: t("columns.expiresAt"),
-      cell: (link) => formatPersianDate(link.expiresAt),
+      cell: (link) => formatJalaliDate(link.expiresAt),
     },
     {
       id: "usedAt",
       header: t("columns.usedAt"),
-      cell: (link) => formatPersianDate(link.usedAt),
+      cell: (link) => formatJalaliDate(link.usedAt),
     },
     {
       id: "createdAt",
       header: t("columns.createdAt"),
-      cell: (link) => formatPersianDate(link.createdAt),
+      cell: (link) => formatJalaliDate(link.createdAt),
     },
   ];
 }

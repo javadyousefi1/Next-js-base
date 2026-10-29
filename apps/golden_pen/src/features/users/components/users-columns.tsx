@@ -4,7 +4,8 @@ import type { DataTableColumn } from "@repo/table/types";
 import { Badge } from "@repo/ui/components/badge";
 import { useTranslations } from "next-intl";
 
-import { formatPersianDate } from "../format-date";
+import { formatJalaliDate } from "@/lib/format-date";
+
 import { identityStatusSchema, isKnownRole, type User } from "../schemas/user.schema";
 
 /** The API has no sorting, so no column is sortable. Empty cells show "—". */
@@ -77,7 +78,7 @@ export function useUsersColumns(): DataTableColumn<User>[] {
     {
       id: "createdAt",
       header: t("columns.createdAt"),
-      cell: (user) => formatPersianDate(user.createdAt),
+      cell: (user) => formatJalaliDate(user.createdAt),
     },
   ];
 }

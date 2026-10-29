@@ -11,20 +11,19 @@ import {
 } from "@repo/ui/components/table";
 import { cn } from "@repo/ui/lib/utils";
 
-import { QueryError } from "@/components/feedback/query-error";
-
 import { DataTableColumnHeader } from "./data-table-column-header";
-import { DataTableEmpty } from "./data-table-empty";
+import { DataTableEmpty, type DataTableEmptyTexts } from "./data-table-empty";
+import { DataTableError } from "./data-table-error";
 import { DataTableSkeleton } from "./data-table-skeleton";
 
 /** Rows of a server-driven table, with its loading / error / empty states and sortable headers. */
-export function DataTable() {
+export function DataTable(emptyTexts: DataTableEmptyTexts) {
   const { table, columns } = useDataTable();
 
   if (table.isLoading) {
     return <DataTableSkeleton columns={columns.length} rows={table.state.pageSize} />;
   }
-  if (table.isError) return <QueryError onRetry={table.retry} />;
+  if (table.isError) return <DataTableError onRetry={table.retry} />;
 
   return (
     <div className="overflow-hidden rounded-lg border">
@@ -53,7 +52,11 @@ export function DataTable() {
           {table.rows.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length}>
-                <DataTableEmpty hasFilters={table.hasFilters} onReset={table.resetFilters} />
+                <DataTableEmpty
+                  hasFilters={table.hasFilters}
+                  onReset={table.resetFilters}
+                  {...emptyTexts}
+                />
               </TableCell>
             </TableRow>
           ) : (

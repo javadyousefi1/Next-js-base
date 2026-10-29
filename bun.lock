@@ -26,6 +26,7 @@
         "@hookform/resolvers": "5.9.1",
         "@repo/hooks": "workspace:*",
         "@repo/http": "workspace:*",
+        "@repo/jalali": "workspace:*",
         "@repo/query": "workspace:*",
         "@repo/table": "workspace:*",
         "@repo/ui": "workspace:*",
