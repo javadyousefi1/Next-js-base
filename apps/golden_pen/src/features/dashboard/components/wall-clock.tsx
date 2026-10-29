@@ -47,7 +47,7 @@ export function WallClock() {
         aria-label={clock.ariaLabel}
         data-testid="wall-clock"
         viewBox="0 0 200 200"
-        className={cn("drop-shadow-lg", FACE_SIZE)}
+        className={cn("drop-shadow-sm", FACE_SIZE)}
       >
         <defs>
           <radialGradient id={`${gradientId}-face`} cx="50%" cy="40%" r="65%">
@@ -135,10 +135,14 @@ export function WallClock() {
         </g>
       </svg>
       <div className="flex items-center gap-3">
-        <time dir="ltr" data-testid="clock" className="font-heading text-3xl font-semibold">
+        <time
+          dir="ltr"
+          data-testid="clock"
+          className="font-heading text-2xl font-semibold tabular-nums"
+        >
           {clock.time}
         </time>
-        <span className="flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+        <span className="flex items-center gap-1.5 rounded-full border border-border bg-background/80 px-2.5 py-1 text-xs font-medium text-muted-foreground">
           <PartIcon className="size-3.5" aria-hidden />
           {clock.partLabel}
         </span>

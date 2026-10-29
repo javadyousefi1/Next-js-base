@@ -7,7 +7,7 @@ import { TodayCard } from "./today-card";
 /** The dashboard: hero, three stat cards, calendar and today side by side, then the quick actions. */
 export function DashboardContent() {
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-6">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-6">
       <GreetingHero />
       <AdminPulse />
       <MonthCalendarCard />

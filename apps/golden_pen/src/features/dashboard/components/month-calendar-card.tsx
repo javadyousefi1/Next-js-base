@@ -15,10 +15,10 @@ export function MonthCalendarCard() {
   const calendar = useMonthCalendar();
 
   return (
-    <Card className="lg:col-span-3">
-      <CardHeader>
+    <Card className="gap-5 rounded-2xl shadow-sm lg:col-span-3">
+      <CardHeader className="border-b border-border/60 pb-4">
         <CardTitle className="flex items-center gap-2">
-          <CalendarIcon className="size-4 text-sky-500" aria-hidden />
+          <CalendarIcon className="size-4 text-muted-foreground" aria-hidden />
           {t("title")}
         </CardTitle>
       </CardHeader>
@@ -27,7 +27,7 @@ export function MonthCalendarCard() {
           <Skeleton className="h-80 w-full" />
         ) : (
           <>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between rounded-xl bg-muted/60 p-1">
               <Button
                 variant="ghost"
                 size="icon"
@@ -48,7 +48,7 @@ export function MonthCalendarCard() {
                 <ChevronLeftIcon />
               </Button>
             </div>
-            <div className="grid grid-cols-7 gap-1 text-center">
+            <div className="grid grid-cols-7 gap-1.5 text-center">
               {calendar.weekdays.map((weekday) => (
                 <span key={weekday} className="py-1 text-xs font-medium text-muted-foreground">
                   {weekday}
@@ -63,9 +63,11 @@ export function MonthCalendarCard() {
                     aria-current={day.isToday ? "date" : undefined}
                     onClick={day.select}
                     className={cn(
-                      "relative mx-auto flex size-9 items-center justify-center rounded-full text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50",
+                      "relative mx-auto flex h-9 w-full max-w-9 items-center justify-center rounded-xl text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50",
                       day.isHoliday && "font-medium text-rose-600 dark:text-rose-400",
-                      day.isSelected && !day.isToday && "bg-muted ring-1 ring-foreground/15",
+                      day.isSelected &&
+                        !day.isToday &&
+                        "bg-accent font-semibold ring-1 ring-border",
                       day.isToday &&
                         "bg-primary font-semibold text-primary-foreground shadow-sm hover:bg-primary/90",
                     )}
@@ -86,7 +88,7 @@ export function MonthCalendarCard() {
                 ),
               )}
             </div>
-            <div className="mt-auto flex flex-col gap-2">
+            <div className="mt-auto flex flex-col gap-2 border-t border-border/60 pt-3">
               <div className="flex min-h-7 items-center" aria-live="polite">
                 {calendar.selectedNote ? (
                   <span className="flex items-center gap-1.5 rounded-full bg-rose-500/15 px-3 py-1 text-xs font-medium text-rose-700 dark:text-rose-300">
