@@ -8,8 +8,12 @@ import type { SessionToken } from "@/features/auth/schemas/auth.schema";
 
 type ResponseCookies = NextResponse["cookies"];
 
-/** Secure cookies everywhere except plain-http local development. */
-const secure = env.AUTH_COOKIE_SECURE ?? env.NODE_ENV === "production";
+/**
+ * `Secure` follows how the panel is served: browsers drop `Secure` cookies on plain http, so an
+ * `http://` site (localhost, or a server reached by IP) gets a non-secure cookie and an `https://`
+ * site a secure one. `AUTH_COOKIE_SECURE` overrides it.
+ */
+const secure = env.AUTH_COOKIE_SECURE ?? env.NEXT_PUBLIC_SITE_URL.startsWith("https://");
 
 /** The token is only ever stored in an httpOnly cookie: JavaScript in the browser can't read it. */
 const baseCookie = { httpOnly: true, secure, sameSite: "lax", path: "/" } as const;

@@ -33,11 +33,11 @@ logout:   POST /api/auth/logout       → clears the cookie
 - `/api/proxy/*` adds the Bearer token; the token-issuing endpoints are blocked there.
 - No rate limiting here: the backend is expected to throttle SMS.
 
-## Mocks (`API_MOCKING=enabled`, the default in `.env.example`)
+## Mocks (`API_MOCKING=enabled`: e2e tests and demos; `.env.example` uses the real API)
 
 MSW in `src/mocks` imitates the API and requires the `back-office: true` header. Admin
 `09120000000` / `admin123`; the SMS code of every phone is `123456`; a registered phone is stored
-unverified until its code is verified. Set `API_MOCKING=disabled` to use the real API.
+unverified until its code is verified.
 
 ## Tests
 

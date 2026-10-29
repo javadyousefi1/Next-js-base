@@ -18,7 +18,7 @@ export const env = createEnv({
     API_BASE_URL: z.url(),
     /** `enabled` → the upstream API is answered by MSW (`src/mocks`), no backend needed. */
     API_MOCKING: z.enum(["enabled", "disabled"]).default("disabled"),
-    /** Defaults to `true` in production (see `src/server/auth/cookies.ts`). */
+    /** Defaults to whether NEXT_PUBLIC_SITE_URL is https (see `src/server/auth/cookies.ts`). */
     AUTH_COOKIE_SECURE: z.stringbool().optional(),
     /** Cookie lifetime when the backend's JWT has no `exp` claim (default: one day). */
     AUTH_TOKEN_TTL_SECONDS: z.coerce.number().int().positive().default(86_400),

@@ -17,7 +17,7 @@ fi
 
 if [[ ! -f apps/golden_pen/.env.local ]]; then
   cp apps/golden_pen/.env.example apps/golden_pen/.env.local
-  echo "▶ Created apps/golden_pen/.env.local from .env.example (API mocked with MSW)"
+  echo "▶ Created apps/golden_pen/.env.local from .env.example (real API)"
 fi
 
 if [[ "${SKIP_BROWSERS:-0}" != "1" ]]; then
