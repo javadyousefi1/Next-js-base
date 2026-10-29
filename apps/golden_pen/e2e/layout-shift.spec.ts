@@ -49,6 +49,8 @@ test.describe("layout shift", () => {
         avatar: page.getByTestId("profile-avatar"),
       }[ready];
       await expect(marker).toBeVisible();
+      // The sidebar footer (role switcher + user menu) is part of every page: it must not shift either.
+      await expect(page.getByRole("combobox", { name: "نمایش به‌عنوان" })).toBeVisible();
       await page.waitForLoadState("networkidle");
       await page.waitForTimeout(1000);
 

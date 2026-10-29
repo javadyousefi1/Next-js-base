@@ -17,6 +17,7 @@ import { PanelsTopLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { ROUTES } from "@/config/routes";
+import { RoleSwitcher } from "@/features/auth/components/role-switcher";
 import { UserMenu } from "@/features/auth/components/user-menu";
 import { Link } from "@/i18n/navigation";
 
@@ -77,6 +78,7 @@ export function AppSidebar({ side }: AppSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter>
+        <RoleSwitcher />
         <SidebarMenu>
           <SidebarMenuItem>
             <UserMenu />

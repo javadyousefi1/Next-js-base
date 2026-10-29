@@ -72,6 +72,16 @@ Verify needs a Requested target, revoke a Verified one. Errors: ProblemDetails `
 (`UserErrors.ProfileNotComplete`, `IdentityNotInRequestedState`, `InvalidIdentityAction`), forwarded by the BFF
 (`bffError` keeps the upstream `errors` for 4xx). The profile's identity tab has the request card.
 
+## Role switcher (UI only)
+
+A real super-admin (session roles include `super-admin`) gets «نمایش به‌عنوان» at the top of the sidebar
+footer (`features/auth`: `role-switcher.tsx`, icon + dropdown when collapsed) and an amber badge with × in the
+header (`view-as-badge.tsx`). The choice is the session cookie `gp_view_as` (non-httpOnly, path `/`, no max-age,
+shared by all tabs; logout clears it; ignored and removed for non-super-admins or unknown values). It changes only
+the UI: the backend still sees the real super-admin token. Every role-based UI decision uses
+`useSessionRoles().roles` (effective roles; pure rules in `view-as.ts`), never `user.roles`; the switcher itself
+uses `isRealSuperAdmin`. E2E: `e2e/role-switch.spec.ts`.
+
 ## Profile
 
 `/profile` (user menu → «پروفایل»; no sidebar item): `features/profile`, `profile.backend.ts` is the only

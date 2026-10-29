@@ -1,6 +1,7 @@
 import { Separator } from "@repo/ui/components/separator";
 import { SidebarTrigger } from "@repo/ui/components/sidebar";
 
+import { ViewAsBadge } from "@/features/auth/components/view-as-badge";
 import { ThemeToggle } from "@/features/preferences/components/theme-toggle";
 
 import { AppBreadcrumbs } from "./app-breadcrumbs";
@@ -11,7 +12,8 @@ export function AppHeader() {
       <SidebarTrigger className="-ms-1" />
       <Separator orientation="vertical" className="my-auto me-2 h-4" />
       <AppBreadcrumbs />
-      <div className="ms-auto flex items-center gap-1">
+      <div className="ms-auto flex items-center gap-2">
+        <ViewAsBadge />
         <ThemeToggle />
       </div>
     </header>
