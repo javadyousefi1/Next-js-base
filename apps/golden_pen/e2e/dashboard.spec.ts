@@ -9,23 +9,27 @@ test.describe("dashboard", () => {
     await expect(page).toHaveURL(/\/$/);
   });
 
-  test("shows the greeting, the live clock and today's dates", async ({ page }) => {
+  test("shows the greeting, the wall clock and today's dates", async ({ page }) => {
     await expect(page.getByTestId("greeting")).toContainText(/(صبح|ظهر|عصر|شب) بخیر، مدیر/);
-    await expect(page.getByTestId("clock")).toHaveText(/^[۰-۹]{2}:[۰-۹]{2}:[۰-۹]{2}$/);
+    await expect(page.getByTestId("clock")).toHaveText(/^[۰-۹]{2}:[۰-۹]{2}$/);
+    await expect(
+      page.getByRole("img", { name: /^ساعت [۰-۹]{2}:[۰-۹]{2} (صبح|ظهر|عصر|شب) به وقت تهران$/ }),
+    ).toBeVisible();
+    await expect(page.getByText(/[۰-۹]+ روز تا نوروز|امروز نوروز است/).first()).toBeVisible();
     await expect(page.getByTestId("jalali-date")).toContainText(/[۰-۹]{4}/);
     await expect(page.getByRole("progressbar", { name: "پیشرفت سال" })).toBeVisible();
   });
 
   test("shows the counts and links the cards to the filtered pages", async ({ page }) => {
-    const users = page.getByText("کل کاربران").locator("..");
-    await expect(users).toContainText("۲۷");
+    const users = page.getByRole("link", { name: /کل کاربران/ });
+    await expect(users.getByTestId("stat-value")).toHaveText("۲۷");
 
     const identity = page.getByRole("link", { name: /درخواست‌های هویت در انتظار بررسی/ });
-    await expect(identity).toContainText("۶");
+    await expect(identity.getByTestId("stat-value")).toHaveText("۶");
     const invites = page.getByRole("link", { name: /لینک‌های دعوت استفاده‌نشده/ });
     // 9 seeded; the invite-links spec may have created one in parallel.
-    await expect(invites).toContainText(/[۰-۹]+$/);
-    const unused = (await invites.textContent())?.match(/[۰-۹]+$/)?.[0];
+    await expect(invites.getByTestId("stat-value")).toHaveText(/^[۰-۹]+$/);
+    const unused = await invites.getByTestId("stat-value").textContent();
 
     await identity.click();
     await expect(page).toHaveURL(/\/users\?identityStatus=2$/);
@@ -38,15 +42,27 @@ test.describe("dashboard", () => {
   });
 
   test("the quick action opens the invite link modal", async ({ page }) => {
-    await page.getByRole("button", { name: "ایجاد لینک دعوت" }).click();
+    await page
+      .getByTestId("quick-actions")
+      .getByRole("button", { name: "ایجاد لینک دعوت" })
+      .click();
     await expect(
       page.getByRole("dialog").getByRole("button", { name: "ایجاد لینک" }),
     ).toBeVisible();
   });
 
-  test("the quick links go to the filtered users and the profile", async ({ page }) => {
-    await page.getByRole("link", { name: "ویرایش پروفایل" }).click();
+  test("the quick links go to the filtered users, the profile and the users", async ({ page }) => {
+    const actions = page.getByTestId("quick-actions");
+    await actions.getByRole("link", { name: "پروفایل من" }).click();
     await expect(page).toHaveURL(/\/profile$/);
+
+    await page.goBack();
+    await actions.getByRole("link", { name: "بررسی هویت‌ها" }).click();
+    await expect(page).toHaveURL(/\/users\?identityStatus=2$/);
+
+    await page.goBack();
+    await actions.getByRole("link", { name: "کاربران" }).click();
+    await expect(page).toHaveURL(/\/users$/);
   });
 
   test("pages the calendar by month", async ({ page }) => {
@@ -56,29 +72,5 @@ test.describe("dashboard", () => {
     await expect(title).not.toHaveText(before ?? "");
     await page.getByRole("button", { name: "ماه قبل" }).click();
     await expect(title).toHaveText(before ?? "");
-  });
-
-  test("notes can be added, ticked, removed and survive a reload", async ({ page }) => {
-    const input = page.getByRole("textbox", { name: "یک کار یا یادداشت بنویس…" });
-    await input.fill("تماس با مشتری");
-    await input.press("Enter");
-    await input.fill("ارسال گزارش");
-    await input.press("Enter");
-
-    const summary = page.getByTestId("notes-summary");
-    await expect(summary).toHaveText("۰ از ۲ انجام شده");
-
-    await page.getByRole("checkbox", { name: "تماس با مشتری" }).click();
-    await expect(summary).toHaveText("۱ از ۲ انجام شده");
-
-    await page.reload();
-    await expect(page.getByRole("checkbox", { name: "تماس با مشتری" })).toBeChecked();
-    await expect(page.getByTestId("notes-summary")).toHaveText("۱ از ۲ انجام شده");
-
-    await page.getByRole("button", { name: "پاک کردن انجام‌شده‌ها" }).click();
-    await expect(page.getByTestId("notes-summary")).toHaveText("۰ از ۱ انجام شده");
-
-    await page.getByRole("button", { name: "حذف یادداشت: ارسال گزارش" }).click();
-    await expect(page.getByText("هنوز یادداشتی ندارید.")).toBeVisible();
   });
 });

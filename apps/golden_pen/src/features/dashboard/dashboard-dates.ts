@@ -2,6 +2,9 @@ import {
   differenceInJalaliDays,
   dateToJalali,
   isLeapJalaliYear,
+  JALALI_MONTH_NAMES,
+  JALALI_WEEKDAY_NAMES,
+  jalaliWeekday,
   toPersianDigits,
   type JalaliDate,
 } from "@repo/jalali";
@@ -71,7 +74,15 @@ export function daysToNowruz(date: JalaliDate): number {
   return differenceInJalaliDays({ year, month: 1, day: 1 }, date);
 }
 
-/** A stable index for "one tip per day": the day of the year modulo the number of tips. */
-export function dailyIndex(date: JalaliDate, count: number): number {
-  return dayOfJalaliYear(date) % count;
+/** `شنبه ۱۲ آبان ۱۴۰۵` — the weekday, day, month and year of a Jalali date. */
+export function jalaliDateText(date: JalaliDate): string {
+  const weekday = JALALI_WEEKDAY_NAMES.fa[jalaliWeekday(date)];
+  const month = JALALI_MONTH_NAMES.fa[date.month - 1];
+  return `${weekday} ${toPersianDigits(date.day)} ${month} ${toPersianDigits(date.year)}`;
+}
+
+/** `۱۴:۰۵` — the Tehran time without seconds, Persian digits. */
+export function formatHourMinute(date: Date): string {
+  const { hour, minute } = tehranTime(date);
+  return [hour, minute].map((value) => toPersianDigits(String(value).padStart(2, "0"))).join(":");
 }

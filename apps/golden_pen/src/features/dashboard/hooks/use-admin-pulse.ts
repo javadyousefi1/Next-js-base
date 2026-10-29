@@ -35,15 +35,15 @@ export function useAdminPulse() {
 
   return [
     {
-      id: "users",
+      id: "users" as const,
       label: t("totalUsers"),
       value: format(users.data),
       isError: users.isError,
       retry: () => void users.refetch(),
-      href: undefined,
+      href: ROUTES.users,
     },
     {
-      id: "identity",
+      id: "identity" as const,
       label: t("pendingIdentity"),
       value: format(pendingTotal),
       isError: pending.isError || requested.isError,
@@ -54,7 +54,7 @@ export function useAdminPulse() {
       href: PENDING_IDENTITY_HREF,
     },
     {
-      id: "invite-links",
+      id: "invite-links" as const,
       label: t("unusedInviteLinks"),
       value: format(unused.data),
       isError: unused.isError,

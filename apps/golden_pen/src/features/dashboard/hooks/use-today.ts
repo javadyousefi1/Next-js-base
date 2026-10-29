@@ -1,16 +1,11 @@
 "use client";
 
-import {
-  JALALI_MONTH_NAMES,
-  JALALI_WEEKDAY_NAMES,
-  jalaliWeekday,
-  toPersianDigits,
-} from "@repo/jalali";
+import { toPersianDigits } from "@repo/jalali";
 import { useTranslations } from "next-intl";
 
 import {
   dayOfJalaliYear,
-  daysToNowruz,
+  jalaliDateText,
   jalaliToday,
   jalaliYearLength,
   TEHRAN_TIME_ZONE,
@@ -34,12 +29,9 @@ export function useToday() {
   if (!now) return null;
 
   const today = jalaliToday(now);
-  const weekday = JALALI_WEEKDAY_NAMES.fa[jalaliWeekday(today)];
-  const month = JALALI_MONTH_NAMES.fa[today.month - 1];
-  const nowruzDays = daysToNowruz(today);
 
   return {
-    jalali: `${weekday} ${toPersianDigits(today.day)} ${month} ${toPersianDigits(today.year)}`,
+    jalali: jalaliDateText(today),
     gregorian: dateText("fa-IR-u-ca-gregory", now),
     // Hijri only: the Jalali date above comes from `@repo/jalali`.
     hijri: dateText("fa-IR-u-ca-islamic-umalqura", now),
@@ -48,8 +40,6 @@ export function useToday() {
       total: toPersianDigits(jalaliYearLength(today.year)),
     }),
     weekOfYear: t("weekOfYearValue", { week: toPersianDigits(weekOfJalaliYear(today)) }),
-    nowruz:
-      nowruzDays === 0 ? t("nowruzToday") : t("nowruzIn", { days: toPersianDigits(nowruzDays) }),
     progressPercent: yearProgressPercent(today),
     progressLabel: `${toPersianDigits(yearProgressPercent(today))}٪`,
   };

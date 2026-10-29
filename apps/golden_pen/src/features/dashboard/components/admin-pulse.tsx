@@ -8,10 +8,11 @@ export function AdminPulse() {
   const cards = useAdminPulse();
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <>
       {cards.map((card) => (
         <StatCard
           key={card.id}
+          kind={card.id}
           label={card.label}
           value={card.value}
           isError={card.isError}
@@ -19,6 +20,6 @@ export function AdminPulse() {
           href={card.href}
         />
       ))}
-    </div>
+    </>
   );
 }

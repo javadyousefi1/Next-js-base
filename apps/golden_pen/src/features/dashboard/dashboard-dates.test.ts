@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
+import { advanceAngles, clockAngles, continueAngle } from "./clock-angles";
 import {
-  dailyIndex,
   dayOfJalaliYear,
   daysToNowruz,
   formatClock,
@@ -45,10 +45,6 @@ describe("year helpers", () => {
     // 1403 is a leap year: 30 Esfand exists.
     expect(daysToNowruz({ year: 1403, month: 12, day: 29 })).toBe(2);
   });
-
-  test("dailyIndex stays inside the list", () => {
-    expect(dailyIndex({ year: 1404, month: 12, day: 29 }, 8)).toBeLessThan(8);
-  });
 });
 
 describe("solarHolidayKey", () => {
@@ -67,5 +63,43 @@ describe("solarHolidayKey", () => {
 describe("formatClock", () => {
   test("Tehran time with Persian digits (UTC+3:30)", () => {
     expect(formatClock(new Date("2026-01-01T10:30:05Z"))).toBe("۱۴:۰۰:۰۵");
+  });
+});
+
+describe("clockAngles", () => {
+  test("hands at Tehran 14:00:30 (10:30:30Z)", () => {
+    const angles = clockAngles(new Date("2026-01-01T10:30:30Z"));
+    expect(angles.second).toBe(180);
+    expect(angles.minute).toBe(3);
+    expect(angles.hour).toBeCloseTo(60.25, 5);
+  });
+});
+
+describe("continueAngle", () => {
+  test("keeps turning forward over 59 → 0", () => {
+    expect(continueAngle(354, 0)).toBe(360);
+    expect(continueAngle(360, 6)).toBe(366);
+    expect(continueAngle(1074, 0)).toBe(1080);
+  });
+
+  test("does not move for the same angle", () => {
+    expect(continueAngle(90, 90)).toBe(90);
+    expect(continueAngle(450, 90)).toBe(450);
+  });
+});
+
+describe("advanceAngles", () => {
+  const target = { hour: 10, minute: 0, second: 0 };
+
+  test("starts at the target", () => {
+    expect(advanceAngles(null, target)).toEqual(target);
+  });
+
+  test("never moves a hand backwards", () => {
+    expect(advanceAngles({ hour: 9, minute: 354, second: 354 }, target)).toEqual({
+      hour: 10,
+      minute: 360,
+      second: 360,
+    });
   });
 });

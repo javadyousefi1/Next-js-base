@@ -74,9 +74,9 @@ identity document with `fieldType` `licenseFile` | `documents`, type JPEG/PNG(+W
 
 ## Dashboard
 
-`/`: `features/dashboard`: greeting + Tehran clock (rendered after mount), today card, Jalali month calendar
+`/`: `features/dashboard`: hero (greeting, Jalali date, Nowruz chip, SVG analog wall clock `wall-clock.tsx`, rendered after mount), today card, Jalali month calendar
 (fixed solar holidays only), admin pulse (counts from the users / invite-links lists with `PageSize=1`, read
-`totalCount`), quick actions, and a localStorage checklist. Pure date helpers: `dashboard-dates.ts`.
+`totalCount`), and quick actions. Pure helpers: `dashboard-dates.ts`, `clock-angles.ts` (hand angles never spin back).
 
 ## Tests
 
