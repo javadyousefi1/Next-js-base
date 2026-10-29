@@ -16,7 +16,7 @@ const PART_ICONS = {
   night: MoonIcon,
 } satisfies Record<GreetingPart, typeof SunIcon>;
 
-const FACE_SIZE = "size-40 sm:size-44";
+const FACE_SIZE = "size-24 sm:size-28";
 
 // A hand is drawn pointing up from the centre (100, 100) and turned by an inline CSS rotation.
 const handClass = "transition-transform duration-1000 ease-linear motion-reduce:transition-none";
@@ -33,7 +33,7 @@ export function WallClock() {
 
   if (clock === null) {
     return (
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex shrink-0 items-center gap-4 sm:flex-col sm:gap-2">
         <Skeleton className={cn("rounded-full", FACE_SIZE)} />
         <Skeleton className="h-9 w-32" />
       </div>
@@ -41,7 +41,7 @@ export function WallClock() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex shrink-0 items-center gap-4 sm:flex-col sm:gap-2">
       <svg
         role="img"
         aria-label={clock.ariaLabel}
@@ -138,7 +138,7 @@ export function WallClock() {
         <time
           dir="ltr"
           data-testid="clock"
-          className="font-heading text-2xl font-semibold tabular-nums"
+          className="font-heading text-xl font-semibold tabular-nums"
         >
           {clock.time}
         </time>

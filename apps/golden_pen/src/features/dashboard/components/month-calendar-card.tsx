@@ -15,7 +15,7 @@ export function MonthCalendarCard() {
   const calendar = useMonthCalendar();
 
   return (
-    <Card className="gap-5 rounded-2xl shadow-sm lg:col-span-3">
+    <Card className="gap-5 self-start rounded-2xl shadow-sm lg:col-span-2">
       <CardHeader className="border-b border-border/60 pb-4">
         <CardTitle className="flex items-center gap-2">
           <CalendarIcon className="size-4 text-muted-foreground" aria-hidden />

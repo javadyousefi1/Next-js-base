@@ -4,15 +4,17 @@ import { MonthCalendarCard } from "./month-calendar-card";
 import { QuickActionsCard } from "./quick-actions-card";
 import { TodayCard } from "./today-card";
 
-/** The dashboard: hero, three stat cards, calendar and today side by side, then the quick actions. */
+/** Management overview first, followed by the action workspace and a compact calendar. */
 export function DashboardContent() {
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-6">
       <GreetingHero />
       <AdminPulse />
+      <div className="grid min-w-0 gap-5 lg:col-span-4">
+        <QuickActionsCard />
+        <TodayCard />
+      </div>
       <MonthCalendarCard />
-      <TodayCard />
-      <QuickActionsCard />
     </div>
   );
 }

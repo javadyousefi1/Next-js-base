@@ -1,13 +1,15 @@
 "use client";
 
 import { Skeleton } from "@repo/ui/components/skeleton";
-import { CalendarDaysIcon, PartyPopperIcon } from "lucide-react";
+import { CalendarDaysIcon, PartyPopperIcon, FeatherIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { useGreeting } from "../hooks/use-greeting";
 import { WallClock } from "./wall-clock";
 
 /** Hero banner: the greeting with the first name, today's date, the Nowruz chip and the wall clock. */
 export function GreetingHero() {
+  const t = useTranslations("Dashboard");
   const { greeting, date, nowruz } = useGreeting();
 
   return (
@@ -17,8 +19,12 @@ export function GreetingHero() {
         <div className="absolute -end-10 -bottom-24 size-72 rounded-full bg-primary/5 blur-3xl" />
         <div className="absolute inset-0 bg-[radial-gradient(var(--foreground)_1px,transparent_1px)] [mask-image:linear-gradient(to_left,black,transparent)] [background-size:22px_22px] opacity-[0.05]" />
       </div>
-      <div className="relative flex flex-col items-center gap-8 p-6 sm:flex-row sm:justify-between sm:px-10 sm:py-8">
-        <div className="flex flex-col items-center gap-5 text-center sm:items-start sm:text-start">
+      <div className="relative flex flex-col items-center gap-8 p-6 sm:flex-row sm:justify-between sm:px-10 sm:py-6">
+        <div className="flex flex-col items-center gap-3 text-center sm:items-start sm:text-start">
+          <span className="flex items-center gap-2 text-xs font-medium tracking-wide text-muted-foreground">
+            <FeatherIcon className="size-4" aria-hidden />
+            {t("workspace")}
+          </span>
           {greeting === null ? (
             <Skeleton className="h-10 w-64 max-w-full" />
           ) : (
@@ -29,6 +35,7 @@ export function GreetingHero() {
               {greeting}
             </h2>
           )}
+          <p className="max-w-lg text-sm leading-7 text-muted-foreground">{t("welcomeNote")}</p>
           <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
             {date === null || nowruz === null ? (
               <Skeleton className="h-8 w-72 max-w-full" />
