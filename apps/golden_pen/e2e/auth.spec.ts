@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { DEMO_USER, OTP_CODE, signIn } from "./fixtures";
+import { DEMO_USER, OTP_CODE, signIn, waitForHydration } from "./fixtures";
 
 test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
   test("protected pages redirect to login with a callback URL", async ({ page }) => {
@@ -19,6 +19,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
 
   test("validates the form with the shared zod schema", async ({ page }) => {
     await page.goto("/login");
+    await waitForHydration(page);
     await page.getByRole("button", { name: "ورود" }).click();
     await expect(page.getByText("شماره موبایل معتبر وارد کنید، مثل 09123456789.")).toBeVisible();
     await expect(page.getByText("رمز عبور را وارد کنید.")).toBeVisible();
@@ -26,6 +27,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
 
   test("rejects a wrong password", async ({ page }) => {
     await page.goto("/login");
+    await waitForHydration(page);
     await page.getByRole("textbox", { name: "شماره موبایل" }).fill(DEMO_USER.phoneNumber);
     await page.getByRole("textbox", { name: "رمز عبور" }).fill("wrong-password");
     await page.getByRole("button", { name: "ورود" }).click();
@@ -49,6 +51,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
 
   test("signs in with an SMS code", async ({ page }) => {
     await page.goto("/login");
+    await waitForHydration(page);
     await page.getByRole("tab", { name: "کد پیامکی" }).click();
     await page.getByRole("textbox", { name: "شماره موبایل" }).fill(DEMO_USER.phoneNumber);
     await page.getByRole("button", { name: "ارسال کد" }).click();
@@ -63,6 +66,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
 
   test("rejects a wrong SMS code and an unknown number", async ({ page }) => {
     await page.goto("/login");
+    await waitForHydration(page);
     await page.getByRole("tab", { name: "کد پیامکی" }).click();
     await page.getByRole("textbox", { name: "شماره موبایل" }).fill("09129999999");
     await page.getByRole("button", { name: "ارسال کد" }).click();
@@ -77,6 +81,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
 
   test("registers a new number, confirms the code and lands signed in", async ({ page }) => {
     await page.goto("/login");
+    await waitForHydration(page);
     await page.getByRole("link", { name: "ثبت‌نام" }).click();
     await expect(page).toHaveURL(/\/register$/);
     await expect(page.getByRole("heading", { name: "ایجاد حساب" })).toBeVisible();
@@ -97,6 +102,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
 
   test("a registered number cannot register again", async ({ page }) => {
     await page.goto("/register");
+    await waitForHydration(page);
     await page.getByRole("textbox", { name: "نام", exact: true }).fill("مدیر");
     await page.getByRole("textbox", { name: "نام خانوادگی" }).fill("تکراری");
     await page.getByRole("textbox", { name: "شماره موبایل" }).fill(DEMO_USER.phoneNumber);
