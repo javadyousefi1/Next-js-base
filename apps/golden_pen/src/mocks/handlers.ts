@@ -6,6 +6,12 @@ import { env } from "@/env";
 import { PAGE_INDEX_BASE } from "@/features/users/api/users.backend";
 
 import { db, MOCK_OTP_CODE, type MockUser } from "./db";
+import {
+  DEFAULT_EXPIRES_IN_DAYS,
+  inviteUrlOf,
+  mockInviteLinks,
+  type MockInviteLink,
+} from "./invite-links-data";
 import { mockListedUsers } from "./users-data";
 
 /**
@@ -178,5 +184,83 @@ export const handlers = [
       .map((user) => ({ ...user, identity: includeIdentity ? user.identity : null }));
 
     return HttpResponse.json({ items, totalCount: matches.length });
+  }),
+
+  http.get(url(API_ENDPOINTS.users.inviteLinks), async ({ request }) => {
+    await delay(RESPONSE_DELAY_MS);
+    const rejected = missingBackOffice(request);
+    if (rejected) return rejected;
+
+    const token = request.headers.get("authorization")?.replace("Bearer ", "");
+    if (!userOf(token)) return new HttpResponse(null, { status: 401 });
+
+    const query = new URL(request.url).searchParams;
+    const isUsed = query.get("IsUsed");
+    const pageIndex = Number(query.get("PageIndex") ?? PAGE_INDEX_BASE);
+    const pageSize = Number(query.get("PageSize") ?? 10);
+
+    const matches = mockInviteLinks.filter(
+      (link) => isUsed === null || (link.usedAt !== null) === (isUsed === "true"),
+    );
+    const start = (pageIndex - PAGE_INDEX_BASE) * pageSize;
+
+    return HttpResponse.json({
+      items: matches.slice(start, start + pageSize),
+      totalCount: matches.length,
+    });
+  }),
+
+  http.post(url(API_ENDPOINTS.users.createInviteLink), async ({ request }) => {
+    await delay(RESPONSE_DELAY_MS);
+    const rejected = missingBackOffice(request);
+    if (rejected) return rejected;
+
+    const token = request.headers.get("authorization")?.replace("Bearer ", "");
+    if (!userOf(token)) return new HttpResponse(null, { status: 401 });
+
+    const body = (await request.json()) as {
+      firstName?: string;
+      lastName?: string;
+      phoneNumber?: string;
+      expiresInDays?: number | null;
+    };
+    if (!body.firstName || !body.lastName || !body.phoneNumber) {
+      return problem(400, "نام، نام خانوادگی و شماره موبایل الزامی است.", "InviteLink.Invalid");
+    }
+    // One valid (unused, not expired) link per phone number.
+    const hasValidLink = mockInviteLinks.some(
+      (link) => link.phoneNumber === body.phoneNumber && link.isValid && link.usedAt === null,
+    );
+    if (hasValidLink) {
+      return problem(409, "برای این شماره یک لینک دعوت فعال وجود دارد.", "InviteLink.Conflict");
+    }
+
+    const days = body.expiresInDays ?? DEFAULT_EXPIRES_IN_DAYS;
+    const newToken = crypto.randomUUID().replaceAll("-", "");
+    const now = new Date();
+    const link: MockInviteLink = {
+      id: crypto.randomUUID(),
+      token: newToken,
+      inviteUrl: inviteUrlOf(newToken),
+      firstName: body.firstName,
+      lastName: body.lastName,
+      phoneNumber: body.phoneNumber,
+      expiresAt: new Date(now.getTime() + days * 86_400_000).toISOString(),
+      usedAt: null,
+      usedByUserId: null,
+      isValid: true,
+      createdAt: now.toISOString(),
+    };
+    mockInviteLinks.unshift(link);
+
+    return HttpResponse.json({
+      id: link.id,
+      token: link.token,
+      inviteUrl: link.inviteUrl,
+      expiresAt: link.expiresAt,
+      firstName: link.firstName,
+      lastName: link.lastName,
+      phoneNumber: link.phoneNumber,
+    });
   }),
 ];

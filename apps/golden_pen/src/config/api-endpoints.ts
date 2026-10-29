@@ -10,5 +10,10 @@ export const API_ENDPOINTS = {
     resendOtp: "/Authentication/ResendOtp",
     registerByInviteLink: "/Authentication/RegisterByInviteLink",
   },
-  users: { me: "/User/Get", list: "/User/GetAll" },
+  users: {
+    me: "/User/Get",
+    list: "/User/GetAll",
+    inviteLinks: "/User/InviteLink/GetAll",
+    createInviteLink: "/User/InviteLink/Create",
+  },
 } as const;

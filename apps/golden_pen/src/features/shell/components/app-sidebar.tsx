@@ -21,6 +21,7 @@ import { UserMenu } from "@/features/auth/components/user-menu";
 import { Link } from "@/i18n/navigation";
 
 import { useNavItems } from "../hooks/use-nav-items";
+import { NavSubmenu } from "./nav-submenu";
 
 type AppSidebarProps = {
   /** `right` for RTL locales. */
@@ -53,18 +54,22 @@ export function AppSidebar({ side }: AppSidebarProps) {
             <SidebarGroupLabel>{t(`Nav.${group.labelKey}`)}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={item.isActive}
-                      tooltip={t(`Nav.${item.labelKey}`)}
-                      render={<Link href={item.href} />}
-                    >
-                      <item.icon />
-                      <span>{t(`Nav.${item.labelKey}`)}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {group.items.map((item) =>
+                  "children" in item ? (
+                    <NavSubmenu key={item.labelKey} item={item} />
+                  ) : (
+                    <SidebarMenuItem key={item.href}>
+                      <SidebarMenuButton
+                        isActive={item.isActive}
+                        tooltip={t(`Nav.${item.labelKey}`)}
+                        render={<Link href={item.href} />}
+                      >
+                        <item.icon />
+                        <span>{t(`Nav.${item.labelKey}`)}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ),
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

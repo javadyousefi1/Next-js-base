@@ -14,10 +14,18 @@
       "code": "کد خطا:"
     }
   },
+  "Modal": {
+    "confirm": "تأیید",
+    "cancel": "انصراف",
+    "ok": "باشه",
+    "close": "بستن"
+  },
   "Nav": {
     "main": "منوی اصلی",
     "dashboard": "داشبورد",
     "users": "کاربران",
+    "userManagement": "مدیریت کاربران",
+    "inviteLinks": "لینک دعوت",
     "settings": "تنظیمات",
     "toggleSidebar": "باز و بسته کردن منو",
     "breadcrumb": "مسیر صفحه",
@@ -120,6 +128,52 @@
       "status": "وضعیت",
       "phoneVerified": "تأیید موبایل",
       "createdAt": "تاریخ ایجاد"
+    }
+  },
+  "InviteLinks": {
+    "title": "لینک‌های دعوت",
+    "description": "ساخت و پیگیری لینک‌های دعوت کاربران. هر تغییر در نشانی صفحه ذخیره می‌شود.",
+    "create": "ایجاد لینک دعوت",
+    "isUsedFilter": "وضعیت استفاده",
+    "isUsed": {
+      "true": "استفاده شده",
+      "false": "استفاده نشده"
+    },
+    "status": {
+      "active": "فعال",
+      "used": "استفاده شده",
+      "expired": "منقضی شده"
+    },
+    "copy": "کپی لینک",
+    "copied": "کپی شد",
+    "columns": {
+      "fullName": "نام کامل",
+      "phoneNumber": "شماره موبایل",
+      "status": "وضعیت",
+      "link": "لینک",
+      "expiresAt": "تاریخ انقضا",
+      "usedAt": "تاریخ استفاده",
+      "createdAt": "تاریخ ایجاد"
+    },
+    "form": {
+      "createTitle": "ایجاد لینک دعوت",
+      "firstName": "نام",
+      "lastName": "نام خانوادگی",
+      "phoneNumber": "شماره موبایل",
+      "expiresInDays": "اعتبار (روز)",
+      "expiresHint": "خالی = پیش‌فرض سرور",
+      "create": "ایجاد لینک",
+      "createdHint": "لینک دعوت ساخته شد. آن را برای کاربر بفرستید.",
+      "close": "بستن"
+    },
+    "validation": {
+      "firstNameRequired": "نام را وارد کنید.",
+      "lastNameRequired": "نام خانوادگی را وارد کنید.",
+      "phoneInvalid": "شماره موبایل معتبر نیست (مثلاً 09123456789).",
+      "expiresInvalid": "یک عدد صحیح و مثبت وارد کنید."
+    },
+    "errors": {
+      "generic": "ساخت لینک انجام نشد. دوباره تلاش کنید."
     }
   },
   "Settings": {

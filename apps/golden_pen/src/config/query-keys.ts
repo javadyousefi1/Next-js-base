@@ -1,5 +1,6 @@
 import type { QueryKey } from "@tanstack/react-query";
 
+import type { InviteLinksListParams } from "@/features/invite-links/schemas/invite-link.schema";
 import type { UsersListParams } from "@/features/users/schemas/user.schema";
 
 /**
@@ -12,6 +13,7 @@ import type { UsersListParams } from "@/features/users/schemas/user.schema";
  */
 const authRoot = ["auth"] as const;
 const usersRoot = ["users"] as const;
+const inviteLinksRoot = ["invite-links"] as const;
 
 export const QUERY_KEYS = {
   auth: {
@@ -22,6 +24,11 @@ export const QUERY_KEYS = {
     all: usersRoot,
     lists: () => [...usersRoot, "list"] as const,
     list: (params: UsersListParams) => [...usersRoot, "list", params] as const,
+  },
+  inviteLinks: {
+    all: inviteLinksRoot,
+    lists: () => [...inviteLinksRoot, "list"] as const,
+    list: (params: InviteLinksListParams) => [...inviteLinksRoot, "list", params] as const,
   },
 } as const;
 
@@ -34,5 +41,8 @@ export const MUTATION_KEYS = {
     otpVerify: ["auth", "otp-verify"],
     register: ["auth", "register"],
     logout: ["auth", "logout"],
+  },
+  inviteLinks: {
+    create: ["invite-links", "create"],
   },
 } as const satisfies Record<string, Record<string, QueryKey>>;

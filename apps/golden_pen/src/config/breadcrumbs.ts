@@ -17,5 +17,6 @@ export type BreadcrumbLabelKey = keyof (typeof messages)["Nav"];
 export const BREADCRUMBS: Readonly<Record<string, BreadcrumbLabelKey>> = {
   [ROUTES.dashboard]: "dashboard",
   [ROUTES.users]: "users",
+  [ROUTES.inviteLinks]: "inviteLinks",
   [ROUTES.settings]: "settings",
 };

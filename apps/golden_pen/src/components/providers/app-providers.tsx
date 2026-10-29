@@ -8,6 +8,8 @@ import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import type { ReactNode } from "react";
 
+import { AppModalHost } from "@/components/feedback/app-modal-host";
+
 import { QueryProvider } from "./query-provider";
 
 type AppProvidersProps = {
@@ -26,6 +28,7 @@ export function AppProviders({ children, direction }: AppProvidersProps) {
               <NextTopLoader color="var(--primary)" height={3} showSpinner={false} />
               {children}
               <Toaster richColors position="bottom-center" />
+              <AppModalHost />
             </TooltipProvider>
           </QueryProvider>
         </NuqsAdapter>

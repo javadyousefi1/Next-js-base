@@ -46,6 +46,19 @@ The toolbar search is `FullName`; the Filters drawer has `PhoneNumber`, `Role` (
 sent as the role name) and `IdentityStatus` (0-5); `IncludeIdentity=true` is always sent; no sorting.
 `PAGE_INDEX_BASE` (`users.backend.ts`, now 1) is a guess: set 0 if the API's `PageIndex` is 0-based.
 
+## Invite links
+
+`/invite-links`: `GET /User/InviteLink/GetAll` (`IsUsed` filter, paging; no search, no sorting, so the
+toolbar hides the search box) and `POST /User/InviteLink/Create` (`features/invite-links`,
+`invite-links.backend.ts` is the only file that knows the API; `PAGE_INDEX_BASE` comes from users).
+Create: the page-header button opens a `modal.open` form (first/last name, phone, optional
+`expiresInDays`; empty = the server's default); on success the modal stays open and shows the
+`inviteUrl` with a copy button, and the list is invalidated. 400/409 show the server's message.
+Status is derived in the mapper: used, else expired (`!isValid`), else active.
+
+Sidebar: one collapsible item "مدیریت کاربران" (`NavParent` in `config/navigation.ts`) holds
+کاربران and لینک دعوت; `features/shell/nav-active.ts` marks it active/open when a child is current.
+
 ## Tests
 
 Unit: `bun test` (`*.test.ts` next to the code). E2E: `e2e/*.spec.ts` (Playwright against

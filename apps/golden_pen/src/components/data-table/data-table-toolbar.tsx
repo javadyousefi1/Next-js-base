@@ -9,27 +9,34 @@ import { useTranslations } from "next-intl";
 
 import { DataTableFilters } from "./data-table-filters";
 
+type DataTableToolbarProps = {
+  /** `false` for an API without text search: no search box. */
+  search?: boolean;
+};
+
 /** Search box + "clear filters" + the Filters drawer button at the end. */
-export function DataTableToolbar() {
+export function DataTableToolbar({ search: showSearch = true }: DataTableToolbarProps) {
   const t = useTranslations("DataTable");
   const { table, searchPlaceholder } = useDataTable();
   const search = useDebouncedInput(table.state.q, table.setSearch);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <InputGroup className="w-full sm:max-w-xs">
-        <InputGroupInput
-          type="search"
-          value={search.value}
-          placeholder={searchPlaceholder}
-          aria-label={searchPlaceholder}
-          onChange={(event) => search.onChange(event.target.value)}
-          onBlur={search.onBlur}
-        />
-        <InputGroupAddon>
-          <SearchIcon />
-        </InputGroupAddon>
-      </InputGroup>
+      {showSearch ? (
+        <InputGroup className="w-full sm:max-w-xs">
+          <InputGroupInput
+            type="search"
+            value={search.value}
+            placeholder={searchPlaceholder}
+            aria-label={searchPlaceholder}
+            onChange={(event) => search.onChange(event.target.value)}
+            onBlur={search.onBlur}
+          />
+          <InputGroupAddon>
+            <SearchIcon />
+          </InputGroupAddon>
+        </InputGroup>
+      ) : null}
 
       {table.hasFilters ? (
         <Button variant="ghost" onClick={table.resetFilters}>
