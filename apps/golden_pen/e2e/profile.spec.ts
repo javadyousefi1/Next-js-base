@@ -8,7 +8,11 @@ const PNG = Buffer.from(
   "base64",
 );
 
-const openTab = (page: Page, name: string) => page.getByRole("tab", { name }).click();
+async function openTab(page: Page, name: string) {
+  await page.getByRole("tab", { name, exact: true }).click();
+  await expect(page.getByRole("tabpanel", { name, exact: true })).toBeVisible();
+  await expect(page.getByRole("tabpanel")).toHaveCount(1);
+}
 
 /**
  * Registers a fresh user through the BFF and signs them in (the cookie lands in the page's
