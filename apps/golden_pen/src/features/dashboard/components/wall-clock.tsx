@@ -3,9 +3,8 @@
 import { Skeleton } from "@repo/ui/components/skeleton";
 import { cn } from "@repo/ui/lib/utils";
 import { MoonIcon, SunIcon, SunriseIcon, SunsetIcon } from "lucide-react";
-import { useId } from "react";
 
-import { CLOCK_NUMERALS, CLOCK_TICKS } from "../clock-angles";
+import { CLOCK_TICKS } from "../clock-angles";
 import type { GreetingPart } from "../dashboard-dates";
 import { useWallClock } from "../hooks/use-wall-clock";
 
@@ -25,16 +24,15 @@ const handStyle = (degrees: number) => ({
   transformOrigin: "100px 100px",
 });
 
-/** Analog Tehran wall clock (pure SVG, upright in RTL) with the digital time and the part of the day. */
+/** Minimal Tehran clock: two hands and an orbiting seconds marker, with digital time below. */
 export function WallClock() {
   const clock = useWallClock();
-  const gradientId = useId();
   const PartIcon = clock ? PART_ICONS[clock.part] : SunIcon;
 
   if (clock === null) {
     return (
       <div className="flex shrink-0 items-center gap-4 sm:flex-col sm:gap-2">
-        <Skeleton className={cn("rounded-full", FACE_SIZE)} />
+        <Skeleton className={cn("rounded-3xl", FACE_SIZE)} />
         <Skeleton className="h-9 w-32" />
       </div>
     );
@@ -47,54 +45,41 @@ export function WallClock() {
         aria-label={clock.ariaLabel}
         data-testid="wall-clock"
         viewBox="0 0 200 200"
-        className={cn("drop-shadow-sm", FACE_SIZE)}
+        className={cn("shrink-0", FACE_SIZE)}
       >
-        <defs>
-          <radialGradient id={`${gradientId}-face`} cx="50%" cy="40%" r="65%">
-            <stop offset="0%" className="[stop-color:var(--card)]" />
-            <stop offset="100%" className="[stop-color:var(--muted)]" />
-          </radialGradient>
-          <radialGradient id={`${gradientId}-inner`} cx="50%" cy="50%" r="50%">
-            <stop offset="80%" stopOpacity="0" className="[stop-color:var(--foreground)]" />
-            <stop offset="100%" stopOpacity="0.14" className="[stop-color:var(--foreground)]" />
-          </radialGradient>
-        </defs>
         <g aria-hidden>
-          <circle cx="100" cy="100" r="98" className="fill-muted-foreground/40" />
-          <circle cx="100" cy="100" r="95" className="fill-card" />
-          <circle cx="100" cy="100" r="93" fill={`url(#${gradientId}-face)`} />
-          <circle cx="100" cy="100" r="93" fill={`url(#${gradientId}-inner)`} />
-          {CLOCK_TICKS.map((tick) => (
-            <line
-              key={tick.index}
-              x1={tick.from.x}
-              y1={tick.from.y}
-              x2={tick.to.x}
-              y2={tick.to.y}
-              strokeLinecap="round"
-              strokeWidth={tick.isMajor ? 2.4 : 1}
-              className={cn(tick.isMajor ? "stroke-foreground" : "stroke-muted-foreground/60")}
-            />
-          ))}
-          {CLOCK_NUMERALS.map((numeral) => (
-            <text
-              key={numeral.hour}
-              x={numeral.x}
-              y={numeral.y}
-              textAnchor="middle"
-              dominantBaseline="central"
-              className="fill-foreground font-heading text-[15px] font-medium"
-            >
-              {numeral.text}
-            </text>
-          ))}
+          <rect
+            x="2"
+            y="2"
+            width="196"
+            height="196"
+            rx="48"
+            strokeWidth="2"
+            className="fill-card stroke-border"
+          />
+          <circle cx="100" cy="100" r="83" className="fill-muted/30" />
+          {CLOCK_TICKS.map((tick) =>
+            tick.isMajor ? (
+              <line
+                key={tick.index}
+                x1={tick.from.x}
+                y1={tick.from.y}
+                x2={tick.to.x}
+                y2={tick.to.y}
+                transform="translate(100 100) scale(0.83) translate(-100 -100)"
+                strokeLinecap="round"
+                strokeWidth="3"
+                className="stroke-muted-foreground/50"
+              />
+            ) : null,
+          )}
           <g className={handClass} style={handStyle(clock.angles.hour)}>
             <line
               x1="100"
-              y1="110"
+              y1="104"
               x2="100"
-              y2="58"
-              strokeWidth="6"
+              y2="62"
+              strokeWidth="5"
               strokeLinecap="round"
               className="stroke-foreground"
             />
@@ -102,36 +87,24 @@ export function WallClock() {
           <g className={handClass} style={handStyle(clock.angles.minute)}>
             <line
               x1="100"
-              y1="112"
+              y1="104"
               x2="100"
-              y2="34"
-              strokeWidth="4"
+              y2="43"
+              strokeWidth="3"
               strokeLinecap="round"
               className="stroke-foreground"
             />
           </g>
           <g className={handClass} style={handStyle(clock.angles.second)}>
-            <line
-              x1="100"
-              y1="124"
-              x2="100"
-              y2="22"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              className="stroke-rose-500"
-            />
-            <line
-              x1="100"
-              y1="104"
-              x2="100"
-              y2="124"
-              strokeWidth="4"
-              strokeLinecap="round"
-              className="stroke-rose-500"
-            />
+            <circle cx="100" cy="17" r="3" className="fill-muted-foreground" />
           </g>
-          <circle cx="100" cy="100" r="6" className="fill-foreground" />
-          <circle cx="100" cy="100" r="2.4" className="fill-rose-500" />
+          <circle
+            cx="100"
+            cy="100"
+            r="4"
+            strokeWidth="2.5"
+            className="fill-card stroke-foreground"
+          />
         </g>
       </svg>
       <div className="flex items-center gap-3">
