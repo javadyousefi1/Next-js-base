@@ -34,8 +34,15 @@ const backendUserSchema = z.object({
   username: z.string().nullish(),
   isActive: z.boolean(),
   isPhoneNumberVerified: z.boolean(),
-  // Only `statusType` is needed; the rest of the identity is ignored.
-  identity: z.looseObject({ statusType: z.number().int() }).nullish(),
+  // The status and the review fields are used; the rest of the identity is ignored.
+  identity: z
+    .looseObject({
+      statusType: z.number().int(),
+      requestedAt: z.string().nullish(),
+      verifiedAt: z.string().nullish(),
+      message: z.string().nullish(),
+    })
+    .nullish(),
   roles: z.array(z.string()).nullish(),
   createdAt: z.string().nullish(),
 });
@@ -55,6 +62,9 @@ export const usersListResponse = z
       username: user.username ?? null,
       roles: user.roles ?? [],
       identityStatus: user.identity?.statusType ?? null,
+      identityRequestedAt: user.identity?.requestedAt ?? null,
+      identityVerifiedAt: user.identity?.verifiedAt ?? null,
+      identityMessage: user.identity?.message ?? null,
       isActive: user.isActive,
       isPhoneNumberVerified: user.isPhoneNumberVerified,
       createdAt: user.createdAt ?? null,

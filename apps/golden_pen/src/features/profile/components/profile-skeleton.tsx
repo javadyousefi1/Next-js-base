@@ -6,7 +6,8 @@ import type { ProfileTab } from "../hooks/use-profile-tab";
 /** Height of each tab's card (rem), measured from the real forms: keep in sync when they change. */
 const TAB_HEIGHT: Record<ProfileTab, string> = {
   info: "h-[24rem]",
-  identity: "h-[57rem]",
+  // The request card (6rem) and the gap (1rem) above the form.
+  identity: "h-[64rem]",
   documents: "h-[10rem]",
 };
 

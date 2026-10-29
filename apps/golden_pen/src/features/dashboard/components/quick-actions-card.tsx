@@ -16,7 +16,7 @@ import { ROUTES } from "@/config/routes";
 import { useInviteLinkActions } from "@/features/invite-links/hooks/use-invite-link-actions";
 import { Link } from "@/i18n/navigation";
 
-import { PENDING_IDENTITY_HREF } from "../hooks/use-admin-pulse";
+import { IDENTITY_REQUESTS_HREF } from "../hooks/use-admin-pulse";
 
 const TILE =
   "group/tile flex flex-col items-center gap-2 rounded-xl bg-muted/40 p-4 text-center text-sm font-medium outline-none ring-1 ring-foreground/5 transition-all duration-200 hover:-translate-y-0.5 hover:bg-muted hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50 motion-reduce:transition-none motion-reduce:hover:translate-y-0";
@@ -29,7 +29,7 @@ function TileIcon({ icon: Icon, tone }: { icon: LucideIcon; tone: string }) {
   );
 }
 
-/** Shortcuts: the invite-link create modal (same hook as its page), pending identities, the profile, users. */
+/** Shortcuts: the invite-link create modal (same hook as its page), identity requests, the profile, users. */
 export function QuickActionsCard() {
   const t = useTranslations("Dashboard.actions");
   const inviteLinks = useInviteLinkActions();
@@ -50,7 +50,7 @@ export function QuickActionsCard() {
           />
           {t("createInviteLink")}
         </button>
-        <Link href={PENDING_IDENTITY_HREF} className={TILE}>
+        <Link href={IDENTITY_REQUESTS_HREF} className={TILE}>
           <TileIcon
             icon={ShieldCheckIcon}
             tone="bg-amber-500/15 text-amber-600 dark:text-amber-300"

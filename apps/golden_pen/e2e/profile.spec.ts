@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { OTP_CODE, signIn, waitForHydration } from "./fixtures";
+import { signIn, signInAsNewUser, waitForHydration } from "./fixtures";
 
 /** A 1x1 PNG. */
 const PNG = Buffer.from(
@@ -9,27 +9,6 @@ const PNG = Buffer.from(
 );
 
 const openTab = (page: Page, name: string) => page.getByRole("tab", { name }).click();
-
-/**
- * Registers a fresh user through the BFF and signs them in (the cookie lands in the page's
- * context), so a test can edit the profile without touching the shared demo admin that other
- * specs read (e.g. the dashboard greeting).
- */
-async function signInAsNewUser(page: Page) {
-  const phoneNumber = `0912${String(Math.floor(Math.random() * 1e7)).padStart(7, "0")}`;
-  const register = await page.request.post("/api/auth/register", {
-    data: { firstName: "سارا", lastName: "محمدی", phoneNumber },
-  });
-  expect(register.ok()).toBe(true);
-  const verify = await page.request.post("/api/auth/otp/verify", {
-    data: { phoneNumber, code: OTP_CODE },
-  });
-  expect(verify.ok()).toBe(true);
-
-  await page.goto("/profile");
-  await expect(page).toHaveURL(/\/profile$/);
-  await waitForHydration(page);
-}
 
 test.describe("profile", () => {
   test("opens from the user menu and shows the identity of the demo admin", async ({ page }) => {
@@ -49,7 +28,7 @@ test.describe("profile", () => {
 
     await openTab(page, "اطلاعات هویتی");
     await expect(page).toHaveURL(/\/profile\?tab=identity$/);
-    await expect(page.getByText("تصویر پروانه خوانا نیست.")).toBeVisible();
+    await expect(page.getByText("تصویر پروانه خوانا نیست.", { exact: true })).toBeVisible();
 
     await openTab(page, "مدارک");
     await expect(page.getByRole("link", { name: "پروانه.pdf" })).toHaveAttribute(
@@ -163,5 +142,32 @@ test.describe("profile", () => {
       .setInputFiles({ name: "a.zip", mimeType: "application/zip", buffer: Buffer.from("zip") });
     await expect(page.getByText("نوع فایل پشتیبانی نمی‌شود.")).toBeVisible();
     await expect(page.getByTestId("document-list")).toHaveCount(0);
+  });
+
+  test("requests identity verification: incomplete first, then complete", async ({ page }) => {
+    await signInAsNewUser(page);
+    await openTab(page, "اطلاعات هویتی");
+    const request = page.getByRole("button", { name: "درخواست احراز هویت" });
+    await expect(request).toBeEnabled();
+
+    // An empty profile: the backend answers ProfileNotComplete.
+    await request.click();
+    await expect(page.getByText("ابتدا اطلاعات هویتی و مدارک را کامل کنید")).toBeVisible();
+
+    await page.getByRole("textbox", { name: "تخصص" }).fill("حقوق کیفری");
+    await page.getByRole("textbox", { name: "کد ملی" }).fill("۰۰۱۲۳۴۵۶۷۸");
+    await page.getByRole("button", { name: "ذخیره تغییرات" }).click();
+    await expect(page.getByText("اطلاعات هویتی ذخیره شد")).toBeVisible();
+    await openTab(page, "مدارک");
+    await page
+      .getByTestId("license-input")
+      .setInputFiles({ name: "license-scan.png", mimeType: "image/png", buffer: PNG });
+    await expect(page.getByTestId("license-list")).toBeVisible();
+
+    await openTab(page, "اطلاعات هویتی");
+    await request.click();
+    await expect(page.getByText("درخواست احراز هویت ثبت شد")).toBeVisible();
+    await expect(page.getByRole("button", { name: "درخواست شما در حال بررسی است" })).toBeDisabled();
+    await expect(page.getByTestId("identity-status")).toHaveText("درخواست شده");
   });
 });

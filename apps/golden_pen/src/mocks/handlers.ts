@@ -41,6 +41,15 @@ const IDENTITY_KEYS = [
   "companyRepresentativeName",
 ];
 
+/** `PUT /User/Identity` `actionType`s and the identity statuses they move to. */
+const IDENTITY_REQUEST = 1;
+const IDENTITY_VERIFY = 2;
+const IDENTITY_REVOKE = 4;
+const IDENTITY_REQUESTED = 1;
+const IDENTITY_VERIFIED = 3;
+/** verify → Verified (3), reject → Rejected (4), revoke → Revoked (5). */
+const IDENTITY_REVIEW_STATUS: Record<number, number> = { 2: 3, 3: 4, 4: 5 };
+
 const TOKEN_HOURS = 24;
 const RESPONSE_DELAY_MS = 150;
 
@@ -158,7 +167,32 @@ export const handlers = [
 
     const user = userOf(request.headers.get("authorization")?.replace("Bearer ", ""));
     if (!user) return new HttpResponse(null, { status: 401 });
-    const includeIdentity = new URL(request.url).searchParams.get("includeIdentity") === "true";
+    const query = new URL(request.url).searchParams;
+    const includeIdentity = query.get("includeIdentity") === "true";
+
+    // `userId`: another user of the back-office list (the identity review).
+    const userId = query.get("userId");
+    if (userId) {
+      const listed = mockListedUsers.find((candidate) => candidate.id === userId);
+      if (!listed) return problem(404, "کاربر پیدا نشد.", "User.NotFound");
+      const [firstName = "", ...rest] = listed.fullName.split(" ");
+      return HttpResponse.json({
+        info: {
+          id: listed.id,
+          fullName: listed.fullName,
+          firstName,
+          lastName: rest.join(" "),
+          phoneNumber: listed.phoneNumber,
+          isPhoneNumberVerified: listed.isPhoneNumberVerified,
+          email: listed.email,
+          username: listed.username,
+          isActive: listed.isActive,
+          avatarUrl: listed.avatarUrl,
+          roles: listed.roles,
+        },
+        identity: includeIdentity && listed.identity ? identityResponse(listed.identity) : null,
+      });
+    }
 
     return HttpResponse.json({
       info: {
@@ -336,6 +370,79 @@ export const handlers = [
     }
 
     return problem(400, "نوع به‌روزرسانی معتبر نیست.", "User.Invalid");
+  }),
+
+  http.put(url(API_ENDPOINTS.users.identity), async ({ request }) => {
+    await delay(RESPONSE_DELAY_MS);
+    const rejected = missingBackOffice(request);
+    if (rejected) return rejected;
+
+    const caller = userOf(request.headers.get("authorization")?.replace("Bearer ", ""));
+    if (!caller) return new HttpResponse(null, { status: 401 });
+
+    const body = (await request.json()) as {
+      actionType?: number;
+      userId?: string;
+      message?: string;
+    };
+    const now = new Date().toISOString();
+
+    // Request: the signed-in user asks for verification (`userId` is ignored).
+    if (body.actionType === IDENTITY_REQUEST) {
+      const status = caller.identity?.statusType ?? 0;
+      if (status === IDENTITY_REQUESTED || status === IDENTITY_VERIFIED) {
+        return problem(
+          400,
+          "درخواست احراز هویت در این وضعیت ممکن نیست.",
+          "UserErrors.InvalidIdentityAction",
+        );
+      }
+      const identity = caller.identity;
+      const isComplete =
+        identity !== null &&
+        Boolean(identity.nationalId) &&
+        Boolean(identity.specialty) &&
+        identity.documents.length > 0;
+      if (!identity || !isComplete) {
+        return problem(400, "پروفایل کاربر کامل نیست.", "UserErrors.ProfileNotComplete");
+      }
+      identity.statusType = IDENTITY_REQUESTED;
+      identity.requestedAt = now;
+      identity.message = null;
+      return new HttpResponse(null, { status: 204 });
+    }
+
+    // Verify / reject / revoke: super-admin only, on a user of the back-office list.
+    const target = IDENTITY_REVIEW_STATUS[body.actionType ?? 0];
+    if (target === undefined) {
+      return problem(400, "عملیات معتبر نیست.", "UserErrors.InvalidIdentityAction");
+    }
+    if (!caller.roles.includes("super-admin")) {
+      return problem(403, "دسترسی لازم را ندارید.", "Auth.Forbidden");
+    }
+    const user = mockListedUsers.find((candidate) => candidate.id === body.userId);
+    if (!user) return problem(404, "کاربر پیدا نشد.", "User.NotFound");
+
+    const status = user.identity?.statusType ?? 0;
+    const isRevoke = body.actionType === IDENTITY_REVOKE;
+    if (isRevoke ? status !== IDENTITY_VERIFIED : status !== IDENTITY_REQUESTED) {
+      return problem(
+        400,
+        isRevoke
+          ? "فقط احراز هویت تأییدشده قابل ابطال است."
+          : "این درخواست دیگر در انتظار بررسی نیست.",
+        isRevoke ? "UserErrors.InvalidIdentityAction" : "UserErrors.IdentityNotInRequestedState",
+      );
+    }
+    const needsMessage = body.actionType !== IDENTITY_VERIFY;
+    if (needsMessage && !body.message?.trim()) {
+      return problem(400, "دلیل الزامی است.", "UserErrors.InvalidIdentityAction");
+    }
+    if (!user.identity) return problem(404, "هویت کاربر پیدا نشد.", "User.NotFound");
+    user.identity.statusType = target;
+    user.identity.verifiedAt = now;
+    user.identity.message = needsMessage ? (body.message?.trim() ?? null) : null;
+    return new HttpResponse(null, { status: 204 });
   }),
 
   http.post(url(API_ENDPOINTS.users.upload), async ({ request }) => {

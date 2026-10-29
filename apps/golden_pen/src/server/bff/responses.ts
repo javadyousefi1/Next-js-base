@@ -17,6 +17,12 @@ export function bffJson(body: unknown, { status = 200 }: { status?: number } = {
     : NextResponse.json(body, { status, headers: NO_STORE });
 }
 
+/** The `errors` array of an upstream error body (`undefined` when it has none). */
+function upstreamErrors(details: unknown): unknown[] | undefined {
+  if (!details || typeof details !== "object" || !("errors" in details)) return undefined;
+  return Array.isArray(details.errors) ? (details.errors as unknown[]) : undefined;
+}
+
 /**
  * Maps any error to a safe JSON response. Upstream messages are forwarded for 4xx; 5xx and
  * unknown errors never leak internals. A 401 also clears the auth cookie (session is over).
@@ -33,7 +39,12 @@ export function bffError(error: unknown): NextResponse {
   const headers: Record<string, string> = { ...NO_STORE };
   if (apiError.retryAfterSeconds) headers["Retry-After"] = String(apiError.retryAfterSeconds);
 
-  const response = NextResponse.json({ message }, { status, headers });
+  // 4xx: the upstream `errors` (ProblemDetails: `{ code, message }`) too, so the browser can map error codes.
+  const errors = status < 500 ? upstreamErrors(apiError.details) : undefined;
+  const response = NextResponse.json(errors ? { message, errors } : { message }, {
+    status,
+    headers,
+  });
   if (apiError.code === "UNAUTHORIZED") clearAuthCookies(response.cookies);
   return response;
 }

@@ -34,6 +34,16 @@ describe("markActive", () => {
     expect(children && "children" in children && children.children.map((c) => c.isActive)).toEqual([
       false,
       true,
+      false,
+    ]);
+  });
+
+  test("the identity-requests child is active on its page", () => {
+    const item = parent("/identity-requests");
+    expect(item && "children" in item && item.children.map((c) => c.isActive)).toEqual([
+      false,
+      false,
+      true,
     ]);
   });
 });

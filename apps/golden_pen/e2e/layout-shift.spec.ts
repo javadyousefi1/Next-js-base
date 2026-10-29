@@ -29,6 +29,7 @@ const PAGES = [
   { name: "dashboard", path: "/", ready: "greeting" },
   { name: "users", path: "/users", ready: "pagination" },
   { name: "invite-links", path: "/invite-links", ready: "pagination" },
+  { name: "identity-requests", path: "/identity-requests", ready: "pagination" },
   { name: "profile", path: "/profile", ready: "avatar" },
   { name: "profile identity tab", path: "/profile?tab=identity", ready: "avatar" },
 ] as const;

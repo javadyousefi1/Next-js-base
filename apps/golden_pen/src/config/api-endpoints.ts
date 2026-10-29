@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
     inviteLinks: "/User/InviteLink/GetAll",
     createInviteLink: "/User/InviteLink/Create",
     update: "/User/Update",
+    identity: "/User/Identity",
     upload: "/User/Upload",
   },
   baseInfo: {

@@ -5,14 +5,13 @@ import { createSerializer } from "nuqs/server";
 
 import { ROUTES } from "@/config/routes";
 import { inviteLinksSearchParams } from "@/features/invite-links/invite-links.search-params";
-import { usersSearchParams } from "@/features/users/users.search-params";
 
 import { dashboardCountQuery } from "../api/dashboard.queries";
 
-const usersUrl = createSerializer(usersSearchParams);
 const inviteLinksUrl = createSerializer(inviteLinksSearchParams);
 
-export const PENDING_IDENTITY_HREF = usersUrl(ROUTES.users, { identityStatus: "2" });
+/** The identity-requests page; its default tab is the requests waiting for review. */
+export const IDENTITY_REQUESTS_HREF = ROUTES.identityRequests;
 export const UNUSED_INVITE_LINKS_HREF = inviteLinksUrl(ROUTES.inviteLinks, { isUsed: "false" });
 
 const numberFormat = new Intl.NumberFormat("fa-IR");
@@ -51,7 +50,7 @@ export function useAdminPulse() {
         void pending.refetch();
         void requested.refetch();
       },
-      href: PENDING_IDENTITY_HREF,
+      href: IDENTITY_REQUESTS_HREF,
     },
     {
       id: "invite-links" as const,

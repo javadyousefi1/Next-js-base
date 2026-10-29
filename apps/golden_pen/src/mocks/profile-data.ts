@@ -4,6 +4,9 @@ export type MockDocument = { fieldType: string; name: string; url: string | null
 export type MockIdentity = {
   statusType: number;
   message: string | null;
+  /** ISO date-times of the request and of the last review (verify / reject / revoke). */
+  requestedAt: string | null;
+  verifiedAt: string | null;
   specialty: string | null;
   bio: string | null;
   licenseNumber: string | null;
@@ -23,6 +26,8 @@ export function emptyIdentity(): MockIdentity {
   return {
     statusType: 0,
     message: null,
+    requestedAt: null,
+    verifiedAt: null,
     specialty: null,
     bio: null,
     licenseNumber: null,
@@ -91,8 +96,6 @@ export function identityResponse(identity: MockIdentity) {
     ...identity,
     province: provinceNameOf(identity.provinceId),
     city: cityNameOf(identity.provinceId, identity.cityId),
-    requestedAt: null,
-    verifiedAt: null,
     verifiedBy: null,
     inviteCodeUsed: null,
   };

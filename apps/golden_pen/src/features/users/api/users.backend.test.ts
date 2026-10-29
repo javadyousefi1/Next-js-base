@@ -39,6 +39,9 @@ describe("usersListResponse", () => {
           username: "ali",
           roles: ["super-admin"],
           identityStatus: 3,
+          identityRequestedAt: null,
+          identityVerifiedAt: null,
+          identityMessage: null,
           isActive: true,
           isPhoneNumberVerified: true,
           createdAt: "2025-03-01T09:30:00Z",
@@ -68,6 +71,29 @@ describe("usersListResponse", () => {
       email: null,
       username: null,
       createdAt: null,
+    });
+  });
+
+  test("maps the review fields of the identity", () => {
+    const list = usersListResponse.parse({
+      items: [
+        {
+          ...ali,
+          identity: {
+            statusType: 4,
+            requestedAt: "2025-04-01T08:00:00Z",
+            verifiedAt: "2025-04-02T08:00:00Z",
+            message: "ناخوانا",
+          },
+        },
+      ],
+      totalCount: 1,
+    });
+    expect(list.items[0]).toMatchObject({
+      identityStatus: 4,
+      identityRequestedAt: "2025-04-01T08:00:00Z",
+      identityVerifiedAt: "2025-04-02T08:00:00Z",
+      identityMessage: "ناخوانا",
     });
   });
 

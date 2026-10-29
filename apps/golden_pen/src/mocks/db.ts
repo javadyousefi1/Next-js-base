@@ -35,7 +35,7 @@ export const db = {
       phoneNumber: DEMO_ACCOUNT.phoneNumber,
       password: DEMO_ACCOUNT.password,
       isPhoneNumberVerified: true,
-      roles: ["Admin"],
+      roles: ["super-admin"],
       email: null,
       username: null,
       avatarUrl: null,

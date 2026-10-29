@@ -11,6 +11,7 @@ export const ROUTES = {
   register: "/register",
   users: "/users",
   inviteLinks: "/invite-links",
+  identityRequests: "/identity-requests",
   settings: "/settings",
   profile: "/profile",
 } as const;

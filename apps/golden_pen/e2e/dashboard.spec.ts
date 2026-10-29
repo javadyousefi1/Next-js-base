@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { signIn } from "./fixtures";
 
-// Mock data: 27 users (3 identity Pending + 3 Requested), 12 invite links (9 unused).
+// Mock data: 27 users (3 identity Pending + 6 Requested; the identity spec reviews some), 12 invite links (9 unused).
 test.describe("dashboard", () => {
   test.beforeEach(async ({ page }) => {
     await signIn(page, "/");
@@ -25,15 +25,18 @@ test.describe("dashboard", () => {
     await expect(users.getByTestId("stat-value")).toHaveText("۲۷");
 
     const identity = page.getByRole("link", { name: /درخواست‌های هویت در انتظار بررسی/ });
-    await expect(identity.getByTestId("stat-value")).toHaveText("۶");
+    await expect(identity.getByTestId("stat-value")).toHaveText(/^[۰-۹]+$/);
     const invites = page.getByRole("link", { name: /لینک‌های دعوت استفاده‌نشده/ });
     // 9 seeded; the invite-links spec may have created one in parallel.
     await expect(invites.getByTestId("stat-value")).toHaveText(/^[۰-۹]+$/);
     const unused = await invites.getByTestId("stat-value").textContent();
 
     await identity.click();
-    await expect(page).toHaveURL(/\/users\?identityStatus=2$/);
-    await expect(page.getByText("۳ نتیجه")).toBeVisible();
+    await expect(page).toHaveURL(/\/identity-requests$/);
+    await expect(page.getByRole("tab", { name: "در انتظار بررسی" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
     await page.goBack();
     await page.getByRole("link", { name: /لینک‌های دعوت استفاده‌نشده/ }).click();
@@ -51,14 +54,16 @@ test.describe("dashboard", () => {
     ).toBeVisible();
   });
 
-  test("the quick links go to the filtered users, the profile and the users", async ({ page }) => {
+  test("the quick links go to the identity requests, the profile and the users", async ({
+    page,
+  }) => {
     const actions = page.getByTestId("quick-actions");
     await actions.getByRole("link", { name: "پروفایل من" }).click();
     await expect(page).toHaveURL(/\/profile$/);
 
     await page.goBack();
     await actions.getByRole("link", { name: "بررسی هویت‌ها" }).click();
-    await expect(page).toHaveURL(/\/users\?identityStatus=2$/);
+    await expect(page).toHaveURL(/\/identity-requests$/);
 
     await page.goBack();
     await actions.getByRole("link", { name: "کاربران" }).click();

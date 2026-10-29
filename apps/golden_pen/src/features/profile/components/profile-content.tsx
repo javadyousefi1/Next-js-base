@@ -8,6 +8,7 @@ import { QueryError } from "@/components/feedback/query-error";
 import { useProfile } from "../hooks/use-profile";
 import { PROFILE_TABS, useProfileTab } from "../hooks/use-profile-tab";
 import { DocumentsCard } from "./documents-card";
+import { IdentityRequestCard } from "./identity-request-card";
 import { ProfileIdentityForm } from "./profile-identity-form";
 import { ProfileInfoForm } from "./profile-info-form";
 import { ProfileLoading } from "./profile-loading";
@@ -39,7 +40,10 @@ export function ProfileContent() {
           <ProfileInfoForm info={profile.info} />
         </TabsContent>
         <TabsContent value="identity" keepMounted>
-          <ProfileIdentityForm identity={profile.identity} />
+          <div className="flex flex-col gap-4">
+            <IdentityRequestCard identity={profile.identity} />
+            <ProfileIdentityForm identity={profile.identity} />
+          </div>
         </TabsContent>
         <TabsContent value="documents" keepMounted>
           <DocumentsCard identity={profile.identity} />

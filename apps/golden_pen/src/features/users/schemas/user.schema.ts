@@ -8,6 +8,9 @@ import { z } from "zod";
 export const USER_ROLES = ["super-admin", "lawyer", "intern", "operator"] as const;
 export const userRoleSchema = z.enum(USER_ROLES);
 
+/** The only role that reviews identities (the name the API sends). */
+export const SUPER_ADMIN_ROLE = USER_ROLES[0];
+
 /** Identity statuses of the filter, as URL strings: 0 None, 1 Requested, 2 Pending, 3 Verified, 4 Rejected, 5 Revoked. */
 export const IDENTITY_STATUSES = ["0", "1", "2", "3", "4", "5"] as const;
 export const identityStatusSchema = z.enum(IDENTITY_STATUSES);
@@ -23,6 +26,10 @@ export type User = {
   roles: string[];
   /** Identity status (see `IDENTITY_STATUSES`); `null` = the user has no identity. */
   identityStatus: number | null;
+  /** ISO date-times and the reviewer's message of the identity (`null` when there is none). */
+  identityRequestedAt: string | null;
+  identityVerifiedAt: string | null;
+  identityMessage: string | null;
   isActive: boolean;
   isPhoneNumberVerified: boolean;
   /** ISO date-time. */

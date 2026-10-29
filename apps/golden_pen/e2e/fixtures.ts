@@ -26,3 +26,28 @@ export async function waitForHydration(page: Page) {
     return form !== null && Object.keys(form).some((key) => key.startsWith("__reactProps"));
   });
 }
+
+/**
+ * Registers a fresh user through the BFF and signs them in (the cookie lands in the page's
+ * context), so a test can change data without touching the shared demo admin that other specs
+ * read. The new user has no roles, so they are not a super-admin.
+ */
+export async function registerNewUser(page: Page) {
+  const phoneNumber = `0912${String(Math.floor(Math.random() * 1e7)).padStart(7, "0")}`;
+  const register = await page.request.post("/api/auth/register", {
+    data: { firstName: "سارا", lastName: "محمدی", phoneNumber },
+  });
+  expect(register.ok()).toBe(true);
+  const verify = await page.request.post("/api/auth/otp/verify", {
+    data: { phoneNumber, code: OTP_CODE },
+  });
+  expect(verify.ok()).toBe(true);
+}
+
+/** `registerNewUser`, then opens a page that has a form (hydrated before the test goes on). */
+export async function signInAsNewUser(page: Page, path = "/profile") {
+  await registerNewUser(page);
+  await page.goto(path);
+  await expect(page).toHaveURL(new RegExp(`${path}$`));
+  await waitForHydration(page);
+}

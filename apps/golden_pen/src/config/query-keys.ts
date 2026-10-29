@@ -2,6 +2,10 @@ import type { QueryKey } from "@tanstack/react-query";
 
 import type { CitiesParams } from "@/features/base-info/schemas/base-info.schema";
 import type { DashboardCountParams } from "@/features/dashboard/schemas/dashboard.schema";
+import type {
+  IdentityDetailParams,
+  IdentityRequestsListParams,
+} from "@/features/identity-requests/schemas/identity-requests.schema";
 import type { InviteLinksListParams } from "@/features/invite-links/schemas/invite-link.schema";
 import type { UsersListParams } from "@/features/users/schemas/user.schema";
 
@@ -16,6 +20,7 @@ import type { UsersListParams } from "@/features/users/schemas/user.schema";
 const authRoot = ["auth"] as const;
 const usersRoot = ["users"] as const;
 const inviteLinksRoot = ["invite-links"] as const;
+const identityRequestsRoot = ["identity-requests"] as const;
 const profileRoot = ["profile"] as const;
 const baseInfoRoot = ["base-info"] as const;
 const dashboardRoot = ["dashboard"] as const;
@@ -34,6 +39,13 @@ export const QUERY_KEYS = {
     all: inviteLinksRoot,
     lists: () => [...inviteLinksRoot, "list"] as const,
     list: (params: InviteLinksListParams) => [...inviteLinksRoot, "list", params] as const,
+  },
+  identityRequests: {
+    all: identityRequestsRoot,
+    lists: () => [...identityRequestsRoot, "list"] as const,
+    list: (params: IdentityRequestsListParams) =>
+      [...identityRequestsRoot, "list", params] as const,
+    detail: (params: IdentityDetailParams) => [...identityRequestsRoot, "detail", params] as const,
   },
   profile: {
     all: profileRoot,
@@ -62,6 +74,9 @@ export const MUTATION_KEYS = {
   },
   inviteLinks: {
     create: ["invite-links", "create"],
+  },
+  identityRequests: {
+    act: ["identity-requests", "act"],
   },
   profile: {
     updateInfo: ["profile", "update-info"],

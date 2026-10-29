@@ -2,6 +2,7 @@ import {
   LayoutDashboardIcon,
   Link2Icon,
   SettingsIcon,
+  ShieldCheckIcon,
   UsersIcon,
   type LucideIcon,
 } from "lucide-react";
@@ -9,7 +10,13 @@ import {
 import { ROUTES, type AppRoute } from "./routes";
 
 /** Key in the `Nav` messages namespace. */
-type NavLabelKey = "dashboard" | "users" | "inviteLinks" | "userManagement" | "settings";
+type NavLabelKey =
+  | "dashboard"
+  | "users"
+  | "inviteLinks"
+  | "identityRequests"
+  | "userManagement"
+  | "settings";
 
 /** A link to a page. */
 export type NavLink = {
@@ -45,6 +52,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
         children: [
           { href: ROUTES.users, labelKey: "users", icon: UsersIcon },
           { href: ROUTES.inviteLinks, labelKey: "inviteLinks", icon: Link2Icon },
+          { href: ROUTES.identityRequests, labelKey: "identityRequests", icon: ShieldCheckIcon },
         ],
       },
       { href: ROUTES.settings, labelKey: "settings", icon: SettingsIcon },

@@ -44,8 +44,9 @@ test.describe("users table (URL state + React Query)", () => {
   test("filters by identity status in the drawer and resets", async ({ page }) => {
     await page.getByRole("button", { name: "فیلترها", exact: true }).click();
     await page.getByRole("combobox", { name: "وضعیت هویت" }).click();
-    await page.getByRole("option", { name: "لغو شده" }).click();
-    await expect(page).toHaveURL(/identityStatus=5/);
+    // "None" is a status the identity-requests spec never changes (it mutates 1, 3, 4, 5).
+    await page.getByRole("option", { name: "بدون هویت" }).click();
+    await expect(page).toHaveURL(/identityStatus=0/);
     await page.keyboard.press("Escape");
     await expect(page.getByText("۳ نتیجه")).toBeVisible();
 

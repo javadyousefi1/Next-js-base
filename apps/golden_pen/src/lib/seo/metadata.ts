@@ -41,6 +41,7 @@ type PageNamespace =
   | "Dashboard"
   | "Users"
   | "InviteLinks"
+  | "IdentityRequests"
   | "Settings"
   | "Profile"
   | "Auth"

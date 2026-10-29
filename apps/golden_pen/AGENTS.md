@@ -59,6 +59,19 @@ Status is derived in the mapper: used, else expired (`!isValid`), else active.
 Sidebar: one collapsible item "مدیریت کاربران" (`NavParent` in `config/navigation.ts`) holds
 کاربران and لینک دعوت; `features/shell/nav-active.ts` marks it active/open when a child is current.
 
+## Identity requests
+
+`/identity-requests` (sidebar: third child of «مدیریت کاربران»): `features/identity-requests`,
+`identity-requests.backend.ts` is the only file that knows the API. The list is `GET /User/GetAll` with
+`IncludeIdentity=true` (users fetcher and mapper reused); the `status` tab (`requested` default, `verified`,
+`rejected`, `revoked`, `all`) is its own URL key, not a filter. The review sheet reads
+`GET /User/Get?userId=&includeIdentity=true` (profile mapper reused). Actions: `PUT /User/Identity`
+`{ actionType, userId?, message? }` → 204; `IDENTITY_ACTION` = request 1 (the signed-in user, needs a complete
+profile), verify 2, reject 3, revoke 4 (super-admin only, `SUPER_ADMIN_ROLE`; reject/revoke need `message`).
+Verify needs a Requested target, revoke a Verified one. Errors: ProblemDetails `errors[].code`
+(`UserErrors.ProfileNotComplete`, `IdentityNotInRequestedState`, `InvalidIdentityAction`), forwarded by the BFF
+(`bffError` keeps the upstream `errors` for 4xx). The profile's identity tab has the request card.
+
 ## Profile
 
 `/profile` (user menu → «پروفایل»; no sidebar item): `features/profile`, `profile.backend.ts` is the only
