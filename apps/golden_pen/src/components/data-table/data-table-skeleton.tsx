@@ -1,21 +1,26 @@
 import { Skeleton } from "@repo/ui/components/skeleton";
+import { TableBody, TableCell, TableRow } from "@repo/ui/components/table";
+
+import { BODY_ROW_CLASS } from "./data-table-layout";
 
 type DataTableSkeletonProps = {
-  columns?: number;
-  rows?: number;
+  columns: number;
+  rows: number;
 };
 
-/** Loading placeholder with the same footprint as `<DataTable>` (server-safe, no hooks). */
-export function DataTableSkeleton({ columns = 5, rows = 10 }: DataTableSkeletonProps) {
+/** Loading rows with the same row height as the real ones (inside the table's `<Table>`). */
+export function DataTableSkeleton({ columns, rows }: DataTableSkeletonProps) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg border p-3" aria-hidden>
-      {Array.from({ length: rows + 1 }, (_row, row) => (
-        <div key={row} className="flex gap-3">
+    <TableBody aria-hidden>
+      {Array.from({ length: rows }, (_row, row) => (
+        <TableRow key={row} className={BODY_ROW_CLASS}>
           {Array.from({ length: columns }, (_column, column) => (
-            <Skeleton key={column} className="h-7 flex-1" />
+            <TableCell key={column}>
+              <Skeleton className="h-5 w-full" />
+            </TableCell>
           ))}
-        </div>
+        </TableRow>
       ))}
-    </div>
+    </TableBody>
   );
 }

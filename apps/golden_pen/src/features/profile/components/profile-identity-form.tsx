@@ -1,18 +1,16 @@
 "use client";
 
 import { Alert, AlertDescription, AlertTitle } from "@repo/ui/components/alert";
-import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@repo/ui/components/card";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@repo/ui/components/field";
+import { Field, FieldError, FieldLabel } from "@repo/ui/components/field";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { Textarea } from "@repo/ui/components/textarea";
@@ -21,6 +19,7 @@ import { useTranslations } from "next-intl";
 import { useProfileIdentityForm } from "../hooks/use-profile-identity-form";
 import type { ProfileIdentity } from "../schemas/profile.schema";
 import { LocationSelect } from "./location-select";
+import { ProfileFormSection as Section } from "./profile-form-section";
 
 /** «اطلاعات هویتی/حرفه‌ای»: the identity status, professional data, location, office and company. */
 export function ProfileIdentityForm({ identity }: { identity: ProfileIdentity | null }) {
@@ -33,22 +32,15 @@ export function ProfileIdentityForm({ identity }: { identity: ProfileIdentity | 
         <CardHeader>
           <CardTitle>{t("identity.title")}</CardTitle>
           <CardDescription>{t("identity.description")}</CardDescription>
-          {form.status && (
-            <CardAction>
-              <Badge variant="outline" data-testid="identity-status">
-                {form.status.label}
-              </Badge>
-            </CardAction>
-          )}
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-6">
           {form.status?.message && (
             <Alert>
               <AlertTitle>{t("identity.message")}</AlertTitle>
               <AlertDescription>{form.status.message}</AlertDescription>
             </Alert>
           )}
-          <FieldGroup className="grid gap-4 sm:grid-cols-2">
+          <Section title={t("sections.professional")}>
             <Field>
               <FieldLabel htmlFor="profile-specialty">{t("fields.specialty")}</FieldLabel>
               <Input id="profile-specialty" {...form.register("specialty")} />
@@ -78,6 +70,8 @@ export function ProfileIdentityForm({ identity }: { identity: ProfileIdentity | 
               <FieldLabel htmlFor="profile-bio">{t("fields.bio")}</FieldLabel>
               <Textarea id="profile-bio" rows={4} {...form.register("bio")} />
             </Field>
+          </Section>
+          <Section title={t("sections.workplace")}>
             <LocationSelect
               label={t("fields.province")}
               placeholder={t("fields.provincePlaceholder")}
@@ -121,6 +115,8 @@ export function ProfileIdentityForm({ identity }: { identity: ProfileIdentity | 
                 {...form.register("officePhone")}
               />
             </Field>
+          </Section>
+          <Section title={t("sections.company")}>
             <Field>
               <FieldLabel htmlFor="profile-company-name">{t("fields.companyName")}</FieldLabel>
               <Input id="profile-company-name" {...form.register("companyName")} />
@@ -154,7 +150,7 @@ export function ProfileIdentityForm({ identity }: { identity: ProfileIdentity | 
                 {...form.register("companyRepresentativeName")}
               />
             </Field>
-          </FieldGroup>
+          </Section>
           {form.formError && (
             <p role="alert" className="text-sm text-destructive">
               {form.formError}

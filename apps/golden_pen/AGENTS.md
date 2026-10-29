@@ -88,3 +88,10 @@ Unit: `bun test` (`*.test.ts` next to the code). E2E: `e2e/*.spec.ts` (Playwrigh
 `bun run docker:image` (repo root) first asks for the app, builds its image for `linux/amd64` and
 saves it to `docker-images/`; it prints the `scp` / `docker load` / `docker run` commands for the
 server. Production `NEXT_PUBLIC_*` values (baked in at build time) go in `.env.production` here.
+
+## No layout shift (CLS < 0.05, `e2e/layout-shift.spec.ts`)
+
+- Tables: one size for every state (`components/data-table/data-table-layout.ts`: header 2.5rem, rows 3rem, body = `pageSize` rows);
+  the toolbar (`*-toolbar.tsx`, URL state only) sits outside the data's Suspense; badges row and pagination bar have fixed heights.
+- Profile (`?tab=info|identity|documents`): side card + tabs; `profile-skeleton.tsx` heights are measured, keep them in sync.
+- CSP `img-src` allows any http(s) image (avatars come from object storage on another host); tighten once the storage origin is fixed.

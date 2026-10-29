@@ -38,7 +38,7 @@ export function DataTableEmpty({
 
   if (hasFilters) {
     return (
-      <Empty className="py-10">
+      <Empty className="h-full justify-center">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <SearchXIcon />
@@ -56,7 +56,7 @@ export function DataTableEmpty({
   }
 
   return (
-    <Empty className="py-10">
+    <Empty className="h-full justify-center">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <InboxIcon />

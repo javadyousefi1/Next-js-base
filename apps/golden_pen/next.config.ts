@@ -8,12 +8,17 @@ import "./src/env.ts";
 
 const isProduction = process.env.NODE_ENV === "production";
 
-/** CSP without nonces (keeps static rendering/caching). Tighten `connect-src` if you add hosts. */
+/**
+ * CSP without nonces (keeps static rendering/caching). Tighten `connect-src` if you add hosts.
+ * `img-src` allows any http(s) image: user content (avatars, documents) comes from object storage
+ * on another host (currently plain http by IP). Images cannot run code, so this is the usual
+ * trade-off; tighten it to the storage origin once that is fixed.
+ */
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isProduction ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' blob: data:",
+  "img-src 'self' blob: data: https: http:",
   "font-src 'self'",
   "connect-src 'self'",
   "object-src 'none'",

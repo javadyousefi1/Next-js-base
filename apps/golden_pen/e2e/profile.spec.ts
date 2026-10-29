@@ -8,6 +8,8 @@ const PNG = Buffer.from(
   "base64",
 );
 
+const openTab = (page: Page, name: string) => page.getByRole("tab", { name }).click();
+
 /**
  * Registers a fresh user through the BFF and signs them in (the cookie lands in the page's
  * context), so a test can edit the profile without touching the shared demo admin that other
@@ -40,7 +42,16 @@ test.describe("profile", () => {
     await expect(page.getByRole("heading", { name: "پروفایل", level: 1 })).toBeVisible();
 
     await expect(page.getByTestId("identity-status")).toHaveText("رد شده");
+    await expect(page.getByRole("tab", { name: "اطلاعات پایه" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+
+    await openTab(page, "اطلاعات هویتی");
+    await expect(page).toHaveURL(/\/profile\?tab=identity$/);
     await expect(page.getByText("تصویر پروانه خوانا نیست.")).toBeVisible();
+
+    await openTab(page, "مدارک");
     await expect(page.getByRole("link", { name: "پروانه.pdf" })).toHaveAttribute(
       "href",
       "https://example.com/license.pdf",
@@ -50,7 +61,7 @@ test.describe("profile", () => {
 
   test("edits the basic info: toast and the sidebar name", async ({ page }) => {
     await signInAsNewUser(page);
-    const save = page.getByRole("button", { name: "ذخیره تغییرات" }).first();
+    const save = page.getByRole("button", { name: "ذخیره تغییرات" });
     await expect(save).toBeDisabled();
 
     await page.getByRole("textbox", { name: "نام", exact: true }).fill("نگار");
@@ -66,16 +77,18 @@ test.describe("profile", () => {
     await signInAsNewUser(page);
 
     await page.getByRole("textbox", { name: "ایمیل" }).fill("not-an-email");
-    await page.getByRole("button", { name: "ذخیره تغییرات" }).first().click();
+    await page.getByRole("button", { name: "ذخیره تغییرات" }).click();
     await expect(page.getByText("ایمیل معتبر نیست.")).toBeVisible();
 
+    await openTab(page, "اطلاعات هویتی");
     await page.getByRole("textbox", { name: "کد ملی" }).fill("۱۲۳");
-    await page.getByRole("button", { name: "ذخیره تغییرات" }).last().click();
+    await page.getByRole("button", { name: "ذخیره تغییرات" }).click();
     await expect(page.getByText("کد ملی باید ۱۰ رقم باشد.")).toBeVisible();
   });
 
   test("saves the identity: the cities follow the province", async ({ page }) => {
     await signInAsNewUser(page);
+    await openTab(page, "اطلاعات هویتی");
     const city = page.getByRole("combobox", { name: "شهر" });
     await expect(city).toBeDisabled();
 
@@ -89,7 +102,7 @@ test.describe("profile", () => {
 
     await page.getByRole("textbox", { name: "تخصص" }).fill("حقوق کیفری");
     await page.getByRole("textbox", { name: "کد ملی" }).fill("۰۰۱۲۳۴۵۶۷۸");
-    await page.getByRole("button", { name: "ذخیره تغییرات" }).last().click();
+    await page.getByRole("button", { name: "ذخیره تغییرات" }).click();
     await expect(page.getByText("اطلاعات هویتی ذخیره شد")).toBeVisible();
 
     await page.reload();
@@ -129,6 +142,7 @@ test.describe("profile", () => {
 
   test("uploads a document into the list", async ({ page }) => {
     await signInAsNewUser(page);
+    await openTab(page, "مدارک");
     await expect(page.getByTestId("license-list")).toHaveCount(0);
 
     await page

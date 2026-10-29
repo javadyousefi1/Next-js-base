@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
+import { Skeleton } from "@repo/ui/components/skeleton";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -25,8 +26,18 @@ export function DataTablePagination() {
   const { page, pageSize } = table.state;
   const pageCount = Math.max(1, Math.ceil(table.total / pageSize));
 
+  // Same height as the real bar (`min-h-8`): it never appears late.
+  if (table.isLoading) {
+    return (
+      <div className="flex min-h-8 items-center justify-between gap-3" aria-hidden>
+        <Skeleton className="h-5 w-24" />
+        <Skeleton className="h-8 w-72 max-w-full" />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+    <div className="flex min-h-8 flex-wrap items-center justify-between gap-3 text-sm">
       <p className="text-muted-foreground">{t("total", { total: table.total })}</p>
 
       <div className="flex flex-wrap items-center gap-4">

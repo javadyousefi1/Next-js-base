@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
-import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
+import { DataTablePlaceholder } from "@/components/data-table/data-table-placeholder";
+import { DataTableToolbarPlaceholder } from "@/components/data-table/data-table-toolbar-placeholder";
 import { PageHeader } from "@/components/layout/page-header";
 import { ROUTES } from "@/config/routes";
 import { usersListQuery } from "@/features/users/api/users.queries";
 import { UsersTable } from "@/features/users/components/users-table";
+import { UsersToolbar } from "@/features/users/components/users-toolbar";
 import { loadUsersSearchParams } from "@/features/users/users.search-params";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -23,12 +26,17 @@ export default async function UsersPage({ searchParams }: PageProps<"/[locale]/u
   return (
     <>
       <PageHeader title={t("title")} description={t("description")} />
-      <PrefetchBoundary
-        queries={[usersListQuery.with(loadUsersSearchParams(searchParams))]}
-        fallback={<DataTableSkeleton />}
-      >
-        <UsersTable />
-      </PrefetchBoundary>
+      <div className="flex flex-col gap-4">
+        <Suspense fallback={<DataTableToolbarPlaceholder />}>
+          <UsersToolbar />
+        </Suspense>
+        <PrefetchBoundary
+          queries={[usersListQuery.with(loadUsersSearchParams(searchParams))]}
+          fallback={<DataTablePlaceholder />}
+        >
+          <UsersTable />
+        </PrefetchBoundary>
+      </div>
     </>
   );
 }

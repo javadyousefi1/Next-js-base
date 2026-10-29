@@ -12,10 +12,10 @@ export function DataTableActiveFilters() {
   const t = useTranslations("DataTable");
   const { badges, clearAll } = useActiveFilters();
 
-  if (badges.length === 0) return null;
-
+  // The row always takes its height and never wraps (it scrolls sideways): adding the first
+  // badge does not push the table down.
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex h-7 items-center gap-2 overflow-x-auto">
       {badges.map((badge) => (
         <Badge key={badge.key} variant="secondary" className="gap-1">
           {badge.label}
