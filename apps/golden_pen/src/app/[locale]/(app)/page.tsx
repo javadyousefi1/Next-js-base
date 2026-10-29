@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { ROUTES } from "@/config/routes";
-import { WelcomeCard } from "@/features/dashboard/components/welcome-card";
+import { DashboardContent } from "@/features/dashboard/components/dashboard-content";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
 
@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   return (
     <>
       <PageHeader title={t("title")} description={t("description")} />
-      <WelcomeCard />
+      <DashboardContent />
     </>
   );
 }

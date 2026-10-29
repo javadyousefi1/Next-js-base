@@ -37,7 +37,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
   test("signs in with a password, sees the name, and signs out", async ({ page, context }) => {
     await signIn(page, "/");
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByText("مدیر سیستم، خوش آمدید")).toBeVisible();
+    await expect(page.getByTestId("greeting")).toContainText(/بخیر، مدیر/);
 
     // The token is httpOnly: invisible to JavaScript.
     const cookies = await context.cookies();
@@ -61,7 +61,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
     await page.getByRole("button", { name: "تأیید و ورود" }).click();
 
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByText("مدیر سیستم، خوش آمدید")).toBeVisible();
+    await expect(page.getByTestId("greeting")).toContainText(/بخیر، مدیر/);
   });
 
   test("rejects a wrong SMS code and an unknown number", async ({ page }) => {
@@ -97,7 +97,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
     await page.getByRole("button", { name: "تأیید و ورود" }).click();
 
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.getByText("سارا احمدی، خوش آمدید")).toBeVisible();
+    await expect(page.getByTestId("greeting")).toContainText(/بخیر، سارا/);
   });
 
   test("a registered number cannot register again", async ({ page }) => {

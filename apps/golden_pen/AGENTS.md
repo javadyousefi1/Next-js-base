@@ -72,6 +72,12 @@ identity document with `fieldType` `licenseFile` | `documents`, type JPEG/PNG(+W
 (`GET /base-info/enums`: `type=1` provinces, `type=2&parentId=` cities). The identity status label is
 `useIdentityStatusLabel` (users feature).
 
+## Dashboard
+
+`/`: `features/dashboard`: greeting + Tehran clock (rendered after mount), today card, Jalali month calendar
+(fixed solar holidays only), admin pulse (counts from the users / invite-links lists with `PageSize=1`, read
+`totalCount`), quick actions, and a localStorage checklist. Pure date helpers: `dashboard-dates.ts`.
+
 ## Tests
 
 Unit: `bun test` (`*.test.ts` next to the code). E2E: `e2e/*.spec.ts` (Playwright against

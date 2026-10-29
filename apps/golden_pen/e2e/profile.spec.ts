@@ -11,7 +11,7 @@ const PNG = Buffer.from(
 /**
  * Registers a fresh user through the BFF and signs them in (the cookie lands in the page's
  * context), so a test can edit the profile without touching the shared demo admin that other
- * specs read (e.g. the welcome card).
+ * specs read (e.g. the dashboard greeting).
  */
 async function signInAsNewUser(page: Page) {
   const phoneNumber = `0912${String(Math.floor(Math.random() * 1e7)).padStart(7, "0")}`;

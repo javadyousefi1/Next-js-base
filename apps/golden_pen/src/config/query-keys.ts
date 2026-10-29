@@ -1,6 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 
 import type { CitiesParams } from "@/features/base-info/schemas/base-info.schema";
+import type { DashboardCountParams } from "@/features/dashboard/schemas/dashboard.schema";
 import type { InviteLinksListParams } from "@/features/invite-links/schemas/invite-link.schema";
 import type { UsersListParams } from "@/features/users/schemas/user.schema";
 
@@ -17,6 +18,7 @@ const usersRoot = ["users"] as const;
 const inviteLinksRoot = ["invite-links"] as const;
 const profileRoot = ["profile"] as const;
 const baseInfoRoot = ["base-info"] as const;
+const dashboardRoot = ["dashboard"] as const;
 
 export const QUERY_KEYS = {
   auth: {
@@ -36,6 +38,10 @@ export const QUERY_KEYS = {
   profile: {
     all: profileRoot,
     detail: () => [...profileRoot, "detail"] as const,
+  },
+  dashboard: {
+    all: dashboardRoot,
+    count: (params: DashboardCountParams) => [...dashboardRoot, "count", params] as const,
   },
   baseInfo: {
     all: baseInfoRoot,
