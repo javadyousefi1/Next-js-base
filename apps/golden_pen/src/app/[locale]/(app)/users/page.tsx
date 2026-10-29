@@ -9,6 +9,7 @@ import { ROUTES } from "@/config/routes";
 import { usersListQuery } from "@/features/users/api/users.queries";
 import { UsersTable } from "@/features/users/components/users-table";
 import { UsersToolbar } from "@/features/users/components/users-toolbar";
+import { USERS_COLUMN_KEYS } from "@/features/users/users-column-keys";
 import { loadUsersSearchParams } from "@/features/users/users.search-params";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -32,7 +33,9 @@ export default async function UsersPage({ searchParams }: PageProps<"/[locale]/u
         </Suspense>
         <PrefetchBoundary
           queries={[usersListQuery.with(loadUsersSearchParams(searchParams))]}
-          fallback={<DataTablePlaceholder />}
+          fallback={
+            <DataTablePlaceholder headers={USERS_COLUMN_KEYS.map((key) => t(`columns.${key}`))} />
+          }
         >
           <UsersTable />
         </PrefetchBoundary>

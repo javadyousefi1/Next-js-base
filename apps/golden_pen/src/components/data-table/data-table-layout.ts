@@ -1,20 +1,12 @@
 /**
- * One size for every state of a table (loading, rows, empty, error), so nothing jumps:
- * the table's body is always `pageSize` rows of `ROW_HEIGHT_REM` under a `HEADER_HEIGHT_REM` header.
+ * Sizes shared by every state of a table so the parts line up: real rows and skeleton rows have
+ * the same height, and the empty / error block has one fixed height. A loaded table takes exactly
+ * the height of its rows (no reserved empty space).
  */
-export const HEADER_HEIGHT_REM = 2.5;
-export const ROW_HEIGHT_REM = 3;
 
-/** Height of the rows area for `rows` rows. */
-export function bodyHeight(rows: number): string {
-  return `${rows * ROW_HEIGHT_REM}rem`;
-}
-
-/** Minimum height of the whole bordered table (2px = its border). */
-export function tableMinHeight(rows: number): string {
-  return `calc(${HEADER_HEIGHT_REM + rows * ROW_HEIGHT_REM}rem + 2px)`;
-}
-
-/** Tailwind classes of the same sizes (keep in sync with the constants above). */
+/** Tailwind classes of the header row and of every body row (real and skeleton). */
 export const HEADER_ROW_CLASS = "h-10";
 export const BODY_ROW_CLASS = "h-12";
+
+/** Height of the empty / no-results / error block inside the table. */
+export const STATE_HEIGHT_CLASS = "h-72";

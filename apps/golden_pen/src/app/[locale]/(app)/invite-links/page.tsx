@@ -10,6 +10,7 @@ import { inviteLinksListQuery } from "@/features/invite-links/api/invite-links.q
 import { InviteLinkCreateButton } from "@/features/invite-links/components/invite-link-create-button";
 import { InviteLinksTable } from "@/features/invite-links/components/invite-links-table";
 import { InviteLinksToolbar } from "@/features/invite-links/components/invite-links-toolbar";
+import { INVITE_LINKS_COLUMN_KEYS } from "@/features/invite-links/invite-links-column-keys";
 import { loadInviteLinksSearchParams } from "@/features/invite-links/invite-links.search-params";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -39,7 +40,11 @@ export default async function InviteLinksPage({
         </Suspense>
         <PrefetchBoundary
           queries={[inviteLinksListQuery.with(loadInviteLinksSearchParams(searchParams))]}
-          fallback={<DataTablePlaceholder />}
+          fallback={
+            <DataTablePlaceholder
+              headers={INVITE_LINKS_COLUMN_KEYS.map((key) => t(`columns.${key}`))}
+            />
+          }
         >
           <InviteLinksTable />
         </PrefetchBoundary>
