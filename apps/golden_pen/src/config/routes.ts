@@ -12,6 +12,7 @@ export const ROUTES = {
   users: "/users",
   inviteLinks: "/invite-links",
   settings: "/settings",
+  profile: "/profile",
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];
@@ -35,6 +36,8 @@ export const API_ROUTES = {
     otpResend: "/api/auth/otp/resend",
     otpVerify: "/api/auth/otp/verify",
   },
+  /** Multipart upload (avatar, identity documents): the generic proxy is JSON-only. */
+  upload: "/api/upload",
   /** Catch-all proxy to the upstream API: `/api/proxy/<upstream path>`. */
   proxy: "/api/proxy",
   health: "/api/health",

@@ -49,6 +49,7 @@ export const sessionUserSchema = z.object({
   lastName: z.string(),
   phoneNumber: z.string(),
   roles: z.array(z.string()),
+  avatarUrl: z.string().nullable(),
 });
 export type SessionUser = z.infer<typeof sessionUserSchema>;
 

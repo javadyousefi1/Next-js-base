@@ -15,5 +15,10 @@ export const API_ENDPOINTS = {
     list: "/User/GetAll",
     inviteLinks: "/User/InviteLink/GetAll",
     createInviteLink: "/User/InviteLink/Create",
+    update: "/User/Update",
+    upload: "/User/Upload",
+  },
+  baseInfo: {
+    enums: "/base-info/enums",
   },
 } as const;

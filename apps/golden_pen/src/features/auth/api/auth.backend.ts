@@ -89,6 +89,7 @@ const backendUser = z.object({
     lastName: z.string().nullish(),
     phoneNumber: z.string(),
     roles: z.array(z.string()).nullish(),
+    avatarUrl: z.string().nullish(),
   }),
 });
 
@@ -103,6 +104,7 @@ export const meResponse = backendUser.transform(({ info }): SessionUser => {
     lastName,
     phoneNumber: info.phoneNumber,
     roles: info.roles ?? [],
+    avatarUrl: info.avatarUrl ?? null,
   };
 });
 

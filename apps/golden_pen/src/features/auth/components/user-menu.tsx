@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@repo/ui/components/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,8 +12,11 @@ import {
 } from "@repo/ui/components/dropdown-menu";
 import { SidebarMenuButton } from "@repo/ui/components/sidebar";
 import { Skeleton } from "@repo/ui/components/skeleton";
-import { LogOutIcon } from "lucide-react";
+import { LogOutIcon, UserIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
+
+import { ROUTES } from "@/config/routes";
+import { Link } from "@/i18n/navigation";
 
 import { useCurrentUser } from "../hooks/use-current-user";
 import { useLogout } from "../hooks/use-logout";
@@ -29,6 +32,7 @@ export function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger render={<SidebarMenuButton size="lg" aria-label={t("account")} />}>
         <Avatar>
+          {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt="" />}
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
         <div className="grid flex-1 text-start text-sm leading-tight">
@@ -41,6 +45,10 @@ export function UserMenu() {
           <DropdownMenuLabel>{t("account")}</DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
+        <DropdownMenuItem render={<Link href={ROUTES.profile} />}>
+          <UserIcon />
+          {t("profile")}
+        </DropdownMenuItem>
         <DropdownMenuItem disabled={isLoggingOut} onClick={logout}>
           <LogOutIcon />
           {t("logout")}

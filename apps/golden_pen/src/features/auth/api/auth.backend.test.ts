@@ -65,6 +65,7 @@ describe("meResponse", () => {
       lastName: "Lovelace",
       phoneNumber: "09120000000",
       roles: ["Admin"],
+      avatarUrl: null,
     });
   });
 

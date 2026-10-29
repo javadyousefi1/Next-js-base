@@ -6,17 +6,15 @@ import { useTranslations } from "next-intl";
 
 import { formatJalaliDate } from "@/lib/format-date";
 
-import { identityStatusSchema, isKnownRole, type User } from "../schemas/user.schema";
+import { useIdentityStatusLabel } from "../hooks/use-identity-status-label";
+import { isKnownRole, type User } from "../schemas/user.schema";
 
 /** The API has no sorting, so no column is sortable. Empty cells show "—". */
 export function useUsersColumns(): DataTableColumn<User>[] {
   const t = useTranslations("Users");
 
   const roleLabel = (role: string) => (isKnownRole(role) ? t(`roles.${role}`) : role);
-  const identityLabel = (status: number) => {
-    const key = identityStatusSchema.safeParse(String(status));
-    return key.success ? t(`identityStatuses.${key.data}`) : String(status);
-  };
+  const identityLabel = useIdentityStatusLabel();
 
   return [
     {

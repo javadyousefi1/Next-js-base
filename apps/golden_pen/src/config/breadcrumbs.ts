@@ -19,4 +19,5 @@ export const BREADCRUMBS: Readonly<Record<string, BreadcrumbLabelKey>> = {
   [ROUTES.users]: "users",
   [ROUTES.inviteLinks]: "inviteLinks",
   [ROUTES.settings]: "settings",
+  [ROUTES.profile]: "profile",
 };

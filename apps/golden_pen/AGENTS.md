@@ -59,6 +59,19 @@ Status is derived in the mapper: used, else expired (`!isValid`), else active.
 Sidebar: one collapsible item "مدیریت کاربران" (`NavParent` in `config/navigation.ts`) holds
 کاربران and لینک دعوت; `features/shell/nav-active.ts` marks it active/open when a child is current.
 
+## Profile
+
+`/profile` (user menu → «پروفایل»; no sidebar item): `features/profile`, `profile.backend.ts` is the only
+file that knows the API. Read: `GET /User/Get?includeIdentity=true` (own query key, separate from the
+session). Write: `PUT /User/Update` through the proxy: `type` 1 = info, 2 = identity (every key of the
+section is sent, nullable; the other section is `null`; the response does not return the office address,
+so that form part starts empty). Upload: `POST /User/Upload` is multipart, so it goes through its own BFF
+route `/api/upload` (`API_ROUTES.upload`; `validateUploadForm` checks `uploadType` 1 = avatar / 2 =
+identity document with `fieldType` `licenseFile` | `documents`, type JPEG/PNG(+WebP/PDF for documents),
+5 MB). An avatar upload without a file deletes the avatar. Province/city selects: `features/base-info`
+(`GET /base-info/enums`: `type=1` provinces, `type=2&parentId=` cities). The identity status label is
+`useIdentityStatusLabel` (users feature).
+
 ## Tests
 
 Unit: `bun test` (`*.test.ts` next to the code). E2E: `e2e/*.spec.ts` (Playwright against

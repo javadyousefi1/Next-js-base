@@ -32,7 +32,8 @@
     "account": "حساب کاربری",
     "logout": "خروج",
     "skipToContent": "رفتن به محتوا",
-    "theme": "پوسته"
+    "theme": "پوسته",
+    "profile": "پروفایل"
   },
   "Auth": {
     "title": "ورود",
@@ -226,5 +227,80 @@
     "light": "روشن",
     "dark": "تیره",
     "system": "سیستم"
+  },
+  "Profile": {
+    "title": "پروفایل",
+    "description": "اطلاعات حساب، اطلاعات هویتی و مدارک خود را ویرایش کنید.",
+    "save": "ذخیره تغییرات",
+    "avatar": {
+      "title": "تصویر پروفایل",
+      "description": "تصویر JPEG یا PNG، حداکثر ۵ مگابایت.",
+      "change": "تغییر تصویر",
+      "remove": "حذف تصویر",
+      "removeTitle": "حذف تصویر پروفایل",
+      "removeText": "تصویر پروفایل حذف شود؟",
+      "removed": "تصویر حذف شد"
+    },
+    "info": {
+      "title": "اطلاعات پایه",
+      "description": "نام، شماره موبایل و راه‌های ارتباطی شما.",
+      "saved": "اطلاعات ذخیره شد"
+    },
+    "identity": {
+      "title": "اطلاعات هویتی و حرفه‌ای",
+      "description": "اطلاعات پروانه، محل فعالیت و شرکت. وضعیت بررسی در کنار عنوان نمایش داده می‌شود.",
+      "message": "پیام بررسی",
+      "saved": "اطلاعات هویتی ذخیره شد"
+    },
+    "fields": {
+      "firstName": "نام",
+      "lastName": "نام خانوادگی",
+      "phoneNumber": "شماره موبایل",
+      "username": "نام کاربری",
+      "email": "ایمیل",
+      "specialty": "تخصص",
+      "bio": "بیوگرافی",
+      "licenseNumber": "شماره پروانه",
+      "barAssociation": "کانون وکلا",
+      "province": "استان",
+      "provincePlaceholder": "انتخاب استان",
+      "city": "شهر",
+      "cityPlaceholder": "انتخاب شهر",
+      "officeText": "آدرس دفتر",
+      "officePostalCode": "کد پستی دفتر",
+      "officePhone": "تلفن دفتر",
+      "nationalId": "کد ملی",
+      "companyName": "نام شرکت",
+      "companyNationalId": "شناسه ملی شرکت",
+      "companyRegistrationNumber": "شماره ثبت شرکت",
+      "companyRepresentativeName": "نام نماینده شرکت"
+    },
+    "documents": {
+      "title": "مدارک",
+      "description": "تصویر یا PDF مدارک خود را بارگذاری کنید.",
+      "kinds": {
+        "license": "پروانه وکالت",
+        "document": "سایر مدارک"
+      },
+      "empty": "مدرکی بارگذاری نشده است.",
+      "upload": "بارگذاری"
+    },
+    "upload": {
+      "success": "فایل بارگذاری شد",
+      "failed": "بارگذاری انجام نشد. دوباره تلاش کنید.",
+      "invalidType": "نوع فایل پشتیبانی نمی‌شود.",
+      "tooLarge": "حجم فایل بیشتر از ۵ مگابایت است."
+    },
+    "validation": {
+      "firstNameRequired": "نام را وارد کنید.",
+      "lastNameRequired": "نام خانوادگی را وارد کنید.",
+      "phoneInvalid": "شماره موبایل معتبر نیست (مثلاً 09123456789).",
+      "emailInvalid": "ایمیل معتبر نیست.",
+      "nationalIdInvalid": "کد ملی باید ۱۰ رقم باشد.",
+      "postalCodeInvalid": "کد پستی باید ۱۰ رقم باشد."
+    },
+    "errors": {
+      "generic": "ذخیره انجام نشد. دوباره تلاش کنید."
+    }
   }
 }

@@ -2,6 +2,8 @@
  * In-memory fake database for MSW (development + e2e only): the users of the back-office API.
  * Restarting the server resets it.
  */
+import { seededIdentity, type MockIdentity } from "./profile-data";
+
 export type MockUser = {
   id: string;
   firstName: string;
@@ -11,6 +13,11 @@ export type MockUser = {
   password: string | null;
   isPhoneNumberVerified: boolean;
   roles: string[];
+  email: string | null;
+  username: string | null;
+  avatarUrl: string | null;
+  /** `null`: no identity yet (created on the first identity update or document upload). */
+  identity: MockIdentity | null;
 };
 
 /** Demo login (password): the seeded admin. */
@@ -29,6 +36,10 @@ export const db = {
       password: DEMO_ACCOUNT.password,
       isPhoneNumberVerified: true,
       roles: ["Admin"],
+      email: null,
+      username: null,
+      avatarUrl: null,
+      identity: seededIdentity(),
     },
   ] as MockUser[],
 };
