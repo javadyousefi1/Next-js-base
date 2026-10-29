@@ -53,6 +53,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
     await page.goto("/login");
     await waitForHydration(page);
     await page.getByRole("tab", { name: "کد پیامکی" }).click();
+    await expect(page.getByRole("tabpanel", { name: "رمز عبور", exact: true })).toBeHidden();
     await page.getByRole("textbox", { name: "شماره موبایل" }).fill(DEMO_USER.phoneNumber);
     await page.getByRole("button", { name: "ارسال کد" }).click();
 
@@ -68,6 +69,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
     await page.goto("/login");
     await waitForHydration(page);
     await page.getByRole("tab", { name: "کد پیامکی" }).click();
+    await expect(page.getByRole("tabpanel", { name: "رمز عبور", exact: true })).toBeHidden();
     await page.getByRole("textbox", { name: "شماره موبایل" }).fill("09129999999");
     await page.getByRole("button", { name: "ارسال کد" }).click();
     await expect(page.getByText("حسابی با این شماره موبایل وجود ندارد.")).toBeVisible();

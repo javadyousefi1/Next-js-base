@@ -13,20 +13,20 @@ export function TodayCard() {
   const today = useToday();
 
   return (
-    <Card className="lg:col-span-3">
-      <CardHeader>
+    <Card className="gap-5 rounded-2xl shadow-sm">
+      <CardHeader className="border-b border-border/60 pb-4">
         <CardTitle className="flex items-center gap-2">
-          <SunMoonIcon className="size-4 text-amber-500" aria-hidden />
+          <SunMoonIcon className="size-4 text-muted-foreground" aria-hidden />
           {t("title")}
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-1 flex-col justify-between gap-5 text-sm">
+      <CardContent className="flex flex-1 flex-col gap-5 text-sm">
         {today === null ? (
           <Skeleton className="h-72 w-full flex-1" />
         ) : (
-          <>
-            <div className="flex items-center gap-3 rounded-xl bg-sky-500/10 p-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-sky-600 dark:text-sky-300">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/50 p-4">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-background text-foreground ring-1 ring-border">
                 <CalendarDaysIcon className="size-5" aria-hidden />
               </span>
               <div className="flex flex-col">
@@ -36,42 +36,48 @@ export function TodayCard() {
                 </span>
               </div>
             </div>
-            <dl className="flex flex-col gap-2">
-              <div className="flex items-center gap-3">
-                <GlobeIcon className="size-4 text-emerald-500" aria-hidden />
+            <dl className="grid gap-3">
+              <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/30 px-3 py-3.5">
+                <GlobeIcon className="size-4 text-muted-foreground" aria-hidden />
                 <dt className="w-16 text-muted-foreground">{t("gregorian")}</dt>
                 <dd>{today.gregorian}</dd>
               </div>
-              <div className="flex items-center gap-3">
-                <MoonIcon className="size-4 text-violet-500" aria-hidden />
+              <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/30 px-3 py-3.5">
+                <MoonIcon className="size-4 text-muted-foreground" aria-hidden />
                 <dt className="w-16 text-muted-foreground">{t("hijri")}</dt>
                 <dd>{today.hijri}</dd>
               </div>
             </dl>
-            <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-muted px-3 py-1 text-xs">{today.dayOfYear}</span>
-              <span className="rounded-full bg-muted px-3 py-1 text-xs">{today.weekOfYear}</span>
-            </div>
-            <div className="mt-auto flex flex-col gap-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">{t("yearProgress")}</span>
-                <span className="font-semibold">{today.progressLabel}</span>
+            <div className="flex flex-col gap-4 sm:col-span-2">
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full border border-border/60 bg-muted/40 px-3 py-1.5 text-center text-xs text-muted-foreground">
+                  {today.dayOfYear}
+                </span>
+                <span className="rounded-full border border-border/60 bg-muted/40 px-3 py-1.5 text-center text-xs text-muted-foreground">
+                  {today.weekOfYear}
+                </span>
               </div>
-              <div
-                role="progressbar"
-                aria-label={t("yearProgress")}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={today.progressPercent}
-                className="h-2.5 overflow-hidden rounded-full bg-muted"
-              >
+              <div className="flex flex-col gap-3 border-t border-border/60 pt-4">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">{t("yearProgress")}</span>
+                  <span className="font-semibold">{today.progressLabel}</span>
+                </div>
                 <div
-                  className="h-full rounded-full bg-linear-to-l from-sky-500 via-violet-500 to-rose-500"
-                  style={{ width: `${today.progressPercent}%` }}
-                />
+                  role="progressbar"
+                  aria-label={t("yearProgress")}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={today.progressPercent}
+                  className="relative h-2 overflow-hidden rounded-full bg-muted after:pointer-events-none after:absolute after:inset-0 after:bg-[repeating-linear-gradient(to_left,transparent_0,transparent_calc(8.333%_-_1px),var(--card)_calc(8.333%_-_1px),var(--card)_8.333%)]"
+                >
+                  <div
+                    className="h-full rounded-full bg-primary"
+                    style={{ width: `${today.progressPercent}%` }}
+                  />
+                </div>
               </div>
             </div>
-          </>
+          </div>
         )}
       </CardContent>
     </Card>

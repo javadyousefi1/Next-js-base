@@ -8,7 +8,11 @@ const PNG = Buffer.from(
   "base64",
 );
 
-const openTab = (page: Page, name: string) => page.getByRole("tab", { name }).click();
+async function openTab(page: Page, name: string) {
+  await page.getByRole("tab", { name, exact: true }).click();
+  await expect(page.getByRole("tabpanel", { name, exact: true })).toBeVisible();
+  await expect(page.getByRole("tabpanel")).toHaveCount(1);
+}
 
 test.describe("profile", () => {
   test("opens from the user menu and shows the identity of the demo admin", async ({ page }) => {
