@@ -333,6 +333,18 @@
         "notificationsOff": "Off",
         "invalid": "This field has an error."
       },
+      "dropzone": {
+        "heading": "File dropzone",
+        "title": "Drop a file here or click to choose",
+        "active": "Drop to upload",
+        "avatarHint": "PNG or JPEG, up to {size}",
+        "documentsHint": "Images or PDF, up to {size}, at most {count, number} files",
+        "reasons": {
+          "type": "{name}: this file type is not supported.",
+          "size": "{name}: the file is larger than {size}.",
+          "count": "{name}: too many files."
+        }
+      },
       "plans": {
         "free": "Free",
         "pro": "Pro",

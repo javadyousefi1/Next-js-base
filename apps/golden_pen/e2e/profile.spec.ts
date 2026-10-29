@@ -153,4 +153,15 @@ test.describe("profile", () => {
     ).toBeVisible();
     await expect(page.getByTestId("document-list")).toHaveCount(0);
   });
+
+  test("rejects a wrong document type and a second file in the dropzone", async ({ page }) => {
+    await signInAsNewUser(page);
+    await openTab(page, "مدارک");
+
+    await page
+      .getByTestId("document-input")
+      .setInputFiles({ name: "a.zip", mimeType: "application/zip", buffer: Buffer.from("zip") });
+    await expect(page.getByText("نوع فایل پشتیبانی نمی‌شود.")).toBeVisible();
+    await expect(page.getByTestId("document-list")).toHaveCount(0);
+  });
 });

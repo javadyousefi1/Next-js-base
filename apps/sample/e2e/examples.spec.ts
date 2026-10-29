@@ -128,4 +128,35 @@ test.describe("examples", () => {
       page.getByRole("row", { name: /\/users users\.read Denied/ }).first(),
     ).toBeVisible();
   });
+
+  test("ui: the dropzones list accepted files and explain rejected ones", async ({ page }) => {
+    await signIn(page, "/en/examples/ui");
+    await page.getByRole("tab", { name: "Forms" }).click();
+    const png = Buffer.from("png");
+
+    await page
+      .getByTestId("dropzone-single")
+      .setInputFiles({ name: "me.png", mimeType: "image/png", buffer: png });
+    await expect(page.getByTestId("dropzone-single-result")).toContainText("me.png");
+
+    await page.getByTestId("dropzone-single").setInputFiles({
+      name: "big.png",
+      mimeType: "image/png",
+      buffer: Buffer.alloc(1024 * 1024 + 1),
+    });
+    await expect(page.getByRole("alert").filter({ hasText: "big.png" })).toContainText(
+      "larger than 1 MB",
+    );
+
+    await page.getByTestId("dropzone-multiple").setInputFiles([
+      { name: "a.png", mimeType: "image/png", buffer: png },
+      { name: "b.pdf", mimeType: "application/pdf", buffer: png },
+      { name: "c.zip", mimeType: "application/zip", buffer: png },
+    ]);
+    await expect(page.getByTestId("dropzone-multiple-result")).toContainText("a.png");
+    await expect(page.getByTestId("dropzone-multiple-result")).toContainText("b.pdf");
+    await expect(page.getByRole("alert").filter({ hasText: "c.zip" })).toContainText(
+      "not supported",
+    );
+  });
 });

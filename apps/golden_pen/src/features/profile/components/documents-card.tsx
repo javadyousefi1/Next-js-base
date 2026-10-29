@@ -11,9 +11,9 @@ import { useTranslations } from "next-intl";
 
 import { useProfileDocuments } from "../hooks/use-profile-documents";
 import type { ProfileIdentity } from "../schemas/profile.schema";
-import { DocumentUploadButton } from "./document-upload-button";
+import { DocumentDropzone } from "./document-dropzone";
 
-/** «مدارک»: the uploaded documents per kind, each opening in a new tab, with an upload button. */
+/** «مدارک»: the uploaded documents per kind, each opening in a new tab, with a drop zone. */
 export function DocumentsCard({ identity }: { identity: ProfileIdentity | null }) {
   const t = useTranslations("Profile.documents");
   const groups = useProfileDocuments(identity);
@@ -27,10 +27,8 @@ export function DocumentsCard({ identity }: { identity: ProfileIdentity | null }
       <CardContent className="grid gap-6 sm:grid-cols-2">
         {groups.map((group) => (
           <section key={group.kind} className="flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-medium">{t(`kinds.${group.kind}`)}</h3>
-              <DocumentUploadButton kind={group.kind} />
-            </div>
+            <h3 className="text-sm font-medium">{t(`kinds.${group.kind}`)}</h3>
+            <DocumentDropzone kind={group.kind} />
             {group.items.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("empty")}</p>
             ) : (

@@ -333,6 +333,18 @@
         "notificationsOff": "خاموش",
         "invalid": "این فیلد خطا دارد."
       },
+      "dropzone": {
+        "heading": "رها کردن فایل",
+        "title": "فایل را اینجا رها کنید یا برای انتخاب کلیک کنید",
+        "active": "برای بارگذاری رها کنید",
+        "avatarHint": "PNG یا JPEG، حداکثر {size}",
+        "documentsHint": "تصویر یا PDF، حداکثر {size}، حداکثر {count, number} فایل",
+        "reasons": {
+          "type": "{name}: نوع این فایل پشتیبانی نمی‌شود.",
+          "size": "{name}: حجم فایل بیشتر از {size} است.",
+          "count": "{name}: تعداد فایل‌ها زیاد است."
+        }
+      },
       "plans": {
         "free": "Free",
         "pro": "Pro",

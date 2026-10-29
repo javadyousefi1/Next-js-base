@@ -27,3 +27,6 @@ Tailwind CSS 4 tokens (`src/styles/globals.css`), `cn()` and UI hooks. Repositor
 - Chat components `message`, `bubble`, `marker` follow the shadcn chat registry (base-nova) by
   hand: the registry was unreachable, so they were copied from the shadcn-ui/ui source with the
   nova styles inlined and RTL logical classes. Usage: `.claude/skills/shadcn/rules/chat.md`.
+- Own component `file-dropzone` (drag-and-drop / click picker, no dependency): rules in
+  `lib/file-validation.ts` (`validateFiles`, `formatBytes`; unit-tested), state in
+  `hooks/use-file-dropzone.ts`. Every visible string is a `labels` prop; fixed min-height, no layout shift.
