@@ -6,8 +6,8 @@ import { isActive, markActive } from "./nav-active";
 
 describe("isActive", () => {
   test("the dashboard is active only on itself", () => {
-    expect(isActive("/", "/")).toBe(true);
-    expect(isActive("/users", "/")).toBe(false);
+    expect(isActive("/dashboard", "/dashboard")).toBe(true);
+    expect(isActive("/users", "/dashboard")).toBe(false);
   });
 
   test("other pages are active on their subpages too", () => {

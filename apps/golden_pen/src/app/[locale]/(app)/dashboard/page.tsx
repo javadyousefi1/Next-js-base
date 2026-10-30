@@ -7,7 +7,9 @@ import { DashboardContent } from "@/features/dashboard/components/dashboard-cont
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
 
-export async function generateMetadata({ params }: PageProps<"/[locale]">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/[locale]/dashboard">): Promise<Metadata> {
   return pageMetadata(await getLocaleParam(params), "Dashboard", ROUTES.dashboard);
 }
 

@@ -5,8 +5,8 @@ import { signIn } from "./fixtures";
 // Mock data: 27 users (3 identity Pending + 6 Requested; the identity spec reviews some), 12 invite links (9 unused).
 test.describe("dashboard", () => {
   test.beforeEach(async ({ page }) => {
-    await signIn(page, "/");
-    await expect(page).toHaveURL(/\/$/);
+    await signIn(page, "/dashboard");
+    await expect(page).toHaveURL(/\/dashboard$/);
   });
 
   test("shows the greeting, the wall clock and today's dates", async ({ page }) => {

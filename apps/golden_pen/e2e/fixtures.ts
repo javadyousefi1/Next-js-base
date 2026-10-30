@@ -7,7 +7,7 @@ export const DEMO_USER = { phoneNumber: "09120000000", password: "admin123" } as
 export const OTP_CODE = "123456";
 
 /** Signs in through the real password form (BFF → mocked upstream → httpOnly cookie). */
-export async function signIn(page: Page, path = "/") {
+export async function signIn(page: Page, path = "/dashboard") {
   await page.goto(path);
   await expect(page).toHaveURL(/\/login/);
   await waitForHydration(page);

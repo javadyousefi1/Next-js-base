@@ -25,7 +25,12 @@ export function AppProviders({ children, direction }: AppProvidersProps) {
         <NuqsAdapter>
           <QueryProvider>
             <TooltipProvider>
-              <NextTopLoader color="var(--primary)" height={3} showSpinner={false} />
+              <NextTopLoader
+                color="var(--primary)"
+                height={3}
+                showSpinner={false}
+                showForHashAnchor={false}
+              />
               {children}
               <Toaster richColors position="bottom-center" />
               <AppModalHost />

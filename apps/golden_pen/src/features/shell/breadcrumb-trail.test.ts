@@ -10,14 +10,11 @@ const labels = {
 
 describe("breadcrumbTrail", () => {
   test("the dashboard is a trail of its own", () => {
-    expect(breadcrumbTrail("/")).toEqual([{ href: "/", labelKey: "dashboard" }]);
+    expect(breadcrumbTrail("/dashboard")).toEqual([{ href: "/dashboard", labelKey: "dashboard" }]);
   });
 
   test("a page is listed after the pages on the way to it", () => {
-    expect(breadcrumbTrail("/settings")).toEqual([
-      { href: "/", labelKey: "dashboard" },
-      { href: "/settings", labelKey: "settings" },
-    ]);
+    expect(breadcrumbTrail("/settings")).toEqual([{ href: "/settings", labelKey: "settings" }]);
   });
 
   test("a [param] segment matches any value", () => {

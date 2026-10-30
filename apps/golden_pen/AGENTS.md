@@ -95,9 +95,15 @@ identity document with `fieldType` `licenseFile` | `documents`, type JPEG/PNG(+W
 (`GET /base-info/enums`: `type=1` provinces, `type=2&parentId=` cities). The identity status label is
 `useIdentityStatusLabel` (users feature).
 
+## Landing
+
+`/`: public Persian product presentation in `features/landing`, outside the authenticated shell.
+Login CTAs use `ROUTES.login`; successful login defaults to `/dashboard`. Capability copy describes
+the final product vision from the supplied reference, not newly implemented panel tools.
+
 ## Dashboard
 
-`/`: `features/dashboard`: hero (greeting, Jalali date, Nowruz chip, SVG analog wall clock `wall-clock.tsx`, rendered after mount), today card, Jalali month calendar
+`/dashboard`: `features/dashboard`: hero (greeting, Jalali date, Nowruz chip, SVG analog wall clock `wall-clock.tsx`, rendered after mount), today card, Jalali month calendar
 (fixed solar holidays only), admin pulse (counts from the users / invite-links lists with `PageSize=1`, read
 `totalCount`), and quick actions. Pure helpers: `dashboard-dates.ts`, `clock-angles.ts` (hand angles never spin back).
 

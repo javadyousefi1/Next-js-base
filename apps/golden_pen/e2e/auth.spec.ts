@@ -35,8 +35,8 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
   });
 
   test("signs in with a password, sees the name, and signs out", async ({ page, context }) => {
-    await signIn(page, "/");
-    await expect(page).toHaveURL(/\/$/);
+    await signIn(page, "/dashboard");
+    await expect(page).toHaveURL(/\/dashboard$/);
     await expect(page.getByTestId("greeting")).toContainText(/بخیر، مدیر/);
 
     // The token is httpOnly: invisible to JavaScript.
@@ -61,7 +61,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
     await page.getByRole("textbox", { name: "کد تأیید" }).fill(OTP_CODE);
     await page.getByRole("button", { name: "تأیید و ورود" }).click();
 
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/dashboard$/);
     await expect(page.getByTestId("greeting")).toContainText(/بخیر، مدیر/);
   });
 
@@ -98,7 +98,7 @@ test.describe("authentication (phone number, BFF + httpOnly cookie)", () => {
     await page.getByRole("textbox", { name: "کد تأیید" }).fill(OTP_CODE);
     await page.getByRole("button", { name: "تأیید و ورود" }).click();
 
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/dashboard$/);
     await expect(page.getByTestId("greeting")).toContainText(/بخیر، سارا/);
   });
 

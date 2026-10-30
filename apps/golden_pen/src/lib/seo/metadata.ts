@@ -24,7 +24,7 @@ export async function rootMetadata(locale: AppLocale): Promise<Metadata> {
     description: t("description"),
     applicationName: SITE.name,
     robots,
-    alternates: { canonical: ROUTES.dashboard },
+    alternates: { canonical: ROUTES.landing },
     openGraph: {
       type: "website",
       siteName: SITE.name,
@@ -38,6 +38,7 @@ export async function rootMetadata(locale: AppLocale): Promise<Metadata> {
 }
 
 type PageNamespace =
+  | "Landing"
   | "Dashboard"
   | "Users"
   | "InviteLinks"

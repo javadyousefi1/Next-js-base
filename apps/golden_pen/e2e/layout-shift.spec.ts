@@ -26,7 +26,7 @@ async function readLayoutShift(page: Page): Promise<number> {
 }
 
 const PAGES = [
-  { name: "dashboard", path: "/", ready: "greeting" },
+  { name: "dashboard", path: "/dashboard", ready: "greeting" },
   { name: "users", path: "/users", ready: "pagination" },
   { name: "invite-links", path: "/invite-links", ready: "pagination" },
   { name: "identity-requests", path: "/identity-requests", ready: "pagination" },
@@ -39,8 +39,8 @@ test.describe("layout shift", () => {
   for (const { name, path, ready } of PAGES) {
     test(`${name} does not jump while it loads`, async ({ page }) => {
       await observeLayoutShift(page);
-      await signIn(page, "/");
-      await expect(page).toHaveURL(/\/$/);
+      await signIn(page, "/dashboard");
+      await expect(page).toHaveURL(/\/dashboard$/);
 
       await page.goto(path);
       const marker = {

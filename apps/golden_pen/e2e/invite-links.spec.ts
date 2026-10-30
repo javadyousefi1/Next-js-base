@@ -5,8 +5,8 @@ import { signIn } from "./fixtures";
 // 12 links are seeded (src/mocks/invite-links-data.ts): 9 unused (6 valid + 3 expired), 3 used.
 test.describe("invite links", () => {
   test("the sidebar group expands and navigates to both pages", async ({ page }) => {
-    await signIn(page, "/");
-    await expect(page).toHaveURL(/\/$/);
+    await signIn(page, "/dashboard");
+    await expect(page).toHaveURL(/\/dashboard$/);
 
     await page.getByRole("button", { name: "مدیریت کاربران" }).click();
     await page.getByRole("link", { name: "لینک دعوت" }).click();

@@ -44,8 +44,8 @@ test.describe("role switcher", () => {
   });
 
   test("logging out clears the override", async ({ page }) => {
-    await signIn(page, "/");
-    await expect(page).toHaveURL(/\/$/);
+    await signIn(page, "/dashboard");
+    await expect(page).toHaveURL(/\/dashboard$/);
     await pickRole(page, "کارآموز");
     await expect(badge(page)).toBeVisible();
 
@@ -64,7 +64,7 @@ test.describe("role switcher", () => {
   }) => {
     await registerNewUser(page);
     await context.addCookies([{ name: "gp_view_as", value: "super-admin", url: baseURL! }]);
-    await page.goto("/");
+    await page.goto("/dashboard");
     await expect(page.getByRole("button", { name: "حساب کاربری" })).toBeVisible();
     await expect(switcher(page)).toHaveCount(0);
     await expect(badge(page)).toHaveCount(0);

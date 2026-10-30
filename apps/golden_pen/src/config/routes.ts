@@ -6,7 +6,8 @@
  * Paths are locale-agnostic: the i18n-aware `Link`/`useAppRouter`/`redirect` add the locale.
  */
 export const ROUTES = {
-  dashboard: "/",
+  landing: "/",
+  dashboard: "/dashboard",
   login: "/login",
   register: "/register",
   users: "/users",
@@ -19,7 +20,7 @@ export const ROUTES = {
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];
 
 /** Pages reachable without a session. Every other page is protected by `src/proxy.ts`. */
-export const PUBLIC_ROUTES: readonly AppRoute[] = [ROUTES.login, ROUTES.register];
+export const PUBLIC_ROUTES: readonly AppRoute[] = [ROUTES.landing, ROUTES.login, ROUTES.register];
 
 /** Landing page after login, and where authenticated users are sent from public pages. */
 export const DEFAULT_AUTHENTICATED_ROUTE: AppRoute = ROUTES.dashboard;

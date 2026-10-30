@@ -16,8 +16,8 @@ async function openTab(page: Page, name: string) {
 
 test.describe("profile", () => {
   test("opens from the user menu and shows the identity of the demo admin", async ({ page }) => {
-    await signIn(page, "/");
-    await expect(page).toHaveURL(/\/$/);
+    await signIn(page, "/dashboard");
+    await expect(page).toHaveURL(/\/dashboard$/);
 
     await page.getByRole("button", { name: "حساب کاربری" }).click();
     await page.getByRole("menuitem", { name: "پروفایل" }).click();

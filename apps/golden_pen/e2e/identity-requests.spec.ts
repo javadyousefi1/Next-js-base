@@ -11,8 +11,8 @@ test.describe("identity requests", () => {
   test("the sidebar group leads to the page, which lists only requested identities", async ({
     page,
   }) => {
-    await signIn(page, "/");
-    await expect(page).toHaveURL(/\/$/);
+    await signIn(page, "/dashboard");
+    await expect(page).toHaveURL(/\/dashboard$/);
 
     await page.getByRole("button", { name: "مدیریت کاربران" }).click();
     await page.getByRole("link", { name: "احراز هویت" }).click();
