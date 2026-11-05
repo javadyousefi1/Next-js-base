@@ -2,10 +2,10 @@
 
 import type { TableController } from "@repo/table/types";
 import { useTableState } from "@repo/table/use-table-state";
-import { keepPreviousData } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { usersListQuery } from "../api/users.queries";
 import type { User } from "../schemas/user.schema";
+import { usersListQuery } from "../users.api";
 import { usersSearchParams } from "../users.search-params";
 
 const NO_USERS: User[] = [];
@@ -14,7 +14,7 @@ const NO_USERS: User[] = [];
 export function useUsersTable(): TableController<User> {
   const { params, ...controls } = useTableState(usersSearchParams);
   // The search box debounces its own typing; keep the previous page visible while loading.
-  const query = usersListQuery.useQuery(params, { placeholderData: keepPreviousData });
+  const query = useQuery({ ...usersListQuery(params), placeholderData: keepPreviousData });
 
   return {
     ...controls,

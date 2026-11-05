@@ -10,9 +10,6 @@ function createUpstreamClient(headers?: Record<string, string>): HttpClient {
     baseURL: env.API_BASE_URL,
     timeout: 10_000,
     headers: { ...backOfficeHeader, ...headers },
-    // MSW intercepts requests inside this process: a mocked upstream must never go through an
-    // HTTP(S)_PROXY from the environment (the proxy would receive — and reject — the call).
-    ...(env.API_MOCKING === "enabled" && { proxy: false as const }),
   });
 }
 

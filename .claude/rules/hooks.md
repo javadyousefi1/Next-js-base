@@ -10,9 +10,10 @@ paths:
 - `"use client"` at the top; file `use-<name>.ts`; one exported hook per file.
 - A feature hook returns a ready-to-render model: plain values + callbacks named for the view
   (`status`, `rows`, `search`, `setSearch`, `onSubmit`, `errors`). The view must not compute.
-- Data: only through `*.queries.ts` definitions (`xQuery.useQuery`, `xMutation.useMutation`).
+- Data: `useQuery(xQuery(params))` / `useMutation(xMutation(queryClient))` with the options
+  factories of `<f>.api.ts`.
 - Tables (copy `use-users-table.ts`): `useTableState(<x>SearchParams)` →
-  `xQuery.useQuery(params, { placeholderData: keepPreviousData })` (no debounced `q` here: the
+  `useQuery({ ...xQuery(params), placeholderData: keepPreviousData })` (no debounced `q` here: the
   search box and text filters debounce themselves) →
   `{ ...controls, rows, total, isLoading, isFetching, isError, retry }` (a `TableController`) for
   `<DataTableProvider>`.

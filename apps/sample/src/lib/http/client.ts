@@ -11,7 +11,7 @@ import { emitUnauthorized } from "./auth-events";
  * - `apiClient` → `/api/proxy/*` (forwarded to the upstream API with the access token)
  * - `bffClient` → `/api/*`       (our own endpoints, e.g. auth)
  *
- * Only `features/<feature>/api/*.service.ts` files and `src/lib/query` use these.
+ * Only `features/<feature>/<feature>.api.ts` files (and the chat transport) use these.
  */
 function createBrowserClient(baseURL: string): HttpClient {
   return new HttpClient({

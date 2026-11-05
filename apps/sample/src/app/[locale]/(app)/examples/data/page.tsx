@@ -1,15 +1,13 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { PageHeader } from "@/components/layout/page-header";
 import { ROUTES } from "@/config/routes";
-import { tasksListQuery } from "@/features/tasks/api/tasks.queries";
 import { TasksTable } from "@/features/tasks/components/tasks-table";
-import { loadTasksSearchParams } from "@/features/tasks/tasks.search-params";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
-import { PrefetchBoundary } from "@/server/query/prefetch-boundary";
 
 export async function generateMetadata({
   params,
@@ -17,20 +15,16 @@ export async function generateMetadata({
   return pageMetadata(await getLocaleParam(params), "Examples.data", ROUTES.examplesData);
 }
 
-export default async function DataExamplePage({
-  searchParams,
-}: PageProps<"/[locale]/examples/data">) {
+export default async function DataExamplePage() {
   const t = await getTranslations("Examples.data");
 
   return (
     <>
       <PageHeader title={t("title")} description={t("description")} />
-      <PrefetchBoundary
-        queries={[tasksListQuery.with(loadTasksSearchParams(searchParams))]}
-        fallback={<DataTableSkeleton />}
-      >
+      {/* The table reads the URL (nuqs) and loads its data in the browser. */}
+      <Suspense fallback={<DataTableSkeleton />}>
         <TasksTable />
-      </PrefetchBoundary>
+      </Suspense>
     </>
   );
 }

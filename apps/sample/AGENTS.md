@@ -20,13 +20,13 @@ app/                    Routing only — thin pages/layouts, BFF route handlers,
   api/health/           Liveness probe (Docker HEALTHCHECK)
   manifest.ts · robots.ts · sitemap.ts
 components/             Shared, feature-agnostic VIEWS: data-table, feedback, layout, providers
-config/                 Constants: routes, query-keys, api-endpoints, cache-tags, navigation, breadcrumbs, site, auth, access
+config/                 Constants: routes, cache-tags, navigation, breadcrumbs, site, auth, access
 features/<name>/        Vertical slices (anatomy below)
 hooks/                  App hooks (useAppRouter: i18n router + top loader); generic ones: @repo/hooks
 i18n/                   next-intl routing, navigation (Link, useRouter…), request config, locale meta
-lib/                    App bindings: http (apiClient/bffClient), query (makeQuery + error toasts), seo
+lib/                    App bindings: http (apiClient/bffClient), query (error toasts), seo
 mocks/                  MSW handlers + Faker database (fake upstream API)
-server/                 Server-only: auth (cookies, refresh), bff responses, upstream client, getRedis, PrefetchBoundary
+server/                 Server-only: auth (cookies, refresh), bff responses, upstream client, getRedis
 env.ts                  All env vars, zod-validated: `server` + `client` objects (@t3-oss/env-nextjs)
 instrumentation.ts      Boot: validates env, starts MSW when API_MOCKING=enabled
 proxy.ts                Next 16 proxy (formerly middleware): i18n routing + optimistic auth guard
@@ -40,10 +40,9 @@ App-agnostic building blocks come from workspace packages: `@repo/http`, `@repo/
 
 ```
 schemas/<f>.schema.ts     domain types + params schema (the app's own shapes)
-api/<f>.backend.ts        the ONLY file that knows the backend: query mapping + response → domain
-api/<f>.service.ts        fetcher: (params, { http, signal }) → raw data
-api/<f>.queries.ts        makeQuery / makeMutation (key + schemas + fetcher)
-<f>.search-params.ts      tables: nuqs parsers = the URL contract (page prefetch + hook)
+<f>.api.ts                the ONLY file that knows the backend: endpoint, query mapping, response
+                          schemas, keys, queryOptions factories, mutation options
+<f>.search-params.ts      tables: nuqs parsers = the URL contract (read by the table hook)
 hooks/use-<f>-*.ts        logic: state, queries, mapping → a render-ready model
 components/*.tsx          views: render the hook's result
 ```
@@ -61,20 +60,18 @@ when no app knowledge is involved.
   `project/no-logic-in-views`). Rules: `views.md`, `hooks.md`.
 - **Server vs client** — cookies/tokens, secrets, upstream API, Redis: `src/server/**`, route
   handlers, Server Components (`import "server-only"`). Interactivity: `"use client"` on the lowest
-  file. Shared non-personal data: Server Component + `'use cache'`. Writes: `makeMutation`; Server
+  file. Shared non-personal data: Server Component + `'use cache'`. Writes: `useMutation`; Server
   Actions only for server-only effects (`updateTag`). Never pass tokens or secrets as props.
   Rule: `server.md`.
-- **Data** — `makeQuery` / `makeMutation` with zod `params`/`variables` and `response`; keys from
-  `QUERY_KEYS`; fetchers use the injected `http` (browser: BFF; server prefetch: upstream with the
-  user's token). Errors are always `ApiError` (`code`, `status`). Rule: `data-fetching.md`;
+- **Data** — TanStack Query directly: `useQuery(xQuery(params))` with `queryOptions` factories and
+  `useMutation(xMutation(queryClient))` declared in `features/<f>/<f>.api.ts` (keys, endpoint,
+  `schema`-validated `apiClient` calls). Pages do not prefetch: the client loads, a skeleton
+  shows meanwhile. Errors are always `ApiError` (`code`, `status`). Rule: `data-fetching.md`;
   skills: `add-query`, `add-mutation`.
 - **Backend independence** — views, hooks, tables, cookies and the BFF only know domain types.
-  A new backend = `API_BASE_URL` → `src/config/api-endpoints.ts` → every `*.backend.ts`
-  (`z.ZodType<Domain>` or a typed `.transform()`; lists → `{ items, total }`) → the MSW mock.
-  Nothing else changes. Auth (JWT) mapping: `features/auth/api/auth.backend.ts`.
-- **Prefetch** — pages wrap a view in `<PrefetchBoundary queries={[xQuery.with(params)]}
-fallback={…}>`: it runs the same fetchers on the server with the user's token and hydrates
-  the cache; no session → the client fetches.
+  A new backend = `API_BASE_URL` → every `<f>.api.ts` (`z.ZodType<Domain>` or a typed
+  `.transform()`; lists → `{ items, total }`) → the MSW mock. Nothing else changes. Auth (JWT)
+  mapping and the server-only token endpoints: `features/auth/auth.backend.ts`.
 
 ## Tables · access · examples · modals · dates · chat · breadcrumbs
 

@@ -52,6 +52,8 @@ export function collectAffectedQueries(
 /**
  * The only invalidation entry point of the app. Invalidates `keys`, everything below them and
  * every query that declared one of them as a related key. Active queries refetch immediately.
+ *
+ * @deprecated golden_pen only, removed after its migration (apps/sample uses TanStack Query directly).
  */
 export async function invalidateKeys(
   queryClient: QueryClient,

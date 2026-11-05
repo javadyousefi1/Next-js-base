@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { toBackendListQuery, usersListResponse } from "./users.backend";
+import { toBackendListQuery, usersListResponse } from "./users.api";
 
 const ada = {
   id: 1,

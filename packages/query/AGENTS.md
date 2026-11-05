@@ -2,12 +2,11 @@
 
 `@repo/query`: the React Query layer. Repository rules: [`../../AGENTS.md`](../../AGENTS.md).
 
-- `createMakeQuery(http)` → `makeQuery({ key, params, response, fetcher, relatedKeys })` and
-  `makeMutation({ mutationKey, variables, response, mutationFn, invalidates })`: input and output
-  are parsed with zod, errors are `ApiError` (`@repo/http`).
-- `invalidateKeys` (follows `relatedKeys` transitively), `makeQueryClient`/`getQueryClient`
-  (retry + dehydrate defaults), `setErrorReporter`, `useInvalidate`.
+- `makeQueryClient`/`getQueryClient` (retry policy: no retry on 4xx; staleTime), `setErrorReporter`
+  (global toasts for background refetch errors + non-`silent` mutations). Apps use TanStack
+  Query directly (`queryOptions`, `useQuery`, `useMutation`).
+- **Deprecated, golden_pen only** (removed after its migration): `createMakeQuery`/`makeQuery`,
+  `makeMutation`, `invalidateKeys`, `useInvalidate`, `parseInput`, `labelFromKey`.
 - `register.ts` types React Query for every consumer (`defaultError: ApiError`, query/mutation meta).
-- App-agnostic: no imports from `apps/*`. The app binds its browser client once
-  (`export const makeQuery = createMakeQuery(apiClient)`) and owns the error UI (toasts).
+- App-agnostic: no imports from `apps/*`. The app owns the error UI (toasts).
 - Tests: `bun test` (`invalidate`, `validation`).

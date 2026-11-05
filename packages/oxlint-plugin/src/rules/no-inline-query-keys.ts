@@ -54,14 +54,17 @@ function findInlineKey(node: ESTree.Node): ESTree.Node | null {
   return null;
 }
 
-/** Query/mutation keys must come from `QUERY_KEYS` / `MUTATION_KEYS` (src/config/query-keys.ts). */
+/**
+ * Query/mutation keys are declared once — in `features/<f>/<f>.api.ts` (`usersKeys`) or a
+ * `src/config/query-keys.ts` registry — and referenced everywhere else (never an inline array).
+ */
 export const noInlineQueryKeys = defineRule({
   meta: {
     type: "problem",
-    docs: { description: "Disallow inline React Query keys; use QUERY_KEYS / MUTATION_KEYS." },
+    docs: { description: "Disallow inline React Query keys; use the feature's keys (<f>.api.ts)." },
     messages: {
       inlineKey:
-        "Inline query/mutation key. Add it to QUERY_KEYS / MUTATION_KEYS in src/config/query-keys.ts and reference it from there.",
+        "Inline query/mutation key. Declare it in the feature's <f>.api.ts (e.g. usersKeys) and reference it from there.",
     },
     schema: [],
   },

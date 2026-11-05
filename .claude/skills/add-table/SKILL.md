@@ -1,6 +1,6 @@
 ---
 name: add-table
-description: Add a server-driven table to apps/sample (search, filters drawer generated from config, sorting, pagination, URL state, server prefetch) or a filter to an existing table. Use whenever a list/table screen or a new filter is needed.
+description: Add a server-driven table to apps/sample (search, filters drawer generated from config, sorting, pagination, URL state) or a filter to an existing table. Use whenever a list/table screen or a new filter is needed.
 ---
 
 # Add a table (or a filter)
@@ -9,7 +9,7 @@ Plain React, no table library: the API pages, sorts and filters; the UI renders 
 Reference: `features/users` (`users.search-params.ts`, `use-users-table.ts`, `users-table.tsx`,
 `users-columns.tsx`, `users-filters.ts`). The list query itself: skill `add-query`.
 
-1. **URL contract** — `features/<x>/<x>.search-params.ts` (`nuqs/server`: shared with the page):
+1. **URL contract** — `features/<x>/<x>.search-params.ts` (`nuqs/server`):
 
    ```ts
    export const usersSearchParams = {
@@ -22,12 +22,12 @@ Reference: `features/users` (`users.search-params.ts`, `use-users-table.ts`, `us
 
 2. **Params schema + backend** — every filter is also a field of the list params schema
    (`.catch()` to its default; a multiSelect maps `[]` to `null`, so `?x=` and no `x` share one
-   cache entry) and a backend param in `toBackendListQuery` (`<x>.backend.ts`).
+   cache entry) and a backend param in `toBackendListQuery` (`<x>.api.ts`).
 3. **Hook** — `hooks/use-<x>-table.ts` (no debounce here: the inputs debounce themselves):
 
    ```ts
    const { params, ...controls } = useTableState(usersSearchParams);
-   const query = usersListQuery.useQuery(params, { placeholderData: keepPreviousData });
+   const query = useQuery({ ...usersListQuery(params), placeholderData: keepPreviousData });
    return {
      ...controls,
      rows: query.data?.items ?? NO_ROWS,
@@ -66,8 +66,8 @@ Reference: `features/users` (`users.search-params.ts`, `use-users-table.ts`, `us
    </DataTableProvider>
    ```
 
-6. **Prefetch (page)** — `<PrefetchBoundary queries={[xListQuery.with(loadXSearchParams(searchParams))]}
-fallback={<DataTableSkeleton />}>` around the view.
+6. **Page** — no prefetch: the header plus `<Suspense fallback={<DataTableSkeleton />}>` around
+   the view (nuqs reads the URL on the client).
 7. **Tests** — e2e: open `getByRole("button", { name: "Filters", exact: true })`, change a field,
    assert the URL (`toHaveURL(/role=admin/)`); with filters set the button reads
    "Filters, 1 active". Skill `write-e2e-test`.

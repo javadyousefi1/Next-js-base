@@ -2,21 +2,21 @@
 
 ## Stack
 
-| Area         | Choice                                                                                                         |
-| ------------ | -------------------------------------------------------------------------------------------------------------- |
-| Monorepo     | Turborepo 2 (strict env mode, cached tasks) + Bun 1.4 workspaces (isolated installs)                           |
-| App          | Next.js 16 App Router, React 19.3 + React Compiler, Cache Components, `proxy.ts`                               |
-| Language     | TypeScript 7 (native compiler), strict + `noUncheckedIndexedAccess`                                            |
-| UI           | shadcn/ui (`base-nova` style, Base UI primitives, RTL) in `packages/ui`, Tailwind CSS 4                        |
-| Data         | `HttpClient` (axios inside) → BFF route handlers → upstream API; TanStack Query via `makeQuery`/`makeMutation` |
-| Validation   | zod 4 everywhere (env, forms, query params, API responses)                                                     |
-| State in URL | nuqs (tables: search, filters, sort, pagination)                                                               |
-| i18n         | next-intl (`en`, `fa` + RTL), prefix routing `/en/...`, `/fa/...`                                              |
-| Server infra | Redis (node-redis): rate limiting + cache-aside; httpOnly cookie sessions                                      |
-| Mock API     | MSW 3 + Faker (`API_MOCKING=enabled`) — no backend needed                                                      |
-| Quality      | Oxlint (type-aware + project rules), Oxfmt, Husky, commitlint, lint-staged                                     |
-| Tests        | `bun test` (unit), `node --test` (lint rules), Playwright (e2e, against production build)                      |
-| Delivery     | Docker multi-stage (turbo prune → standalone Next.js on Node), docker compose + Redis                          |
+| Area         | Choice                                                                                                                                          |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Monorepo     | Turborepo 2 (strict env mode, cached tasks) + Bun 1.4 workspaces (isolated installs)                                                            |
+| App          | Next.js 16 App Router, React 19.3 + React Compiler, Cache Components, `proxy.ts`                                                                |
+| Language     | TypeScript 7 (native compiler), strict + `noUncheckedIndexedAccess`                                                                             |
+| UI           | shadcn/ui (`base-nova` style, Base UI primitives, RTL) in `packages/ui`, Tailwind CSS 4                                                         |
+| Data         | `HttpClient` (fetch inside) → BFF route handlers → upstream API; TanStack Query (`queryOptions`/`mutationOptions` in `features/<f>/<f>.api.ts`) |
+| Validation   | zod 4 everywhere (env, forms, query params, API responses)                                                                                      |
+| State in URL | nuqs (tables: search, filters, sort, pagination)                                                                                                |
+| i18n         | next-intl (`en`, `fa` + RTL), prefix routing `/en/...`, `/fa/...`                                                                               |
+| Server infra | Redis (node-redis): rate limiting + cache-aside; httpOnly cookie sessions                                                                       |
+| Mock API     | MSW 3 + Faker (`API_MOCKING=enabled`) — no backend needed                                                                                       |
+| Quality      | Oxlint (type-aware + project rules), Oxfmt, Husky, commitlint, lint-staged                                                                      |
+| Tests        | `bun test` (unit), `node --test` (lint rules), Playwright (e2e, against production build)                                                       |
+| Delivery     | Docker multi-stage (turbo prune → standalone Next.js on Node), docker compose + Redis                                                           |
 
 ## Monorepo
 
@@ -24,7 +24,7 @@
 apps/sample                Next.js 16 sample app: every package/feature in use (`/examples/*`)
 apps/shokolet              Persian chocolate gift-box builder, live 3D preview (React Three Fiber + GSAP)
 packages/http             HttpClient (axios inside): data or ApiError out
-packages/query            makeQuery / makeMutation, related-key invalidation, QueryClient
+packages/query            QueryClient (retry, error toasts); makeQuery/makeMutation deprecated (golden_pen only)
 packages/access           role-based access: grants, permission/role checks, <Can>
 packages/chat             headless chat: ChatTransport (WebSocket/REST), store, timeline, virtual scroll
 packages/table            headless tables: nuqs URL contract + useTableState
@@ -49,7 +49,6 @@ Browser ──page request──▶ proxy.ts ── i18n (next-intl): "/" → "/
         ──/api/auth/*────▶ BFF route handlers ── upstream /auth/* ── Set-Cookie (httpOnly)
         ──/api/proxy/*───▶ BFF catch-all ── Bearer <access_token cookie> ──▶ upstream API
                               └── 401 → refresh once → retry → rotate cookies │ fail → clear cookies → 401
-<PrefetchBoundary> ── same query fetchers, http = upstream + cookie token ── dehydrate → HydrationBoundary
 MSW (API_MOCKING=enabled) intercepts every upstream call inside the Node process (instrumentation.ts)
 ```
 
@@ -63,19 +62,17 @@ MSW (API_MOCKING=enabled) intercepts every upstream call inside the Node process
 ## Data flow (client)
 
 ```
-view ──calls──▶ feature hook ──▶ xQuery.useQuery(params)
-                                   │ params ── zod parse (VALIDATION on failure)
-                                   │ fetcher(params, { http }) ── http = apiClient (/api/proxy) ── BFF ── upstream
-                                   │ response ── zod parse (INVALID_RESPONSE on failure)
+view ──calls──▶ feature hook ──▶ useQuery(xQuery(params))
+                                   │ queryFn ── apiClient (/api/proxy) ── BFF ── upstream
+                                   │ response ── zod parse (`schema`; INVALID_RESPONSE on failure)
                                    ▼
-                              React Query cache (key from QUERY_KEYS)
-mutation success ──▶ invalidate `invalidates` keys ──▶ + every query whose `relatedKeys` match
-                                                      (transitively, cycle-safe)
+                              React Query cache (key from `xKeys` in <f>.api.ts)
+mutation success ──▶ queryClient.invalidateQueries({ queryKey: xKeys.all }) (+ other features')
 ```
 
 Tables follow the shadcn data-table pattern: a feature's `<x>.search-params.ts` (nuqs parsers)
-is the URL contract, read by `useQueryStates` in the browser and by `createLoader` in
-`<PrefetchBoundary>` on the server, so both build the same query key. `useTableState` turns
+is the URL contract, read by `useQueryStates` in the browser (the page does not prefetch).
+`useTableState` turns
 that URL state into actions (search, filter, sort, page) and the toolbar, table and pagination
 components are plain React (no table library). Token-issuing endpoints (`/auth/login`,
 `/auth/refresh`) are blocked in the proxy; the current user is `/auth/me`.

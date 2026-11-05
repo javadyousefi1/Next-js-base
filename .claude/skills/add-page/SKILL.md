@@ -29,8 +29,7 @@ description: Add a new route/page to apps/sample — ROUTES constant, thin Serve
 
    Request-time data (cookies, `searchParams`, uncached fetch) goes in a child component inside
    `<Suspense fallback={<Skeleton />}>` (Cache Components rule).
-   Server-prefetched data: `<PrefetchBoundary queries={[xQuery.with(params)]} fallback={…}>`
-   (it has its own Suspense).
+   Client-loaded data (queries): the client view inside `<Suspense fallback={<Skeleton />}>`.
 
 4. **Navigation** — add `{ href: ROUTES.<name>, labelKey, icon }` to `src/config/navigation.ts` and
    the `Nav.<labelKey>` message in both locales. Add `<Namespace>` to `PageNamespace` in

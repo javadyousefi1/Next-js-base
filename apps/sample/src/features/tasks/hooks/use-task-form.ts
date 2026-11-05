@@ -3,13 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { JalaliDate } from "@repo/jalali";
 import { useModalClose } from "@repo/ui/hooks/use-modal-close";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import { useForm, useWatch } from "react-hook-form";
 
 import { useJalaliPickerProps } from "@/hooks/use-jalali-picker-props";
 
-import { createTaskMutation, updateTaskMutation } from "../api/tasks.queries";
 import {
   TASK_STATUSES,
   TITLE_MAX_LENGTH,
@@ -20,6 +20,7 @@ import {
   type TaskStatus,
 } from "../schemas/task.schema";
 import { isoToJalali, jalaliToIso } from "../task-dates";
+import { createTaskMutation, updateTaskMutation } from "../tasks.api";
 
 /** zod messages in task.schema.ts are keys of `Examples.data.validation`. */
 const VALIDATION_KEYS = ["titleMin", "titleMax"] as const;
@@ -43,12 +44,15 @@ export function useTaskForm(task?: Task) {
       dueDate: task?.dueDate ?? null,
     },
   });
-  const create = createTaskMutation.useMutation({ onSuccess: (saved) => close(saved) });
-  const update = updateTaskMutation.useMutation({ onSuccess: (saved) => close(saved) });
+  const queryClient = useQueryClient();
+  const create = useMutation(createTaskMutation(queryClient));
+  const update = useMutation(updateTaskMutation(queryClient));
   const mutation = task ? update : create;
 
   const submit = form.handleSubmit((values) =>
-    task ? update.mutate({ id: task.id, ...values }) : create.mutate(values),
+    task
+      ? update.mutate({ id: task.id, ...values }, { onSuccess: close })
+      : create.mutate(values, { onSuccess: close }),
   );
   const titleError = form.formState.errors.title?.message;
   const titleErrorKey = VALIDATION_KEYS.find((key) => key === titleError);

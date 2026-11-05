@@ -5,7 +5,7 @@ export const USER_ROLES = ["admin", "moderator", "user"] as const;
 export const userRoleSchema = z.enum(USER_ROLES);
 export type UserRole = z.infer<typeof userRoleSchema>;
 
-/** A user as the app uses it; the backend shape lives in api/users.backend.ts. */
+/** A user as the app uses it; the backend shape lives in users.api.ts. */
 export type User = {
   id: number;
   firstName: string;
@@ -36,5 +36,5 @@ export const usersListParamsSchema = z.object({
 export type UsersListParams = z.output<typeof usersListParamsSchema>;
 export type UsersListParamsInput = z.input<typeof usersListParamsSchema>;
 
-/** A page of users as the app uses it; the backend shape lives in api/users.backend.ts. */
+/** A page of users as the app uses it; the backend shape lives in users.api.ts. */
 export type UsersList = { items: User[]; total: number };

@@ -1,11 +1,5 @@
 import type { ApiError } from "@repo/http";
-import {
-  defaultShouldDehydrateQuery,
-  isServer,
-  MutationCache,
-  QueryCache,
-  QueryClient,
-} from "@tanstack/react-query";
+import { isServer, MutationCache, QueryCache, QueryClient } from "@tanstack/react-query";
 
 import "./register";
 
@@ -54,18 +48,12 @@ export function makeQueryClient(): QueryClient {
     }),
     defaultOptions: {
       queries: {
-        // With SSR we want a non-zero staleTime so hydrated data isn't refetched immediately.
         staleTime: 60_000,
         gcTime: 5 * 60_000,
         retry: shouldRetry,
         refetchOnWindowFocus: true,
       },
       mutations: { retry: false },
-      dehydrate: {
-        // Stream pending queries started on the server (prefetch without await).
-        shouldDehydrateQuery: (query) =>
-          defaultShouldDehydrateQuery(query) || query.state.status === "pending",
-      },
     },
   });
 }

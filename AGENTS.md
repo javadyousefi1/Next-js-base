@@ -60,7 +60,7 @@ apps/sample/             Next.js sample app: every package and feature in use �
 apps/golden_pen/         Golden Pen: Persian-only admin panel: phone-number auth (password, OTP, register), lean copy of sample — see apps/golden_pen/AGENTS.md
 apps/shokolet/           Persian chocolate gift-box builder with a live 3D preview (R3F + GSAP) — see apps/shokolet/AGENTS.md
 packages/http/           HttpClient (axios inside): data or ApiError out, zod-validated responses
-packages/query/          React Query layer: createMakeQuery / makeMutation, invalidation, QueryClient
+packages/query/          React Query layer: QueryClient (retry, toasts), error reporter, typed `ApiError`; makeQuery/makeMutation deprecated (golden_pen only)
 packages/access/         Role-based access: grants, permission/role checks, route rules, <Can>
 packages/chat/           Headless chat: transport contract (WebSocket/REST), store, timeline, virtual scroll
 packages/table/          Headless server-side tables: nuqs URL contract, useTableState, types
@@ -77,7 +77,7 @@ docs/                    Architecture & decisions (start at docs/README.md)
 
 **Packages are app-agnostic.** They never import from `apps/*` and never read env, routes or
 i18n; the app binds them (HTTP instances in `src/lib/http` + `src/server/http`,
-`makeQuery = createMakeQuery(apiClient)` in `src/lib/query`, `getRedis()` in `src/server/redis`).
+`getRedis()` in `src/server/redis`).
 They are Just-in-Time packages: `exports` point at the TypeScript source and the app transpiles
 them (`transpilePackages` in `next.config.ts`). New shared code → `packages/<name>/` with
 `package.json` (`exports`, `typecheck`/`test` scripts), `tsconfig.json`, `AGENTS.md`; add it to the
@@ -88,20 +88,20 @@ app's dependencies (`workspace:*`), to `transpilePackages`, as a commit scope an
 Most rules are enforced by Oxlint (`oxlint.config.ts`) — a lint error is a rule violation, not a
 nuisance: fix the code, don't disable the rule. Disabling needs a comment with a real reason.
 
-| #   | Rule                                                                                                                                                                                               | Enforced by                                                         |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| 1   | Paths only from `ROUTES` (`src/config/routes.ts`); navigate with `Link`/`useAppRouter`/`redirect` from `@/i18n/navigation`                                                                         | `project/no-hardcoded-routes`, `no-restricted-imports`              |
-| 2   | Query/mutation keys only from `QUERY_KEYS`/`MUTATION_KEYS` (`src/config/query-keys.ts`)                                                                                                            | `project/no-inline-query-keys`                                      |
-| 3   | Server data only through `makeQuery`/`makeMutation` with zod `params`/`variables` **and** `response` schemas                                                                                       | `no-restricted-imports`                                             |
-| 4   | Conditional/composed class names only with `cn()` from `@repo/ui/lib/utils`                                                                                                                        | `project/cn-for-conditional-classes`                                |
-| 5   | **No logic in views.** Components render; state, effects, fetching, mapping and validation live in hooks/services                                                                                  | `project/no-logic-in-views`                                         |
-| 6   | Server code stays on the server: `src/server/**` and `features/*/server/**` start with `import "server-only"`; client files never import them (Server Actions in `*.actions.ts` are the exception) | `project/require-server-only`, `project/no-server-import-in-client` |
-| 7   | Env vars only via `env` from `src/env.ts` (`server`/`client` objects), validated by zod — a missing key fails the build/boot                                                                       | `project/no-process-env`                                            |
-| 8   | Tokens never reach the browser: httpOnly cookies, browser calls only the BFF (`/api/auth/*`, `/api/proxy/*`)                                                                                       | architecture + review                                               |
-| 9   | HTTP only through `HttpClient` instances (data or `ApiError` out): `src/lib/http` (browser → BFF) and `src/server/http` (server → upstream)                                                        | `no-restricted-imports` (axios, `HttpClient`)                       |
-| 10  | Every user-facing string in `messages/en.json` **and** `messages/fa.json` (same keys); layouts must work in RTL (logical classes `ms-*`, `ps-*`, `start-*`)                                        | review                                                              |
-| 11  | File names kebab-case; one component/hook per file; named exports (default only where Next requires it)                                                                                            | `unicorn/filename-case`                                             |
-| 12  | Conventional Commits: `type(scope): subject` (`feat(sample): add user page`)                                                                                                                       | commitlint (commit-msg hook)                                        |
+| #   | Rule                                                                                                                                                                                                                            | Enforced by                                                         |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| 1   | Paths only from `ROUTES` (`src/config/routes.ts`); navigate with `Link`/`useAppRouter`/`redirect` from `@/i18n/navigation`                                                                                                      | `project/no-hardcoded-routes`, `no-restricted-imports`              |
+| 2   | Query/mutation keys are declared once, in the feature's `features/<f>/<f>.api.ts` (`usersKeys`); elsewhere only reference them                                                                                                  | `project/no-inline-query-keys`                                      |
+| 3   | Server data only through `queryOptions` factories + `useQuery(xQuery(params))` / `mutationOptions` in `<f>.api.ts`, responses validated with `schema` (golden_pen still uses the old `makeQuery`/`makeMutation` until migrated) | review                                                              |
+| 4   | Conditional/composed class names only with `cn()` from `@repo/ui/lib/utils`                                                                                                                                                     | `project/cn-for-conditional-classes`                                |
+| 5   | **No logic in views.** Components render; state, effects, fetching, mapping and validation live in hooks/services                                                                                                               | `project/no-logic-in-views`                                         |
+| 6   | Server code stays on the server: `src/server/**` and `features/*/server/**` start with `import "server-only"`; client files never import them (Server Actions in `*.actions.ts` are the exception)                              | `project/require-server-only`, `project/no-server-import-in-client` |
+| 7   | Env vars only via `env` from `src/env.ts` (`server`/`client` objects), validated by zod — a missing key fails the build/boot                                                                                                    | `project/no-process-env`                                            |
+| 8   | Tokens never reach the browser: httpOnly cookies, browser calls only the BFF (`/api/auth/*`, `/api/proxy/*`)                                                                                                                    | architecture + review                                               |
+| 9   | HTTP only through `HttpClient` instances (fetch inside; data or `ApiError` out): `src/lib/http` (browser → BFF) and `src/server/http` (server → upstream)                                                                       | `no-restricted-imports` (`HttpClient`)                              |
+| 10  | Every user-facing string in `messages/en.json` **and** `messages/fa.json` (same keys); layouts must work in RTL (logical classes `ms-*`, `ps-*`, `start-*`)                                                                     | review                                                              |
+| 11  | File names kebab-case; one component/hook per file; named exports (default only where Next requires it)                                                                                                                         | `unicorn/filename-case`                                             |
+| 12  | Conventional Commits: `type(scope): subject` (`feat(sample): add user page`)                                                                                                                                                    | commitlint (commit-msg hook)                                        |
 
 ## 5. Git workflow
 

@@ -2,10 +2,10 @@
 
 import type { TableController } from "@repo/table/types";
 import { useTableState } from "@repo/table/use-table-state";
-import { keepPreviousData } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import { tasksListQuery } from "../api/tasks.queries";
 import type { Task } from "../schemas/task.schema";
+import { tasksListQuery } from "../tasks.api";
 import { tasksSearchParams } from "../tasks.search-params";
 
 const NO_TASKS: Task[] = [];
@@ -13,7 +13,7 @@ const NO_TASKS: Task[] = [];
 /** URL state → tasks query → everything the data-table components need. */
 export function useTasksTable(): TableController<Task> {
   const { params, ...controls } = useTableState(tasksSearchParams);
-  const query = tasksListQuery.useQuery(params, { placeholderData: keepPreviousData });
+  const query = useQuery({ ...tasksListQuery(params), placeholderData: keepPreviousData });
 
   return {
     ...controls,

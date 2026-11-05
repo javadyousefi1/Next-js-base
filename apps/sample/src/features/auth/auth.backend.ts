@@ -4,14 +4,21 @@ import { z } from "zod";
 import { ACCESS_POLICY, PERMISSIONS } from "@/config/access";
 import { userRoleSchema } from "@/features/users/schemas/user.schema";
 
-import type { LoginInput, LoginResult, SessionUser, TokenPair } from "../schemas/auth.schema";
+import type { LoginInput, LoginResult, SessionUser, TokenPair } from "./schemas/auth.schema";
 
 /**
  * The ONLY file that knows the backend's auth API: JWT access + refresh token (here
- * DummyJSON-style). A new backend → change this file (+ `API_ENDPOINTS`, the MSW mock), nothing
+ * DummyJSON-style). A new backend → change this file (+ `AUTH_ENDPOINTS`, the MSW mock), nothing
  * else. It is imported by the browser too (`meResponse`): no env and no secrets here — a backend
  * that needs a client secret for token calls gets it in `src/server/auth/upstream-auth.ts`.
  */
+
+/** Relative to `API_BASE_URL` (server) or `/api/proxy` (browser). Login/refresh are server-only. */
+export const AUTH_ENDPOINTS = {
+  login: "/auth/login",
+  refresh: "/auth/refresh",
+  me: "/auth/me",
+} as const;
 
 /** Login credentials → the backend's login request body. */
 export function toLoginBody(input: LoginInput) {

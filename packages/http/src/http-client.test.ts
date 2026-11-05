@@ -5,7 +5,7 @@ import { z } from "zod";
 import { ApiError } from "./errors";
 import { HttpClient } from "./http-client";
 
-/** A real local HTTP server: the client runs exactly as in the app (axios, no mocks). */
+/** A real local HTTP server: the client runs exactly as in the app (real fetch, no mocks). */
 const server = Bun.serve({
   port: 0,
   async fetch(request) {
@@ -20,6 +20,17 @@ const server = Bun.serve({
     if (pathname === "/errors-strings")
       return Response.json({ errors: ["Too short"] }, { status: 422 });
     if (pathname === "/detail") return Response.json({ detail: "Already exists" }, { status: 409 });
+    if (pathname === "/echo") {
+      const type = request.headers.get("content-type") ?? "";
+      const body: unknown = type.includes("json")
+        ? await request.json()
+        : type.includes("form-data")
+          ? Object.fromEntries(await request.formData())
+          : null;
+      return Response.json({ query: new URL(request.url).search, body });
+    }
+    if (pathname === "/boom") return Response.json({ message: "Crash" }, { status: 503 });
+    if (pathname === "/empty") return new Response(null, { status: 204 });
     if (pathname === "/slow") await Bun.sleep(500);
     return Response.json({ message: "No such user" }, { status: 404 });
   },
@@ -27,7 +38,7 @@ const server = Bun.serve({
 afterAll(() => server.stop(true));
 
 const onError = mock((_error: ApiError) => {});
-const client = new HttpClient({ baseURL: server.url.href, timeout: 2000, proxy: false, onError });
+const client = new HttpClient({ baseURL: server.url.href, timeout: 2000, onError });
 const userSchema = z.object({ id: z.number(), name: z.string() });
 
 const failure = (promise: Promise<unknown>) => promise.catch((caught: unknown) => caught);
@@ -81,10 +92,46 @@ describe("HttpClient", () => {
   });
 
   test("timeouts and network failures are ApiErrors too", async () => {
-    const slow = new HttpClient({ baseURL: server.url.href, timeout: 50, proxy: false });
+    const slow = new HttpClient({ baseURL: server.url.href, timeout: 50 });
     expect(await failure(slow.get("/slow"))).toMatchObject({ code: "TIMEOUT" });
 
-    const offline = new HttpClient({ baseURL: "http://127.0.0.1:1", timeout: 1000, proxy: false });
+    const offline = new HttpClient({ baseURL: "http://127.0.0.1:1", timeout: 1000 });
     expect(await failure(offline.get("/user"))).toMatchObject({ code: "NETWORK" });
+  });
+
+  test("params become the query string (null/undefined skipped, arrays bracketed)", async () => {
+    const { query } = z
+      .object({ query: z.string() })
+      .parse(await client.get("/echo", { params: { a: 1, b: null, c: undefined, d: ["x", "y"] } }));
+    expect(decodeURIComponent(query)).toBe("?a=1&d[]=x&d[]=y");
+  });
+
+  test("a body is sent as JSON, FormData is passed through", async () => {
+    expect(await client.post("/echo", { name: "Ada" })).toMatchObject({ body: { name: "Ada" } });
+    const form = new FormData();
+    form.set("file", "content");
+    expect(await client.post("/echo", form)).toMatchObject({ body: { file: "content" } });
+  });
+
+  test("an empty response resolves to undefined", async () => {
+    expect(await client.delete("/empty")).toBeUndefined();
+  });
+
+  test("5xx is SERVER; the body is kept as details", async () => {
+    expect(await failure(client.get("/boom"))).toMatchObject({
+      code: "SERVER",
+      status: 503,
+      details: { message: "Crash" },
+    });
+  });
+
+  test("a cancelled request rethrows the abort (not an ApiError) and skips onError", async () => {
+    onError.mockClear();
+    const controller = new AbortController();
+    const pending = failure(client.get("/slow", { signal: controller.signal }));
+    controller.abort();
+    const error = await pending;
+    expect(error).not.toBeInstanceOf(ApiError);
+    expect(onError).not.toHaveBeenCalled();
   });
 });

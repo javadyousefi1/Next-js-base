@@ -2,7 +2,7 @@ import type { ChatEvent, ChatMessage } from "@repo/chat/types";
 import { http, HttpResponse } from "msw/http";
 import { delay } from "msw/utils/delay";
 
-import { API_ENDPOINTS } from "@/config/api-endpoints";
+import { CHAT_ENDPOINTS } from "@/features/chat/api/chat.backend";
 import { fakeChatServerFor } from "@/features/chat/mock/fake-chat-server";
 
 import type { MockUser } from "./db";
@@ -100,7 +100,7 @@ export function createChatHandlers({ url, currentUser, unauthorized }: Helpers) 
 
   return [
     http.get(
-      url(API_ENDPOINTS.chat.messages),
+      url(CHAT_ENDPOINTS.messages),
       withRoom(async ({ server }, request) => {
         await delay(400);
         const params = new URL(request.url).searchParams;
@@ -116,7 +116,7 @@ export function createChatHandlers({ url, currentUser, unauthorized }: Helpers) 
       }),
     ),
     http.post(
-      url(API_ENDPOINTS.chat.messages),
+      url(CHAT_ENDPOINTS.messages),
       withRoom(async ({ server }, request) => {
         await delay(250);
         const body = (await request.json()) as {
@@ -133,14 +133,14 @@ export function createChatHandlers({ url, currentUser, unauthorized }: Helpers) 
       }),
     ),
     http.patch(
-      url(`${API_ENDPOINTS.chat.messages}/:id`),
+      url(`${CHAT_ENDPOINTS.messages}/:id`),
       withRoom(async ({ server }, request, params) => {
         const body = (await request.json()) as { text: string };
         return HttpResponse.json(toBackend(server.edit(params.id ?? "", body.text)));
       }),
     ),
     http.delete(
-      url(`${API_ENDPOINTS.chat.messages}/:id`),
+      url(`${CHAT_ENDPOINTS.messages}/:id`),
       withRoom(async ({ server }, _request, params) => {
         await delay(300);
         server.remove(params.id ?? "");
@@ -148,7 +148,7 @@ export function createChatHandlers({ url, currentUser, unauthorized }: Helpers) 
       }),
     ),
     http.post(
-      url(API_ENDPOINTS.chat.read),
+      url(CHAT_ENDPOINTS.read),
       withRoom(async ({ server }, request) => {
         const body = (await request.json()) as { message_id: string };
         server.read(body.message_id);
@@ -156,11 +156,11 @@ export function createChatHandlers({ url, currentUser, unauthorized }: Helpers) 
       }),
     ),
     http.post(
-      url(API_ENDPOINTS.chat.typing),
+      url(CHAT_ENDPOINTS.typing),
       withRoom(async () => new HttpResponse(null, { status: 204 })),
     ),
     http.get(
-      url(API_ENDPOINTS.chat.events),
+      url(CHAT_ENDPOINTS.events),
       withRoom(async ({ log }, request) => {
         const cursor = new URL(request.url).searchParams.get("cursor");
         const after = cursor === null ? log.seq : Number(cursor);

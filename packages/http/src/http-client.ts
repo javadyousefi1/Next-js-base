@@ -1,7 +1,6 @@
-import axios, { type AxiosInstance } from "axios";
 import type { z } from "zod";
 
-import { toApiError, type ApiError } from "./errors";
+import { apiErrorFromResponse, toApiError, type ApiError } from "./errors";
 import { parseResponse } from "./parse-response";
 
 type HttpClientConfig = {
@@ -10,8 +9,6 @@ type HttpClientConfig = {
   headers?: Record<string, string>;
   /** Send cookies (browser → BFF). */
   withCredentials?: boolean;
-  /** `false` ignores HTTP(S)_PROXY from the environment (needed while MSW mocks the upstream). */
-  proxy?: false;
   /** Sees every error before it is thrown (the browser reports a 401 as "session expired"). */
   onError?: (error: ApiError) => void;
 };
@@ -25,7 +22,7 @@ export type RequestOptions = {
 /** Response contract: `data` is parsed with `schema` (`INVALID_RESPONSE` on mismatch) and typed. */
 export type ValidatedOptions<TSchema extends z.ZodType> = RequestOptions & { schema: TSchema };
 
-/** Status + data: the only response shape that leaves the client (no axios types). */
+/** Status + data: the only response shape that leaves the client (no fetch types). */
 export type HttpResponse<TData> = { status: number; data: TData };
 
 type SendOptions = RequestOptions & { schema?: z.ZodType; body?: unknown };
@@ -35,7 +32,7 @@ type SendOptions = RequestOptions & { schema?: z.ZodType; body?: unknown };
  * two things come out:
  * - the response data: typed and validated with `{ schema }`, `unknown` without one (then e.g.
  *   `makeQuery` parses it with its `response` schema)
- * - an `ApiError` (network, timeout, 4xx/5xx, invalid response) — never an AxiosError
+ * - an `ApiError` (network, timeout, 4xx/5xx, invalid response) — never a raw fetch error
  *
  *   const stats = await upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsResponse });
  *
@@ -43,12 +40,10 @@ type SendOptions = RequestOptions & { schema?: z.ZodType; body?: unknown };
  * server client for the upstream API).
  */
 export class HttpClient {
-  readonly #axios: AxiosInstance;
-  readonly #onError: HttpClientConfig["onError"];
+  readonly #config: HttpClientConfig;
 
-  constructor({ headers, onError, ...config }: HttpClientConfig) {
-    this.#axios = axios.create({ ...config, headers: { Accept: "application/json", ...headers } });
-    this.#onError = onError;
+  constructor(config: HttpClientConfig) {
+    this.#config = config;
   }
 
   get(url: string, options?: RequestOptions): Promise<unknown>;
@@ -105,18 +100,87 @@ export class HttpClient {
   async #send(
     method: string,
     url: string,
-    { schema, body, ...options }: SendOptions = {},
+    { schema, body, params, headers, signal }: SendOptions = {},
   ): Promise<HttpResponse<unknown>> {
+    const { baseURL, timeout, withCredentials, onError } = this.#config;
     try {
-      const response = await this.#axios.request<unknown>({ method, url, data: body, ...options });
-      const data = schema
-        ? parseResponse(schema, response.data, `${method} ${url}`)
-        : response.data;
+      const timeoutSignal = timeout > 0 ? AbortSignal.timeout(timeout) : undefined;
+      const signals = [signal, timeoutSignal].filter((item) => item !== undefined);
+      const response = await fetch(buildUrl(baseURL, url, params), {
+        method,
+        headers: {
+          Accept: "application/json",
+          ...this.#config.headers,
+          ...(isRawBody(body) || body === undefined ? {} : { "Content-Type": "application/json" }),
+          ...headers,
+        },
+        body: body === undefined ? undefined : isRawBody(body) ? body : JSON.stringify(body),
+        credentials: withCredentials ? "include" : "same-origin",
+        signal: signals.length ? AbortSignal.any(signals) : undefined,
+      });
+      const payload = await readBody(response);
+      if (!response.ok) throw apiErrorFromResponse(response, payload);
+
+      const data = schema ? parseResponse(schema, payload, `${method} ${url}`) : payload;
       return { status: response.status, data };
     } catch (error) {
+      // A cancelled request is not an error: TanStack Query must see the abort.
+      if (signal?.aborted) throw error;
       const apiError = toApiError(error);
-      this.#onError?.(apiError);
+      onError?.(apiError);
       throw apiError;
     }
+  }
+}
+
+type RawBody = string | FormData | Blob | URLSearchParams | ArrayBuffer;
+
+/** Bodies `fetch` understands natively; everything else is sent as JSON. */
+function isRawBody(body: unknown): body is RawBody {
+  return (
+    typeof body === "string" ||
+    body instanceof FormData ||
+    body instanceof Blob ||
+    body instanceof URLSearchParams ||
+    body instanceof ArrayBuffer
+  );
+}
+
+/** `baseURL` + `url` + query string (null/undefined skipped, arrays as `key[]=a&key[]=b`). */
+function buildUrl(baseURL: string, url: string, params?: Record<string, unknown>): string {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params ?? {})) {
+    if (value === null || value === undefined) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) query.append(`${key}[]`, queryValue(item));
+    } else {
+      query.append(key, queryValue(value));
+    }
+  }
+  const path = /^https?:\/\//.test(url)
+    ? url
+    : `${baseURL.replace(/\/+$/, "")}/${url.replace(/^\/+/, "")}`;
+  const search = query.toString();
+  if (!search) return path;
+  return `${path}${path.includes("?") ? "&" : "?"}${search}`;
+}
+
+function queryValue(value: unknown): string {
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return JSON.stringify(value);
+}
+
+/** 204/empty → `undefined`; JSON when the content type says so, else the text. */
+async function readBody(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (!text) return undefined;
+  const isJson = response.headers.get("content-type")?.includes("json") ?? false;
+  if (!isJson) return text;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return text;
   }
 }

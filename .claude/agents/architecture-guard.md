@@ -22,7 +22,7 @@ Verify, and cite `file:line` for every violation:
    route handlers via `src/server/auth/cookies.ts`; upstream calls only through
    `src/server/http/upstream.ts`.
 5. **Caching** — `'use cache'` only for non-personal data with `cacheLife` + `cacheTag`; React Query
-   keys hierarchical and from `QUERY_KEYS`; invalidation through `invalidates`/`relatedKeys`.
+   keys hierarchical and declared in `<f>.api.ts`; mutations invalidate in `onSuccess`.
 
 Output: a verdict (OK / needs changes), then the violations with the minimal fix for each, then
 any structural suggestion (clearly marked optional).

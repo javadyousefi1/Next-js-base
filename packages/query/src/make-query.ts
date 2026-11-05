@@ -32,7 +32,7 @@ export type QueryFetcher<TParams> = (
   context: QueryFetcherContext,
 ) => Promise<unknown>;
 
-/** Server prefetch unit, created by `xQuery.with(params)`; run by `<PrefetchBoundary>`. */
+/** @deprecated golden_pen only, removed after its migration. Server prefetch unit (`xQuery.with(params)`). */
 export type PrefetchItem = {
   prefetch: (queryClient: QueryClient, http: HttpClient) => Promise<void>;
 };
@@ -73,6 +73,8 @@ type QueryOverrides<TData> = Partial<
  *   export const makeQuery = createMakeQuery(apiClient); // apps/<app>/src/lib/query/index.ts
  *
  * Server prefetch (`xQuery.with(params)`) gets its client from `<PrefetchBoundary>` instead.
+ *
+ * @deprecated golden_pen only, removed after its migration (apps/sample uses TanStack Query directly).
  */
 export function createMakeQuery(defaultHttp: HttpClient) {
   return <TParamsSchema extends z.ZodType, TResponseSchema extends z.ZodType>(

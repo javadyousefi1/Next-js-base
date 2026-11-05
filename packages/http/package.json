@@ -2,7 +2,7 @@
   "name": "@repo/http",
   "version": "0.0.0",
   "private": true,
-  "description": "HttpClient (axios inside): every request resolves to its data — parsed with a zod schema when one is given — or throws an ApiError.",
+  "description": "HttpClient (fetch inside): every request resolves to its data — parsed with a zod schema when one is given — or throws an ApiError.",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
@@ -10,9 +10,6 @@
   "scripts": {
     "test": "bun test src",
     "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "axios": "1.20.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",

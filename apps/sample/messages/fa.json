@@ -87,7 +87,7 @@
       "title": "امکانات این بیس",
       "items": {
         "bff": "احراز هویت BFF: توکن‌ها فقط در کوکی httpOnly هستند و همه‌ی درخواست‌ها از /api/proxy عبور می‌کنند",
-        "query": "ری‌اکت کوئری با makeQuery و makeMutation و باطل‌سازی خودکار کلیدهای مرتبط",
+        "query": "ری‌اکت کوئری با queryOptions و mutationها و باطل‌سازی صریح کلیدها",
         "table": "جستجو، فیلتر، مرتب‌سازی و صفحه‌بندی همگام با URL (useTableState)",
         "i18n": "انگلیسی و فارسی با پشتیبانی کامل از راست‌به‌چپ",
         "cache": "Cache Components نکست (`use cache`) و Redis برای محدودیت نرخ و کش",

@@ -1,42 +1,43 @@
 ---
 name: add-mutation
-description: Add a validated write operation in apps/sample — zod variables/response schemas, makeMutation with invalidation of related queries, form hook with react-hook-form, MSW mock. Use for create/update/delete actions and forms.
+description: Add a validated write operation in apps/sample — mutationOptions in the feature's <f>.api.ts with invalidation of related queries, form hook with react-hook-form, MSW mock. Use for create/update/delete actions and forms.
 ---
 
 # Add a mutation
 
-1. **Schemas** — `variables` schema (the same one the form uses; messages are i18n keys:
-   `z.string().min(1, { error: "nameRequired" })`). The `response` schema and any request-body
-   mapping go in `api/<f>.backend.ts` (typed against the domain; `z.unknown()` when the endpoint
-   answers 204 No Content — the body is empty).
-2. **Keys** — add to `MUTATION_KEYS` in `src/config/query-keys.ts`.
-3. **Service** — `api/<f>.service.ts`: `return apiClient.post(API_ENDPOINTS.<f>.…,
-toBackend<X>Body(variables))` (also `put`/`patch`/`delete`; resolves to the raw data and
-   `makeMutation` validates it with `response`).
-4. **Definition** (`api/<f>.queries.ts`):
+1. **Schemas** — the input schema (the same one the form uses; messages are i18n keys:
+   `z.string().min(1, { error: "nameRequired" })`) in `schemas/<f>.schema.ts`. The response
+   schema and request-body mapping (`toBackend<X>Body`) go in `<f>.api.ts` (typed against the
+   domain; omit `schema` when the endpoint answers 204 No Content).
+2. **Options factory** (`features/<f>/<f>.api.ts`):
 
    ```ts
-   export const create<X>Mutation = makeMutation({
-     mutationKey: MUTATION_KEYS.<f>.create,
-     variables: create<X>Schema,
-     response: <x>Response, // from <f>.backend.ts
-     mutationFn: create<X>,
-     invalidates: [QUERY_KEYS.<f>.lists()], // + every query listing them in relatedKeys
-     // silent: true → no global error toast (the form shows the error)
-   });
+   export const create<X>Mutation = (queryClient: QueryClient) =>
+     mutationOptions({
+       mutationFn: (input: <X>Input) =>
+         apiClient.post(<X>_ENDPOINT, toBackend<X>Body(input), { schema: <x>Response }),
+       meta: { silent: true }, // no global error toast (the form shows the error)
+       onSuccess: () =>
+         Promise.all([
+           queryClient.invalidateQueries({ queryKey: <f>Keys.all }),
+           // cross-feature: queryClient.invalidateQueries({ queryKey: dashboardKeys.all }),
+         ]),
+     });
    ```
 
-   Need data-dependent keys? `invalidates: (data, variables) => [QUERY_KEYS.<f>.detail(data.id)]`.
+   Also `put`/`patch`/`delete`. Data-dependent keys: use the `onSuccess(data, variables)` args.
 
-5. **Form hook** (`hooks/use-<x>-form.ts`): `useForm({ resolver: zodResolver(schema) })`,
-   `mutation = create<X>Mutation.useMutation({ onSuccess })`, return `register`, `errors`
+3. **Form hook** (`hooks/use-<x>-form.ts`): `useForm({ resolver: zodResolver(schema) })`,
+   `const queryClient = useQueryClient(); const mutation = useMutation(create<X>Mutation(queryClient))`,
+   submit with `mutation.mutate(values, { onSuccess })` (call-level callbacks keep the invalidation
+   — passing `onSuccess` to `useMutation` would replace it). Return `register`, `errors`
    (translated), `onSubmit: (e) => void submit(e)`, `isSubmitting`, `formError`. Copy
    `features/tasks/hooks/use-task-form.ts` (a form inside `modal.open`, closes with the saved
    item; `useWatch`, not `watch`) or `features/auth/hooks/use-login-form.ts` (`"use no memo"`).
    Deletes: `modal.confirm(…, { onAction: () => mutation.mutateAsync(…) })` — the modal waits and
    shows the error (`features/tasks/hooks/use-task-actions.tsx`).
-6. **Server-side cache** — if the change affects `'use cache'` data, also call `updateTag(tag)` in
+4. **Server-side cache** — if the change affects `'use cache'` data, also call `updateTag(tag)` in
    a Server Action (`*.actions.ts`).
-7. **Mock** — MSW handler that mutates `db` in `src/mocks/db.ts`.
-8. **Verify** — invalid input never reaches the network (`VALIDATION`); list refetches after
-   success; `bun run check`; e2e for the happy path.
+5. **Mock** — MSW handler that mutates `db` in `src/mocks/db.ts`.
+6. **Verify** — invalid input never reaches the network (the form's zod resolver); the list
+   refetches after success; `bun run check`; e2e for the happy path.

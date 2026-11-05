@@ -6,6 +6,15 @@ import { z } from "zod";
  * backend to `@repo/chat`'s types; nothing else in the app sees the backend's shapes.
  */
 
+/** Relative to `API_BASE_URL` (server / MSW mock) or `/api/proxy` (browser). */
+export const CHAT_ENDPOINTS = {
+  messages: "/chat/messages",
+  message: (id: string) => `/chat/messages/${id}`,
+  read: "/chat/read",
+  typing: "/chat/typing",
+  events: "/chat/events",
+} as const;
+
 const backendMessage = z
   .object({
     id: z.string(),

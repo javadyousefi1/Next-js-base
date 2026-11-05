@@ -1,12 +1,19 @@
+import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 
-import { userRoleSchema, type UsersList, type UsersListParams } from "../schemas/user.schema";
+import { apiClient } from "@/lib/http/client";
+
+import { userRoleSchema, type UsersList, type UsersListParams } from "./schemas/user.schema";
 
 /**
  * The ONLY file that knows the backend's users API (here DummyJSON-style: offset pagination,
- * `{ users, total }`). A new backend → change this file (+ `API_ENDPOINTS`, the MSW mock),
- * nothing else: views, hooks and the BFF only see the domain types in `schemas/`.
+ * `{ users, total }`): endpoint, query mapping, response schema, keys and queries. A new backend
+ * → change this file (+ the MSW mock), nothing else: views, hooks and the BFF only see the
+ * domain types in `schemas/`.
  */
+
+/** Relative to `API_BASE_URL` on the server, or to `/api/proxy` in the browser (BFF). */
+export const USERS_ENDPOINT = "/users";
 
 /** Maps the table params to the backend query string (limit/skip pagination). */
 export function toBackendListQuery(params: UsersListParams) {
@@ -39,3 +46,21 @@ export const usersListResponse = z
     total: z.number().int().nonnegative(),
   })
   .transform(({ users, total }): UsersList => ({ items: users, total }));
+
+/** Hierarchical: invalidating `all` refreshes every users query. */
+export const usersKeys = {
+  all: ["users"] as const,
+  list: (params: UsersListParams) => ["users", "list", params] as const,
+};
+
+export const usersListQuery = (params: UsersListParams) =>
+  queryOptions({
+    queryKey: usersKeys.list(params),
+    queryFn: ({ signal }) =>
+      apiClient.get(USERS_ENDPOINT, {
+        params: toBackendListQuery(params),
+        signal,
+        schema: usersListResponse,
+      }),
+    staleTime: 30_000,
+  });

@@ -1,6 +1,6 @@
 ---
 name: add-query
-description: Add a validated read endpoint in apps/sample — zod params/response schemas, endpoint constant, query key, service, makeQuery definition and MSW mock. Use whenever new server data must be displayed.
+description: Add a validated read endpoint in apps/sample — endpoint constant, backend zod schema, key and queryOptions factory in the feature's <f>.api.ts, plus the MSW mock. Use whenever new server data must be displayed.
 ---
 
 # Add a query
@@ -8,50 +8,41 @@ description: Add a validated read endpoint in apps/sample — zod params/respons
 1. **Domain + params** (`features/<f>/schemas/<f>.schema.ts`) — the app's own shapes:
 
    ```ts
-   export const <x>ParamsSchema = z.object({ id: z.number().int().positive() }); // input
-   export type <Entity> = { id: number; name: string };                          // what views use
+   export type <Entity> = { id: number; name: string };            // what views use
+   export type <X>Params = { id: number };                         // the query's input
    ```
 
-   No params? use `z.void()` (then call `xQuery.useQuery()` without arguments).
-
-2. **Backend contract** (`api/<f>.backend.ts`) — the only place that knows the backend:
+2. **`features/<f>/<f>.api.ts`** — the only file that knows the backend, in this order:
 
    ```ts
+   export const <X>_ENDPOINT = "/things"; // relative to the upstream API (BFF maps it 1:1)
+
    export const <x>Response: z.ZodType<<Entity>> = z.object({ id: z.number(), name: z.string() });
    // backend differs? z.object({ ... }).transform((raw): <Entity> => ({ ... }))
+   // lists map to { items, total }; backend query params are built in toBackend…Query
+
+   export const <f>Keys = {
+     all: ["<f>"] as const,
+     detail: (id: number) => ["<f>", "detail", id] as const, // hierarchical
+   };
+
+   export const <x>Query = (params: <X>Params) =>
+     queryOptions({
+       queryKey: <f>Keys.detail(params.id),
+       queryFn: ({ signal }) =>
+         apiClient.get(`${<X>_ENDPOINT}/${params.id}`, { signal, schema: <x>Response }),
+       staleTime: 30_000, // optional
+     });
    ```
 
-   Lists map to `{ items, total }`; backend query params are built here too (`toBackend…Query`).
+   `schema` validates the response (`INVALID_RESPONSE`) and types the data. Copy
+   `features/users/users.api.ts`.
 
-3. **Endpoint** — `src/config/api-endpoints.ts` (path relative to the upstream API).
-4. **Key** — `src/config/query-keys.ts`, under the feature's root key:
-   `detail: (id: number) => [...usersRoot, "detail", id] as const`.
-5. **Service** (`api/<f>.service.ts`) — HTTP only, returns `unknown`. Use the injected `http`
-   (browser: BFF proxy; server prefetch: upstream with the user's token), never import a client:
-
-   ```ts
-   export const fetch<X>: QueryFetcher<<X>Params> = (params, { http, signal }) =>
-     http.get(`${API_ENDPOINTS.users.list}/${params.id}`, { signal });
-   ```
-
-6. **Definition** (`api/<f>.queries.ts`):
-
-   ```ts
-   export const <x>Query = makeQuery({
-     key: QUERY_KEYS.<f>.<x>,
-     params: <x>ParamsSchema,
-     response: <x>Response,               // from <f>.backend.ts
-     fetcher: fetch<X>,
-     relatedKeys: [QUERY_KEYS.<other>.all], // refetch when these are invalidated (optional)
-     staleTime: 30_000,                     // optional
-   });
-   ```
-
-7. **Use it in a hook** — `const query = <x>Query.useQuery(params)`; map `query.data`,
-   `query.isPending`, `query.isError` to a view model. Never in a component.
-8. **SSR (optional)** — in the page: `<PrefetchBoundary queries={[<x>Query.with(params)]}
-fallback={<Skeleton />}>`. Nothing else to write (same fetcher, server transport).
-9. **Mock** — handler in `src/mocks/handlers.ts` returning the BACKEND shape (what `<x>Response`
-   parses).
-10. **Verify** — a malformed mock response must surface `INVALID_RESPONSE` (dev logs show the zod
-    tree); `bun run check`.
+3. **Use it in a hook** — `const query = useQuery(<x>Query(params))`; map `query.data`,
+   `query.isPending`, `query.isError` to a view model. Never in a component. Options:
+   `useQuery({ ...<x>Query(params), placeholderData: keepPreviousData })`.
+4. **Page** — no prefetch: render the client view in `<Suspense fallback={<Skeleton />}>`.
+5. **Mock** — handler in `src/mocks/handlers.ts` (import the endpoint const) returning the
+   BACKEND shape (what `<x>Response` parses).
+6. **Verify** — a malformed mock response must surface `INVALID_RESPONSE` (dev logs show the zod
+   tree); `bun run check`.

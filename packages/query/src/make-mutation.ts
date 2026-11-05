@@ -42,6 +42,8 @@ type MutationOverrides<TData, TVariables> = Omit<
  * Builds a typed, validated mutation definition. The ONLY way to declare a mutation.
  * Variables are parsed before the request (`VALIDATION`), responses after it
  * (`INVALID_RESPONSE`), then `invalidates` (+ related keys) are invalidated.
+ *
+ * @deprecated golden_pen only, removed after its migration (apps/sample uses TanStack Query directly).
  */
 export function makeMutation<TVariablesSchema extends z.ZodType, TResponseSchema extends z.ZodType>(
   config: MakeMutationConfig<TVariablesSchema, TResponseSchema>,

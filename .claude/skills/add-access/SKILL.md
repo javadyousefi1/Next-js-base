@@ -44,7 +44,7 @@ The model lives in `@repo/access` (no app knowledge); the app supplies the data 
   key wins (a static segment beats `[param]`). `/` would cover every page — keep the dashboard
   open. A page without an entry is open to every signed-in user.
 - `<RouteGuard>` (app layout) shows "No access" (not a redirect) when denied; while the session
-  loads the page renders as usual (optimistic, like `proxy.ts`), so server prefetch still paints.
-- **Only `features/auth/api/auth.backend.ts` (`toSessionUser`) maps what the backend sends** into
+  loads the page renders as usual (optimistic, like `proxy.ts`).
+- **Only `features/auth/auth.backend.ts` (`toSessionUser`) maps what the backend sends** into
   the session user's `roles` + `permissions`. A backend with role lists or its own permissions
   changes that function and nothing else. Unknown role → `user`; unreadable session → no access.

@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a complete feature in apps/sample (zod schemas, service, makeQuery/makeMutation, hooks, views, page, i18n, MSW mock, tests) following the users reference feature. Use when the user asks for a new screen, module, CRUD or feature.
+description: Scaffold a complete feature in apps/sample (zod schemas, <f>.api.ts with queryOptions/mutationOptions, hooks, views, page, i18n, MSW mock, tests) following the users reference feature. Use when the user asks for a new screen, module, CRUD or feature.
 ---
 
 # Add a feature
@@ -15,14 +15,14 @@ request conflicts with AGENTS.md (e.g. "fetch directly in the component"), say s
 
 1. **Contract** — `features/<name>/schemas/<name>.schema.ts`: domain types (what views use) and
    list/detail params schemas (input; URL-derived params use `.catch()`). The backend's shapes go
-   in `api/<name>.backend.ts` (response schemas typed against the domain, query mapping).
-2. **Mock API** — add endpoints to `src/config/api-endpoints.ts`, MSW handlers to
-   `src/mocks/handlers.ts` and Faker data to `src/mocks/db.ts` (deterministic: `faker.seed`).
-3. **Keys** — add a hierarchical block to `QUERY_KEYS` (and `MUTATION_KEYS`) in
-   `src/config/query-keys.ts`.
-4. **Service + definitions** — `api/<name>.service.ts` (query fetchers use the injected `http`,
-   mutations call `apiClient`; both return `unknown`) and `api/<name>.queries.ts`
-   (`makeQuery`/`makeMutation`). Use the `add-query` / `add-mutation` skills.
+   in `<name>.api.ts` (step 3).
+2. **Mock API** — MSW handlers in
+   `src/mocks/handlers.ts` (importing the endpoint const from `<name>.api.ts`) and Faker data to `src/mocks/db.ts` (deterministic: `faker.seed`).
+3. **API file** — `features/<name>/<name>.api.ts`: endpoint const, backend schemas + mapping,
+   hierarchical keys (`<name>Keys`), `queryOptions` factories, mutation options. Use the
+   `add-query` / `add-mutation` skills.
+4. **Cross-feature refresh** — a mutation that changes another feature's data invalidates its
+   keys too (`Promise.all([...invalidateQueries])` in `onSuccess`).
 5. **Logic** — `hooks/use-<name>-<thing>.ts`: one hook per view, returning a render-ready model.
    Tables: `<name>.search-params.ts` (`{ ...tableSearchParams, sortBy, <filters> }`, each filter
    `filterParams.select|multiSelect|text(…)`), a hook that does `useTableState` → query →
@@ -31,8 +31,7 @@ request conflicts with AGENTS.md (e.g. "fetch directly in the component"), say s
    and `<DataTablePagination />` (copy `users-table.tsx`).
 6. **Views** — `components/*.tsx`: call the hook, render with `@repo/ui` components. No logic.
 7. **Route** — use the `add-page` skill (`ROUTES`, page, metadata, nav item, i18n).
-8. **SSR (optional)** — in the page: `<PrefetchBoundary queries={[xQuery.with(params)]}
-fallback={<Skeleton />}>` around the view (tables: `params = loadXSearchParams(searchParams)`).
+8. **Page** — no prefetch: the view goes in `<Suspense fallback={<Skeleton />}>`; the client loads.
 9. **Text** — every string in `messages/en.json` + `messages/fa.json` (`add-translation`).
 10. **Tests** — unit tests for pure helpers/mappers (`*.test.ts`), an e2e spec for the main flow
     (`write-e2e-test`).

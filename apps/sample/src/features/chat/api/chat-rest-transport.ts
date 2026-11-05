@@ -1,10 +1,10 @@
 import { createPollingTransport } from "@repo/chat/polling-transport";
 import type { ChatTransport } from "@repo/chat/types";
 
-import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { apiClient } from "@/lib/http/client";
 
 import {
+  CHAT_ENDPOINTS,
   chatEventsResponse,
   chatHistoryResponse,
   chatMessageResponse,
@@ -22,27 +22,27 @@ export function createChatRestTransport(): ChatTransport {
   return createPollingTransport(
     {
       history: ({ before, limit }) =>
-        apiClient.get(API_ENDPOINTS.chat.messages, {
+        apiClient.get(CHAT_ENDPOINTS.messages, {
           params: { before, limit },
           schema: chatHistoryResponse,
         }),
       send: (draft) =>
-        apiClient.post(API_ENDPOINTS.chat.messages, toBackendDraft(draft), {
+        apiClient.post(CHAT_ENDPOINTS.messages, toBackendDraft(draft), {
           schema: chatMessageResponse,
         }),
       edit: (id, text) =>
-        apiClient.patch(API_ENDPOINTS.chat.message(id), { text }, { schema: chatMessageResponse }),
+        apiClient.patch(CHAT_ENDPOINTS.message(id), { text }, { schema: chatMessageResponse }),
       remove: async (id) => {
-        await apiClient.delete(API_ENDPOINTS.chat.message(id));
+        await apiClient.delete(CHAT_ENDPOINTS.message(id));
       },
       markRead: async (messageId) => {
-        await apiClient.post(API_ENDPOINTS.chat.read, { message_id: messageId });
+        await apiClient.post(CHAT_ENDPOINTS.read, { message_id: messageId });
       },
       setTyping: async (typing) => {
-        await apiClient.post(API_ENDPOINTS.chat.typing, { typing });
+        await apiClient.post(CHAT_ENDPOINTS.typing, { typing });
       },
       poll: (cursor) =>
-        apiClient.get(API_ENDPOINTS.chat.events, {
+        apiClient.get(CHAT_ENDPOINTS.events, {
           params: { cursor: cursor ?? undefined },
           schema: chatEventsResponse,
         }),

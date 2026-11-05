@@ -2,8 +2,8 @@
 
 `@repo/http`: the HTTP client every app uses. Repository rules: [`../../AGENTS.md`](../../AGENTS.md).
 
-- `HttpClient` wraps axios. Every request resolves to the response data — parsed with
-  `{ schema }` when one is given, `unknown` otherwise — or throws an `ApiError`. No axios type
+- `HttpClient` wraps `fetch` (timeout via `AbortSignal.timeout`, a caller `signal` is rethrown as an abort). Every request resolves to the response data — parsed with
+  `{ schema }` when one is given, `unknown` otherwise — or throws an `ApiError`. No fetch type
   leaves the class (`request()` returns `{ status, data }` for pass-through proxies).
 - App-agnostic: never import from `apps/*`, never read env, routes or i18n. Apps create their
   instances (base URL, timeout, `onError`) in `src/lib/http` / `src/server/http` — the only places

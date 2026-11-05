@@ -1,5 +1,3 @@
-import { isAxiosError } from "axios";
-
 export type ApiErrorCode =
   | "UNAUTHORIZED"
   | "FORBIDDEN"
@@ -79,28 +77,27 @@ function messageFromBody(body: unknown): string | undefined {
   return typeof first === "string" ? first : stringField(first, "message");
 }
 
-/** Normalizes anything thrown by axios (or our own code) into an `ApiError`. */
+/** An `ApiError` for a non-2xx response: status → code, text from the body, body as `details`. */
+export function apiErrorFromResponse(response: Response, body: unknown): ApiError {
+  const { status } = response;
+  const retryAfter = Number(response.headers.get("retry-after"));
+  return new ApiError(messageFromBody(body) ?? (response.statusText || `HTTP ${status}`), {
+    status,
+    code: codeFromStatus(status),
+    details: body,
+    retryAfterSeconds: Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
+  });
+}
+
+/** Normalizes anything thrown (by `fetch` or our own code) into an `ApiError`. */
 export function toApiError(error: unknown): ApiError {
   if (isApiError(error)) return error;
-
-  if (isAxiosError(error)) {
-    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") {
-      return new ApiError("Request timed out", { status: null, code: "TIMEOUT" });
-    }
-    if (!error.response) {
-      return new ApiError("Network error", { status: null, code: "NETWORK" });
-    }
-
-    const { status, data, headers } = error.response;
-    const retryAfter = Number(headers["retry-after"]);
-    return new ApiError(messageFromBody(data) ?? error.message, {
-      status,
-      code: codeFromStatus(status),
-      details: data,
-      retryAfterSeconds: Number.isFinite(retryAfter) ? retryAfter : undefined,
-    });
+  if (error instanceof DOMException && error.name === "TimeoutError") {
+    return new ApiError("Request timed out", { status: null, code: "TIMEOUT" });
   }
-
+  if (error instanceof TypeError) {
+    return new ApiError("Network error", { status: null, code: "NETWORK" });
+  }
   if (error instanceof Error) return new ApiError(error.message, { status: null, code: "UNKNOWN" });
   return new ApiError("Unknown error", { status: null, code: "UNKNOWN", details: error });
 }

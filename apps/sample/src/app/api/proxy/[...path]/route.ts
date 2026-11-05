@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
 
-import { API_ENDPOINTS } from "@/config/api-endpoints";
-import { authorizationHeader } from "@/features/auth/api/auth.backend";
+import { AUTH_ENDPOINTS, authorizationHeader } from "@/features/auth/auth.backend";
 import { withSession } from "@/server/auth/session";
 import { bffError, bffJson } from "@/server/bff/responses";
 import { upstream } from "@/server/http/upstream";
@@ -15,7 +14,7 @@ import { upstream } from "@/server/http/upstream";
  * Token-issuing endpoints are only reachable through `/api/auth/*`, which stores the tokens in
  * httpOnly cookies. Proxying them would hand raw tokens to browser JavaScript.
  */
-const BLOCKED_PATHS = new Set<string>([API_ENDPOINTS.auth.login, API_ENDPOINTS.auth.refresh]);
+const BLOCKED_PATHS = new Set<string>([AUTH_ENDPOINTS.login, AUTH_ENDPOINTS.refresh]);
 
 async function forward(request: NextRequest, context: RouteContext<"/api/proxy/[...path]">) {
   const { path } = await context.params;

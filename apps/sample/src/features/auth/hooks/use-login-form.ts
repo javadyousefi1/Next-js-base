@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { ApiError } from "@repo/http";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
 import type { FormEvent } from "react";
@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form";
 import { CALLBACK_URL_PARAM, sanitizeCallbackUrl } from "@/config/routes";
 import { useAppRouter } from "@/hooks/use-app-router";
 
-import { loginMutation, sessionQuery } from "../api/auth.queries";
+import { loginMutation, sessionQuery } from "../auth.api";
 import { loginInputSchema, PASSWORD_MIN_LENGTH, type LoginInput } from "../schemas/auth.schema";
 
 /** zod messages in auth.schema.ts are i18n keys of `Auth.validation`. */
@@ -35,9 +35,10 @@ export function useLoginForm() {
     defaultValues: { username: "", password: "" },
   });
 
-  const mutation = loginMutation.useMutation({
+  const mutation = useMutation({
+    ...loginMutation(),
     onSuccess: ({ user }) => {
-      sessionQuery.setData(queryClient, undefined, () => user);
+      queryClient.setQueryData(sessionQuery().queryKey, user);
       router.replace(sanitizeCallbackUrl(callbackUrl));
     },
   });

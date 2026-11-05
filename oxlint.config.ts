@@ -75,7 +75,7 @@ export default defineConfig({
     // New JSX transform; side-effect imports ("server-only", CSS, env validation) are intentional.
     "react/react-in-jsx-scope": "off",
     "import/no-unassigned-import": "off",
-    // `axios.create()` is axios' documented API; Base UI relies on ARIA roles.
+    // Base UI relies on ARIA roles.
     "import/no-named-as-default-member": "off",
     "jsx-a11y/prefer-tag-over-role": "off",
     // Only DOM elements have ARIA roles; `<Can role="admin">` (@repo/access) is a prop.
@@ -116,17 +116,6 @@ export default defineConfig({
             allowTypeImports: true,
             message:
               "Use apiClient/bffClient (src/lib/http/client.ts) or upstream/upstreamFor (src/server/http/upstream.ts).",
-          },
-          {
-            name: "@tanstack/react-query",
-            importNames: [
-              "useQuery",
-              "useSuspenseQuery",
-              "useInfiniteQuery",
-              "useMutation",
-              "queryOptions",
-            ],
-            message: "Declare queries/mutations with makeQuery / makeMutation (@/lib/query).",
           },
         ],
       },

@@ -3,7 +3,7 @@ import { createLoader, parseAsStringLiteral } from "nuqs/server";
 
 import { TASK_SORT_FIELDS, TASK_STATUSES } from "./schemas/task.schema";
 
-/** URL state of the tasks table (browser hook + server prefetch send the same params). */
+/** URL state of the tasks table (the `useTasksTable` hook reads it). */
 export const tasksSearchParams = {
   ...tableSearchParams,
   sortBy: parseAsStringLiteral(TASK_SORT_FIELDS),

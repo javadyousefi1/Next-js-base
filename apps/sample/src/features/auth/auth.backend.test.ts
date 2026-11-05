@@ -2,7 +2,6 @@ import { describe, expect, test } from "bun:test";
 
 import { PERMISSIONS } from "@/config/access";
 
-import type { SessionUser } from "../schemas/auth.schema";
 import {
   authorizationHeader,
   loginResponse,
@@ -11,6 +10,7 @@ import {
   toLoginBody,
   toRefreshBody,
 } from "./auth.backend";
+import type { SessionUser } from "./schemas/auth.schema";
 
 /** What the backend sends (one role). */
 const backendUser = {

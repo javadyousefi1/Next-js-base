@@ -1,11 +1,10 @@
 import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { CACHE_TAGS } from "@/config/cache-tags";
 import { upstream } from "@/server/http/upstream";
 
-import { dashboardStatsResponse } from "../api/dashboard.backend";
+import { dashboardStatsResponse, STATS_ENDPOINT } from "../api/dashboard.backend";
 
 /**
  * Next.js-level cache (`use cache`): one upstream call per `cacheLife("minutes")` window, shared
@@ -17,5 +16,5 @@ export async function getDashboardStats() {
   cacheLife("minutes");
   cacheTag(CACHE_TAGS.dashboardStats);
 
-  return upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsResponse });
+  return upstream.get(STATS_ENDPOINT, { schema: dashboardStatsResponse });
 }

@@ -4,8 +4,7 @@ import type { Permission, Role } from "@repo/access/register";
 import { isApiError } from "@repo/http";
 import { cache } from "react";
 
-import { API_ENDPOINTS } from "@/config/api-endpoints";
-import { meResponse } from "@/features/auth/api/auth.backend";
+import { AUTH_ENDPOINTS, meResponse } from "@/features/auth/auth.backend";
 import { upstreamFor } from "@/server/http/upstream";
 
 import { getAccessToken } from "./cookies";
@@ -16,7 +15,7 @@ export const getSessionUser = cache(async () => {
   if (!accessToken) return null;
 
   try {
-    return await upstreamFor(accessToken).get(API_ENDPOINTS.auth.me, { schema: meResponse });
+    return await upstreamFor(accessToken).get(AUTH_ENDPOINTS.me, { schema: meResponse });
   } catch (error) {
     // No valid session is normal; anything else (outage, schema drift) is worth a log line.
     if (!isApiError(error) || error.code !== "UNAUTHORIZED") {

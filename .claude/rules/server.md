@@ -22,8 +22,8 @@ paths:
 - Upstream calls: `upstream.get(url, { schema })` / `upstream.post(url, body, { schema })` — the
   client validates the response and labels errors with the endpoint constant (`GET /stats`).
   `upstream.request(method, url, …)` (status + raw data) only for pass-through (the BFF proxy).
-- Hydration: `<PrefetchBoundary queries={[xQuery.with(params)]} fallback={…}>` in the page. Never
-  hand-write prefetch/dehydrate code or a second (server) fetcher.
+- No server prefetch/hydration for client queries: the page renders the view in `<Suspense>` and
+  the client loads through the BFF.
 - `proxy.ts` is an optimistic guard (cookie presence) + next-intl routing. No data fetching there.
 - Redis via `getRedis()` + the `@repo/redis` helpers (`rateLimit(getRedis(), …)`,
   `remember(getRedis(), …)`); features must keep working when Redis is down (fail open, log).

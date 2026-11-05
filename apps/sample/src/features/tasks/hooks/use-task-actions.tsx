@@ -2,15 +2,13 @@
 
 import { isApiError } from "@repo/http";
 import { modal } from "@repo/ui/lib/modal";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import type { ComponentType } from "react";
 import { toast } from "sonner";
 
-import { QUERY_KEYS } from "@/config/query-keys";
-import { useInvalidate } from "@/lib/query";
-
-import { deleteTaskMutation, updateTaskMutation } from "../api/tasks.queries";
 import type { Task } from "../schemas/task.schema";
+import { deleteTaskMutation, tasksKeys, updateTaskMutation } from "../tasks.api";
 
 type TaskActionsOptions = {
   /** The create/edit form shown by `modal.open`; it closes with the saved task. */
@@ -24,9 +22,9 @@ type TaskActionsOptions = {
  */
 export function useTaskActions({ Form }: TaskActionsOptions) {
   const t = useTranslations("Examples.data");
-  const invalidate = useInvalidate();
-  const remove = deleteTaskMutation.useMutation();
-  const update = updateTaskMutation.useMutation();
+  const queryClient = useQueryClient();
+  const remove = useMutation(deleteTaskMutation(queryClient));
+  const update = useMutation(updateTaskMutation(queryClient));
 
   const openForm = async (task?: Task) => {
     const saved = await modal.open<Task>(<Form task={task} />, {
@@ -63,7 +61,7 @@ export function useTaskActions({ Form }: TaskActionsOptions) {
     create: () => void openForm(),
     edit: (task: Task) => void openForm(task),
     remove: (task: Task) => void confirmDelete(task),
-    /** Checkbox → done / back to todo (the list refetches through `invalidates`). */
+    /** Checkbox → done / back to todo (the mutation refreshes the list). */
     toggleDone: (task: Task) =>
       update.mutate({
         id: task.id,
@@ -72,7 +70,7 @@ export function useTaskActions({ Form }: TaskActionsOptions) {
         status: task.status === "done" ? "todo" : "done",
       }),
     isUpdating: (task: Task) => update.isPending && update.variables?.id === task.id,
-    /** Refetch the list by key (+ related keys) with `useInvalidate`. */
-    refresh: () => void invalidate([QUERY_KEYS.tasks.all]),
+    /** Refetch every tasks query by key. */
+    refresh: () => void queryClient.invalidateQueries({ queryKey: tasksKeys.all }),
   };
 }

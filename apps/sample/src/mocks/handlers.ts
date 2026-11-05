@@ -1,8 +1,11 @@
 import { http, HttpResponse } from "msw/http";
 import { delay } from "msw/utils/delay";
 
-import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { env } from "@/env";
+import { AUTH_ENDPOINTS } from "@/features/auth/auth.backend";
+import { STATS_ENDPOINT } from "@/features/dashboard/api/dashboard.backend";
+import { TASKS_ENDPOINT } from "@/features/tasks/tasks.api";
+import { USERS_ENDPOINT } from "@/features/users/users.api";
 
 import { createChatHandlers } from "./chat-handlers";
 import { db, DEMO_ACCOUNTS, TASK_STATUSES, USER_ROLES, type MockTask, type MockUser } from "./db";
@@ -50,7 +53,7 @@ const unauthorized = () =>
 
 export const handlers = [
   ...createChatHandlers({ url, currentUser, unauthorized }),
-  http.post(url(API_ENDPOINTS.auth.login), async ({ request }) => {
+  http.post(url(AUTH_ENDPOINTS.login), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const body = (await request.json()) as { username?: string; password?: string };
     const isValid = Object.values(DEMO_ACCOUNTS).some(
@@ -64,7 +67,7 @@ export const handlers = [
     return HttpResponse.json({ ...user, ...issueTokens(user.id) });
   }),
 
-  http.post(url(API_ENDPOINTS.auth.refresh), async ({ request }) => {
+  http.post(url(AUTH_ENDPOINTS.refresh), async ({ request }) => {
     const { refreshToken } = (await request.json()) as { refreshToken?: string };
     const session = refreshToken ? db.refreshTokens.get(refreshToken) : undefined;
 
@@ -73,12 +76,12 @@ export const handlers = [
     return HttpResponse.json(issueTokens(session.userId));
   }),
 
-  http.get(url(API_ENDPOINTS.auth.me), ({ request }) => {
+  http.get(url(AUTH_ENDPOINTS.me), ({ request }) => {
     const user = currentUser(request);
     return user ? HttpResponse.json(user) : unauthorized();
   }),
 
-  http.get(url(API_ENDPOINTS.users.list), async ({ request }) => {
+  http.get(url(USERS_ENDPOINT), async ({ request }) => {
     const caller = currentUser(request);
     if (!caller) return unauthorized();
     // A real API authorizes too: members may not list users (the UI only hides the page).
@@ -116,7 +119,7 @@ export const handlers = [
   }),
 
   // ── Tasks (the data example): list, create, update, delete ──────────────────────────────────
-  http.get(url(API_ENDPOINTS.tasks.list), async ({ request }) => {
+  http.get(url(TASKS_ENDPOINT), async ({ request }) => {
     if (!currentUser(request)) return unauthorized();
     await delay(RESPONSE_DELAY_MS);
 
@@ -143,7 +146,7 @@ export const handlers = [
     return HttpResponse.json({ tasks: tasks.slice(skip, skip + limit), total: tasks.length });
   }),
 
-  http.post(url(API_ENDPOINTS.tasks.list), async ({ request }) => {
+  http.post(url(TASKS_ENDPOINT), async ({ request }) => {
     if (!currentUser(request)) return unauthorized();
     await delay(RESPONSE_DELAY_MS);
     const body = (await request.json()) as Partial<MockTask>;
@@ -161,7 +164,7 @@ export const handlers = [
     return HttpResponse.json(task, { status: 201 });
   }),
 
-  http.patch(url(`${API_ENDPOINTS.tasks.list}/:id`), async ({ request, params }) => {
+  http.patch(url(`${TASKS_ENDPOINT}/:id`), async ({ request, params }) => {
     if (!currentUser(request)) return unauthorized();
     await delay(RESPONSE_DELAY_MS);
     const task = db.tasks.find((item) => item.id === Number(params.id));
@@ -178,7 +181,7 @@ export const handlers = [
     return HttpResponse.json(task);
   }),
 
-  http.delete(url(`${API_ENDPOINTS.tasks.list}/:id`), async ({ request, params }) => {
+  http.delete(url(`${TASKS_ENDPOINT}/:id`), async ({ request, params }) => {
     if (!currentUser(request)) return unauthorized();
     await delay(RESPONSE_DELAY_MS);
     const index = db.tasks.findIndex((item) => item.id === Number(params.id));
@@ -194,7 +197,7 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.get(url(API_ENDPOINTS.stats), async () => {
+  http.get(url(STATS_ENDPOINT), async () => {
     await delay(RESPONSE_DELAY_MS);
     const roles = Object.fromEntries(
       USER_ROLES.map((role) => [role, db.users.filter((user) => user.role === role).length]),

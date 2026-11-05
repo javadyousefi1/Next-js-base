@@ -5,7 +5,7 @@ export const TASK_STATUSES = ["todo", "doing", "done"] as const;
 export const taskStatusSchema = z.enum(TASK_STATUSES);
 export type TaskStatus = z.infer<typeof taskStatusSchema>;
 
-/** A task as the app uses it; the backend shape lives in api/tasks.backend.ts. */
+/** A task as the app uses it; the backend shape lives in tasks.api.ts. */
 export type Task = {
   id: number;
   title: string;

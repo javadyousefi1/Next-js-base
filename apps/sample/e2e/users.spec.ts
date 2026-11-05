@@ -51,7 +51,7 @@ test.describe("users table (URL state + React Query)", () => {
     await expect(page).not.toHaveURL(/page=2/);
   });
 
-  test("a shared URL restores the same view (server prefetch)", async ({ page }) => {
+  test("a shared URL restores the same view", async ({ page }) => {
     await page.goto("/en/users?q=admin%40example");
     await expect(page.getByRole("searchbox")).toHaveValue("admin@example");
     await expect(page.getByRole("cell", { name: "admin@example.com" })).toBeVisible();
