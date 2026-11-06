@@ -1,6 +1,6 @@
 ---
 name: add-query
-description: Add a validated read endpoint in apps/sample — endpoint constant, backend zod schema, key and queryOptions factory in the feature's <f>.api.ts, plus the MSW mock. Use whenever new server data must be displayed.
+description: Add a validated read endpoint in apps/sample — endpoint constant, backend zod schema, key and `useApiQuery` hook in the feature's <f>.api.ts, plus the MSW mock. Use whenever new server data must be displayed.
 ---
 
 # Add a query
@@ -26,17 +26,13 @@ description: Add a validated read endpoint in apps/sample — endpoint constant,
      detail: (id: number) => ["<f>", "detail", id] as const, // hierarchical
    };
 
-   export const <x>Query = (params: <X>Params) =>
-     queryOptions({
-       queryKey: <f>Keys.detail(params.id),
-       queryFn: ({ signal }) =>
-         apiClient.get(`${<X>_ENDPOINT}/${params.id}`, { signal, schema: <x>Response }),
-       staleTime: 30_000, // optional
+   export const use<X>Query = (params: <X>Params) =>
+     useApiQuery({
+       key: <f>Keys.detail(params.id),
+       url: `${<X>_ENDPOINT}/${params.id}`,
+       schema: <x>Response,
+       staleTime: 30_000, // optional; tables: params: toBackendListQuery(params), keepPrevious: true
      });
-
-   export function use<X>Query(params: <X>Params) {
-     return useQuery(<x>Query(params)); // tables: { ...<x>Query(params), placeholderData: keepPreviousData }
-   }
    ```
 
    `schema` validates the response (`INVALID_RESPONSE`) and types the data. Copy
@@ -44,7 +40,7 @@ description: Add a validated read endpoint in apps/sample — endpoint constant,
 
 3. **Use it in a hook** — `const query = use<X>Query(params)`; map `query.data`,
    `query.isPending`, `query.isError` to a view model. Never in a component, and never call
-   `useQuery(<x>Query(…))` outside `<f>.api.ts`.
+   `useApiQuery`/`useQuery` outside `<f>.api.ts`.
 4. **Page** — no prefetch: render the client view in `<Suspense fallback={<Skeleton />}>`.
 5. **Mock** — handler in `src/mocks/handlers.ts` (import the endpoint const) returning the
    BACKEND shape (what `<x>Response` parses).

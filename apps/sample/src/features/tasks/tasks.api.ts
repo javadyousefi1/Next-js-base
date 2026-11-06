@@ -1,13 +1,7 @@
-import {
-  keepPreviousData,
-  queryOptions,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
-import { apiClient } from "@/lib/http/client";
+import { useApiMutation, useApiQuery } from "@/lib/query/api-hooks";
 
 import {
   taskStatusSchema,
@@ -81,22 +75,16 @@ export const tasksKeys = {
   list: (params: TasksListParams) => ["tasks", "list", params] as const,
 };
 
-export const tasksListQuery = (params: TasksListParams) =>
-  queryOptions({
-    queryKey: tasksKeys.list(params),
-    queryFn: ({ signal }) =>
-      apiClient.get(TASKS_ENDPOINT, {
-        params: toBackendListQuery(params),
-        signal,
-        schema: tasksListResponse,
-      }),
+/** One table page; the previous page stays visible while the next one loads. */
+export const useTasksListQuery = (params: TasksListParams) =>
+  useApiQuery({
+    key: tasksKeys.list(params),
+    url: TASKS_ENDPOINT,
+    params: toBackendListQuery(params),
+    schema: tasksListResponse,
+    keepPrevious: true,
     staleTime: 30_000,
   });
-
-/** One table page; the previous page stays visible while the next one loads. */
-export function useTasksListQuery(params: TasksListParams) {
-  return useQuery({ ...tasksListQuery(params), placeholderData: keepPreviousData });
-}
 
 /** Refetches every tasks query (lists included). */
 export function useRefreshTasks() {
@@ -109,32 +97,31 @@ export function useRefreshTasks() {
  * itself, so no global toast. Callers add their own `onSuccess` to `mutate(vars, { onSuccess })`.
  */
 
-export function useCreateTaskMutation() {
-  const refresh = useRefreshTasks();
-  return useMutation({
-    mutationFn: (input: TaskInput) =>
-      apiClient.post(TASKS_ENDPOINT, toBackendTaskBody(input), { schema: taskResponse }),
-    meta: { silent: true },
-    onSuccess: refresh,
+export const useCreateTaskMutation = () =>
+  useApiMutation({
+    method: "POST",
+    url: TASKS_ENDPOINT,
+    body: (input: TaskInput) => toBackendTaskBody(input),
+    schema: taskResponse,
+    invalidates: [tasksKeys.all],
+    silent: true,
   });
-}
 
-export function useUpdateTaskMutation() {
-  const refresh = useRefreshTasks();
-  return useMutation({
-    mutationFn: ({ id, ...input }: UpdateTaskInput) =>
-      apiClient.patch(taskEndpoint(id), toBackendTaskBody(input), { schema: taskResponse }),
-    meta: { silent: true },
-    onSuccess: refresh,
+export const useUpdateTaskMutation = () =>
+  useApiMutation({
+    method: "PATCH",
+    url: ({ id }: UpdateTaskInput) => taskEndpoint(id),
+    body: ({ id: _id, ...input }) => toBackendTaskBody(input),
+    schema: taskResponse,
+    invalidates: [tasksKeys.all],
+    silent: true,
   });
-}
 
 /** DELETE answers 204 No Content. */
-export function useDeleteTaskMutation() {
-  const refresh = useRefreshTasks();
-  return useMutation({
-    mutationFn: ({ id }: TaskId) => apiClient.delete(taskEndpoint(id)),
-    meta: { silent: true },
-    onSuccess: refresh,
+export const useDeleteTaskMutation = () =>
+  useApiMutation({
+    method: "DELETE",
+    url: ({ id }: TaskId) => taskEndpoint(id),
+    invalidates: [tasksKeys.all],
+    silent: true,
   });
-}

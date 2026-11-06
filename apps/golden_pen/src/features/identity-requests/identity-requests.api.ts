@@ -1,11 +1,3 @@
-import {
-  keepPreviousData,
-  queryOptions,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-
 import { authKeys } from "@/features/auth/auth.api";
 import { ignoredResponse } from "@/features/auth/auth.backend";
 import { dashboardKeys } from "@/features/dashboard/dashboard.backend";
@@ -17,7 +9,7 @@ import {
   usersKeys,
   usersListResponse,
 } from "@/features/users/users.api";
-import { apiClient } from "@/lib/http/client";
+import { useApiMutation, useApiQuery } from "@/lib/query/api-hooks";
 
 import type {
   IdentityActionInput,
@@ -116,60 +108,44 @@ export const identityRequestsKeys = {
   detail: (params: IdentityDetailParams) => ["identity-requests", "detail", params] as const,
 };
 
-export const identityRequestsListQuery = (params: IdentityRequestsListParams) =>
-  queryOptions({
-    queryKey: identityRequestsKeys.list(params),
-    queryFn: ({ signal }) =>
-      apiClient.get(USERS_ENDPOINT, {
-        params: toBackendListQuery(params),
-        signal,
-        schema: usersListResponse,
-      }),
+/** One table page; the previous page stays visible while the next one loads. */
+export const useIdentityRequestsListQuery = (params: IdentityRequestsListParams) =>
+  useApiQuery({
+    key: identityRequestsKeys.list(params),
+    url: USERS_ENDPOINT,
+    params: toBackendListQuery(params),
+    schema: usersListResponse,
+    keepPrevious: true,
     staleTime: 30_000,
   });
 
-/** One table page; the previous page stays visible while the next one loads. */
-export function useIdentityRequestsListQuery(params: IdentityRequestsListParams) {
-  return useQuery({ ...identityRequestsListQuery(params), placeholderData: keepPreviousData });
-}
-
 /** One user with their identity, for the review sheet. */
-export const identityDetailQuery = (params: IdentityDetailParams) =>
-  queryOptions({
-    queryKey: identityRequestsKeys.detail(params),
-    queryFn: ({ signal }) =>
-      apiClient.get(PROFILE_ENDPOINT, {
-        params: toDetailQuery(params),
-        signal,
-        schema: profileResponse,
-      }),
+export const useIdentityDetailQuery = (params: IdentityDetailParams) =>
+  useApiQuery({
+    key: identityRequestsKeys.detail(params),
+    url: PROFILE_ENDPOINT,
+    params: toDetailQuery(params),
+    schema: profileResponse,
     staleTime: 0,
   });
-
-export function useIdentityDetailQuery(params: IdentityDetailParams) {
-  return useQuery(identityDetailQuery(params));
-}
 
 /**
  * Request / verify / reject / revoke (answers 204). The callers show their own errors (`silent`).
  * A status change moves rows between lists, so every list, the dashboard counts, the own profile
  * and the session are refreshed. Callers add their own `onSuccess` to `mutate(vars, { onSuccess })`.
  */
-export function useIdentityActionMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: IdentityActionInput) =>
-      apiClient.put(IDENTITY_ENDPOINT, toIdentityActionBody(input), { schema: ignoredResponse }),
-    meta: { silent: true },
-    onSuccess: () =>
-      Promise.all(
-        [
-          identityRequestsKeys.all,
-          usersKeys.all,
-          dashboardKeys.all,
-          profileKeys.all,
-          authKeys.session(),
-        ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
-      ),
+export const useIdentityActionMutation = () =>
+  useApiMutation({
+    method: "PUT",
+    url: IDENTITY_ENDPOINT,
+    body: (input: IdentityActionInput) => toIdentityActionBody(input),
+    schema: ignoredResponse,
+    invalidates: [
+      identityRequestsKeys.all,
+      usersKeys.all,
+      dashboardKeys.all,
+      profileKeys.all,
+      authKeys.session(),
+    ],
+    silent: true,
   });
-}

@@ -41,7 +41,7 @@ App-agnostic building blocks come from workspace packages: `@repo/http`, `@repo/
 ```
 schemas/<f>.schema.ts     domain types + params schema (the app's own shapes)
 <f>.api.ts                the ONLY file that knows the backend: endpoint, query mapping, response
-                          schemas, keys, queryOptions factories, mutation options
+                          schemas, keys, `useApiQuery`/`useApiMutation` hooks
 <f>.search-params.ts      tables: nuqs parsers = the URL contract (read by the table hook)
 hooks/use-<f>-*.ts        logic: state, queries, mapping → a render-ready model
 components/*.tsx          views: render the hook's result
@@ -60,10 +60,10 @@ when no app knowledge is involved.
   `project/no-logic-in-views`). Rules: `views.md`, `hooks.md`.
 - **Server vs client** — cookies/tokens, secrets, upstream API, Redis: `src/server/**`, route
   handlers, Server Components (`import "server-only"`). Interactivity: `"use client"` on the lowest
-  file. Shared non-personal data: Server Component + `'use cache'`. Writes: `useMutation`; Server
+  file. Shared non-personal data: Server Component + `'use cache'`. Writes: `useApiMutation`; Server
   Actions only for server-only effects (`updateTag`). Never pass tokens or secrets as props.
   Rule: `server.md`.
-- **Data** — TanStack Query directly: `queryOptions` factories plus ready hooks (`useXListQuery(params)`,
+- **Data** — TanStack Query through `useApiQuery`/`useApiMutation` (`src/lib/query/api-hooks.ts`): ready hooks (`useXListQuery(params)`,
   `useCreateXMutation()`, which own invalidation) declared in `features/<f>/<f>.api.ts` (keys, endpoint,
   `schema`-validated `apiClient` calls). Pages do not prefetch: the client loads, a skeleton
   shows meanwhile. Errors are always `ApiError` (`code`, `status`). Rule: `data-fetching.md`;

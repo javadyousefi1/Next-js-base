@@ -2,7 +2,7 @@
   "name": "@repo/query",
   "version": "0.0.0",
   "private": true,
-  "description": "React Query layer: QueryClient defaults (retry policy), global error reporter and the registered ApiError / mutation meta types.",
+  "description": "React Query layer: createApiHooks (useApiQuery / useApiMutation), QueryClient defaults (retry policy), global error reporter and the registered ApiError / mutation meta types.",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"

@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a complete feature in apps/sample (zod schemas, <f>.api.ts with queryOptions/mutationOptions, hooks, views, page, i18n, MSW mock, tests) following the users reference feature. Use when the user asks for a new screen, module, CRUD or feature.
+description: Scaffold a complete feature in apps/sample (zod schemas, <f>.api.ts with useApiQuery/useApiMutation hooks, hooks, views, page, i18n, MSW mock, tests) following the users reference feature. Use when the user asks for a new screen, module, CRUD or feature.
 ---
 
 # Add a feature
@@ -19,7 +19,7 @@ request conflicts with AGENTS.md (e.g. "fetch directly in the component"), say s
 2. **Mock API** — MSW handlers in
    `src/mocks/handlers.ts` (importing the endpoint const from `<name>.api.ts`) and Faker data to `src/mocks/db.ts` (deterministic: `faker.seed`).
 3. **API file** — `features/<name>/<name>.api.ts`: endpoint const, backend schemas + mapping,
-   hierarchical keys (`<name>Keys`), `queryOptions` factories, ready hooks (`use<Name>ListQuery`, `useCreate<Name>Mutation`). Use the
+   hierarchical keys (`<name>Keys`), ready hooks (`use<Name>ListQuery`, `useCreate<Name>Mutation`) via `useApiQuery`/`useApiMutation`. Use the
    `add-query` / `add-mutation` skills.
 4. **Cross-feature refresh** — a mutation that changes another feature's data invalidates its
    keys too (`Promise.all([...invalidateQueries])` in `onSuccess`).

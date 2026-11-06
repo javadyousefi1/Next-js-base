@@ -12,22 +12,18 @@ description: Add a validated write operation in apps/sample — a ready mutation
 2. **Ready hook** (`features/<f>/<f>.api.ts`):
 
    ```ts
-   export function useCreate<X>Mutation() {
-     const queryClient = useQueryClient();
-     return useMutation({
-       mutationFn: (input: <X>Input) =>
-         apiClient.post(<X>_ENDPOINT, toBackend<X>Body(input), { schema: <x>Response }),
-       meta: { silent: true }, // no global error toast (the form shows the error)
-       onSuccess: () =>
-         Promise.all([
-           queryClient.invalidateQueries({ queryKey: <f>Keys.all }),
-           // cross-feature: queryClient.invalidateQueries({ queryKey: dashboardKeys.all }),
-         ]),
+   export const useCreate<X>Mutation = () =>
+     useApiMutation({
+       method: "POST",
+       url: <X>_ENDPOINT, // or (input) => `${<X>_ENDPOINT}/${input.id}`
+       body: (input: <X>Input) => toBackend<X>Body(input),
+       schema: <x>Response,
+       invalidates: [<f>Keys.all], // cross-feature: add dashboardKeys.all; data-dependent: (data, vars) => keys
+       silent: true, // no global error toast (the form shows the error)
      });
-   }
    ```
 
-   Also `put`/`patch`/`delete`. Data-dependent keys: use the `onSuccess(data, variables)` args.
+   Also `PUT`/`PATCH`/`DELETE`. Cache writes (`setQueryData`): `onSuccess(data, vars, queryClient)`.
 
 3. **Form hook** (`hooks/use-<x>-form.ts`): `useForm({ resolver: zodResolver(schema) })`,
    `const mutation = useCreate<X>Mutation()` (no `useQueryClient` in the form hook),

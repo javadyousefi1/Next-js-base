@@ -11,7 +11,7 @@ paths:
 - A feature hook returns a ready-to-render model: plain values + callbacks named for the view
   (`status`, `rows`, `search`, `setSearch`, `onSubmit`, `errors`). The view must not compute.
 - Data: call the ready hooks of `<f>.api.ts` (`useXListQuery(params)`, `useCreateXMutation()`);
-  never compose `useQuery`/`useMutation`/`useQueryClient` in a feature hook. UI callbacks go to
+  never compose `useQuery`/`useMutation`/`useQueryClient`/`useApiQuery` in a feature hook. UI callbacks go to
   `mutate(vars, { onSuccess })`. `<f>.api.ts` is the one file allowed to hold several hooks.
 - Tables (copy `use-users-table.ts`, 3 lines): `const { params, ...controls } =
 useTableState(<x>SearchParams); return toTableController(controls, useXListQuery(params));`

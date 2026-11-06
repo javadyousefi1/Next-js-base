@@ -1,15 +1,8 @@
-import {
-  keepPreviousData,
-  queryOptions,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
 import { z } from "zod";
 
 import { dashboardKeys } from "@/features/dashboard/dashboard.backend";
 import { PAGE_INDEX_BASE } from "@/features/users/users.api";
-import { apiClient } from "@/lib/http/client";
+import { useApiMutation, useApiQuery } from "@/lib/query/api-hooks";
 
 import type {
   CreatedInviteLink,
@@ -97,39 +90,27 @@ export const inviteLinksKeys = {
   list: (params: InviteLinksListParams) => ["invite-links", "list", params] as const,
 };
 
-export const inviteLinksListQuery = (params: InviteLinksListParams) =>
-  queryOptions({
-    queryKey: inviteLinksKeys.list(params),
-    queryFn: ({ signal }) =>
-      apiClient.get(INVITE_LINKS_ENDPOINT, {
-        params: toBackendListQuery(params),
-        signal,
-        schema: inviteLinksListResponse,
-      }),
+/** One table page; the previous page stays visible while the next one loads. */
+export const useInviteLinksListQuery = (params: InviteLinksListParams) =>
+  useApiQuery({
+    key: inviteLinksKeys.list(params),
+    url: INVITE_LINKS_ENDPOINT,
+    params: toBackendListQuery(params),
+    schema: inviteLinksListResponse,
+    keepPrevious: true,
     staleTime: 30_000,
   });
-
-/** One table page; the previous page stays visible while the next one loads. */
-export function useInviteLinksListQuery(params: InviteLinksListParams) {
-  return useQuery({ ...inviteLinksListQuery(params), placeholderData: keepPreviousData });
-}
 
 /**
  * Refreshes the lists and the dashboard counts (unused invite links). `silent`: the form renders
  * the error. Callers add their own `onSuccess` to `mutate(vars, { onSuccess })`.
  */
-export function useCreateInviteLinkMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: CreateInviteLinkInput) =>
-      apiClient.post(CREATE_INVITE_LINK_ENDPOINT, toBackendCreateBody(input), {
-        schema: createInviteLinkResponse,
-      }),
-    meta: { silent: true },
-    onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: inviteLinksKeys.all }),
-        queryClient.invalidateQueries({ queryKey: dashboardKeys.all }),
-      ]),
+export const useCreateInviteLinkMutation = () =>
+  useApiMutation({
+    method: "POST",
+    url: CREATE_INVITE_LINK_ENDPOINT,
+    body: (input: CreateInviteLinkInput) => toBackendCreateBody(input),
+    schema: createInviteLinkResponse,
+    invalidates: [inviteLinksKeys.all, dashboardKeys.all],
+    silent: true,
   });
-}

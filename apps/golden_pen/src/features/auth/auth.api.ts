@@ -1,7 +1,6 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
 import { API_ROUTES } from "@/config/routes";
-import { apiClient, bffClient } from "@/lib/http/client";
+import { bffClient } from "@/lib/http/client";
+import { useApiMutation, useApiQuery } from "@/lib/query/api-hooks";
 
 import { AUTH_ENDPOINTS, meResponse } from "./auth.backend";
 import {
@@ -11,7 +10,6 @@ import {
   type OtpVerifyInput,
   type PasswordLoginInput,
   type RegisterInput,
-  type SessionResponse,
 } from "./schemas/auth.schema";
 
 /** Browser side of auth. The server side (token calls) lives in `auth.backend.ts`. */
@@ -21,76 +19,80 @@ export const authKeys = {
 };
 
 /** The signed-in user (validated). A 401 here triggers the global "session expired" redirect. */
-export const sessionQuery = () =>
-  queryOptions({
-    queryKey: authKeys.session(),
-    queryFn: ({ signal }) => apiClient.get(AUTH_ENDPOINTS.me, { signal, schema: meResponse }),
+export const useSessionQuery = () =>
+  useApiQuery({
+    key: authKeys.session(),
+    url: AUTH_ENDPOINTS.me,
+    schema: meResponse,
     staleTime: 5 * 60_000,
   });
 
-export function useSessionQuery() {
-  return useQuery(sessionQuery());
-}
-
 /*
- * Every sign-in step goes to our BFF routes: they are the only place the auth cookie is written.
- * The sign-in forms render their own error message (`silent`). Redirects go to
+ * Every sign-in step goes to our BFF routes (`bffClient`): they are the only place the auth
+ * cookie is written. The sign-in forms render their own error message (`silent`). A sign-in
+ * stores the signed-in user as the session, so no extra `/me` request follows. Redirects go to
  * `mutate(vars, { onSuccess })`.
  */
 
-/** A sign-in stores the signed-in user as the session, so no extra `/me` request follows. */
-function useStoreSession() {
-  const queryClient = useQueryClient();
-  return ({ user }: SessionResponse) => queryClient.setQueryData(authKeys.session(), user);
-}
-
-export function usePasswordLoginMutation() {
-  const storeSession = useStoreSession();
-  return useMutation({
-    mutationFn: (input: PasswordLoginInput) =>
-      bffClient.post(API_ROUTES.auth.login, input, { schema: sessionResponseSchema }),
-    meta: { silent: true },
-    onSuccess: storeSession,
+export const usePasswordLoginMutation = () =>
+  useApiMutation({
+    client: bffClient,
+    method: "POST",
+    url: API_ROUTES.auth.login,
+    body: (input: PasswordLoginInput) => input,
+    schema: sessionResponseSchema,
+    onSuccess: ({ user }, _input, queryClient) =>
+      queryClient.setQueryData(authKeys.session(), user),
+    silent: true,
   });
-}
 
-export function useOtpSendMutation() {
-  return useMutation({
-    mutationFn: (input: OtpSendInput) =>
-      bffClient.post(API_ROUTES.auth.otpSend, input, { schema: okResponseSchema }),
-    meta: { silent: true },
+export const useOtpSendMutation = () =>
+  useApiMutation({
+    client: bffClient,
+    method: "POST",
+    url: API_ROUTES.auth.otpSend,
+    body: (input: OtpSendInput) => input,
+    schema: okResponseSchema,
+    silent: true,
   });
-}
 
-export function useOtpResendMutation() {
-  return useMutation({
-    mutationFn: (input: OtpSendInput) =>
-      bffClient.post(API_ROUTES.auth.otpResend, input, { schema: okResponseSchema }),
-    meta: { silent: true },
+export const useOtpResendMutation = () =>
+  useApiMutation({
+    client: bffClient,
+    method: "POST",
+    url: API_ROUTES.auth.otpResend,
+    body: (input: OtpSendInput) => input,
+    schema: okResponseSchema,
+    silent: true,
   });
-}
 
-export function useOtpVerifyMutation() {
-  const storeSession = useStoreSession();
-  return useMutation({
-    mutationFn: (input: OtpVerifyInput) =>
-      bffClient.post(API_ROUTES.auth.otpVerify, input, { schema: sessionResponseSchema }),
-    meta: { silent: true },
-    onSuccess: storeSession,
+export const useOtpVerifyMutation = () =>
+  useApiMutation({
+    client: bffClient,
+    method: "POST",
+    url: API_ROUTES.auth.otpVerify,
+    body: (input: OtpVerifyInput) => input,
+    schema: sessionResponseSchema,
+    onSuccess: ({ user }, _input, queryClient) =>
+      queryClient.setQueryData(authKeys.session(), user),
+    silent: true,
   });
-}
 
-export function useRegisterMutation() {
-  return useMutation({
-    mutationFn: (input: RegisterInput) =>
-      bffClient.post(API_ROUTES.auth.register, input, { schema: okResponseSchema }),
-    meta: { silent: true },
+export const useRegisterMutation = () =>
+  useApiMutation({
+    client: bffClient,
+    method: "POST",
+    url: API_ROUTES.auth.register,
+    body: (input: RegisterInput) => input,
+    schema: okResponseSchema,
+    silent: true,
   });
-}
 
-export function useLogoutMutation() {
-  return useMutation({
-    mutationFn: () =>
-      bffClient.post(API_ROUTES.auth.logout, undefined, { schema: okResponseSchema }),
+export const useLogoutMutation = () =>
+  useApiMutation({
+    client: bffClient,
+    method: "POST",
+    url: API_ROUTES.auth.logout,
+    body: () => undefined,
+    schema: okResponseSchema,
   });
-}

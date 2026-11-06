@@ -1,10 +1,10 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
 import { API_ROUTES } from "@/config/routes";
 import { authKeys } from "@/features/auth/auth.api";
 import { AUTH_ENDPOINTS, ignoredResponse } from "@/features/auth/auth.backend";
-import { apiClient, bffClient } from "@/lib/http/client";
+import { bffClient } from "@/lib/http/client";
+import { useApiMutation, useApiQuery } from "@/lib/query/api-hooks";
 
 import { DOCUMENT_FIELD, toUploadFormData } from "./profile.backend";
 import {
@@ -148,21 +148,14 @@ export const profileKeys = {
 };
 
 /** The signed-in user with their identity (its own key: the session query has no identity). */
-export const profileQuery = () =>
-  queryOptions({
-    queryKey: profileKeys.detail(),
-    queryFn: ({ signal }) =>
-      apiClient.get(PROFILE_ENDPOINT, {
-        params: toProfileQuery(),
-        signal,
-        schema: profileResponse,
-      }),
+export const useProfileQuery = () =>
+  useApiQuery({
+    key: profileKeys.detail(),
+    url: PROFILE_ENDPOINT,
+    params: toProfileQuery(),
+    schema: profileResponse,
     staleTime: 30_000,
   });
-
-export function useProfileQuery() {
-  return useQuery(profileQuery());
-}
 
 /*
  * The forms show their own errors (`silent`); the writes answer 204. Callers add their own
@@ -170,46 +163,38 @@ export function useProfileQuery() {
  */
 
 /** Refreshes the profile and the session (the sidebar shows the name). */
-export function useUpdateInfoMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: UpdateInfoInput) =>
-      apiClient.put(UPDATE_ENDPOINT, toUpdateInfoBody(input), { schema: ignoredResponse }),
-    meta: { silent: true },
-    onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: profileKeys.all }),
-        queryClient.invalidateQueries({ queryKey: authKeys.session() }),
-      ]),
+export const useUpdateInfoMutation = () =>
+  useApiMutation({
+    method: "PUT",
+    url: UPDATE_ENDPOINT,
+    body: (input: UpdateInfoInput) => toUpdateInfoBody(input),
+    schema: ignoredResponse,
+    invalidates: [profileKeys.all, authKeys.session()],
+    silent: true,
   });
-}
 
-export function useUpdateIdentityMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: UpdateIdentityInput) =>
-      apiClient.put(UPDATE_ENDPOINT, toUpdateIdentityBody(input), { schema: ignoredResponse }),
-    meta: { silent: true },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: profileKeys.all }),
+export const useUpdateIdentityMutation = () =>
+  useApiMutation({
+    method: "PUT",
+    url: UPDATE_ENDPOINT,
+    body: (input: UpdateIdentityInput) => toUpdateIdentityBody(input),
+    schema: ignoredResponse,
+    invalidates: [profileKeys.all],
+    silent: true,
   });
-}
 
 /**
  * Files go to our own multipart BFF route (the generic proxy is JSON-only). An avatar change
  * also refreshes the session (the sidebar shows the avatar).
  */
-export function useUploadMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: UploadInput) =>
-      bffClient.post(API_ROUTES.upload, toUploadFormData(input), { schema: ignoredResponse }),
-    meta: { silent: true },
-    onSuccess: (_data, { target }) =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: profileKeys.all }),
-        target === "avatar"
-          ? queryClient.invalidateQueries({ queryKey: authKeys.session() })
-          : undefined,
-      ]),
+export const useUploadMutation = () =>
+  useApiMutation({
+    client: bffClient,
+    method: "POST",
+    url: API_ROUTES.upload,
+    body: (input: UploadInput) => toUploadFormData(input),
+    schema: ignoredResponse,
+    invalidates: (_data, { target }) =>
+      target === "avatar" ? [profileKeys.all, authKeys.session()] : [profileKeys.all],
+    silent: true,
   });
-}

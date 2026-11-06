@@ -1,12 +1,10 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
-
 import {
   INVITE_LINKS_ENDPOINT,
   toBackendListQuery as toInviteLinksQuery,
 } from "@/features/invite-links/invite-links.api";
 import type { UsersListParams } from "@/features/users/schemas/user.schema";
 import { toBackendListQuery as toUsersQuery, USERS_ENDPOINT } from "@/features/users/users.api";
-import { apiClient } from "@/lib/http/client";
+import { useApiQuery } from "@/lib/query/api-hooks";
 
 import { dashboardCountResponse, dashboardKeys } from "./dashboard.backend";
 import type { DashboardCountParams } from "./schemas/dashboard.schema";
@@ -45,18 +43,11 @@ const COUNT_REQUESTS: Record<
 };
 
 /** One count of the admin pulse (a number); refreshed when users or invite links change. */
-export const dashboardCountQuery = (params: DashboardCountParams) =>
-  queryOptions({
-    queryKey: dashboardKeys.count(params),
-    queryFn: ({ signal }) =>
-      apiClient.get(COUNT_REQUESTS[params.count].url, {
-        params: COUNT_REQUESTS[params.count].params,
-        signal,
-        schema: dashboardCountResponse,
-      }),
+export const useDashboardCountQuery = (params: DashboardCountParams) =>
+  useApiQuery({
+    key: dashboardKeys.count(params),
+    url: COUNT_REQUESTS[params.count].url,
+    params: COUNT_REQUESTS[params.count].params,
+    schema: dashboardCountResponse,
     staleTime: 30_000,
   });
-
-export function useDashboardCountQuery(params: DashboardCountParams) {
-  return useQuery(dashboardCountQuery(params));
-}

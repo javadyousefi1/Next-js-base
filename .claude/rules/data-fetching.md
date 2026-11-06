@@ -15,28 +15,29 @@ paths:
 
 # Data fetching
 
-`apps/sample` and `apps/golden_pen` use TanStack Query directly, wrapped in ready hooks.
+`apps/sample` and `apps/golden_pen` write ready hooks with `useApiQuery`/`useApiMutation`
+(`@/lib/query/api-hooks`, from `createApiHooks` in `@repo/query`).
 
 - One file per feature, `features/<f>/<f>.api.ts`, in this order: endpoint const → backend zod
   schemas + mapping (`toBackendListQuery`, response `.transform()` typed as the domain) → keys
-  (`usersKeys = { all, list(p) }`, hierarchical) → `queryOptions` factories → ready hooks
+  (`usersKeys = { all, list(p) }`, hierarchical) → ready hooks
   (`useXListQuery`, `useCreateXMutation`). `<f>.api.ts` is the one file allowed to hold several
   hooks (exception to "one hook per file").
   Only this file knows backend field names, query params and envelopes; views/hooks only see
   the domain (lists are `{ items, total }`). Server-only endpoints (auth tokens) live in
   `<f>.backend.ts` so server code never imports client code.
-- Queries: `queryOptions({ queryKey: xKeys.list(p), queryFn: ({ signal }) => apiClient.get(EP,
-{ params, signal, schema }), staleTime })`; the ready hook `useXListQuery(p)` wraps
-  `useQuery(xQuery(p))` (+ `placeholderData: keepPreviousData` for tables); callers never call
-  `useQuery(xQuery(…))` themselves. `schema`
-  validates the response (`INVALID_RESPONSE`) and types the data. Keys are declared in
-  `<f>.api.ts` only; inline arrays elsewhere are lint errors (`project/no-inline-query-keys`).
-- Mutations: `useCreateXMutation()` = `useMutation({ mutationFn, meta: { silent: true },
-onSuccess: () => queryClient.invalidateQueries({ queryKey: xKeys.all }) })` with
-  `useQueryClient()` inside the hook; callers never touch `queryClient`. Cross-feature refresh = one more
-  `invalidateQueries` in the same `onSuccess` (`Promise.all`). `silent: true` only when the view
-  renders the error itself. Callers add behaviour with `mutate(vars, { onSuccess })` so the
-  invalidation is not replaced.
+- Queries: one-expression consts, no `queryOptions` factory: `export const useXListQuery = (p) =>
+useApiQuery({ key: xKeys.list(p), url: EP, params: toBackendListQuery(p), schema, keepPrevious:
+true, staleTime })` (`keepPrevious` for tables, `enabled`, `client` optional). `schema` validates
+  the response (`INVALID_RESPONSE`) and types the data. Keys are declared in `<f>.api.ts` only;
+  inline arrays elsewhere are lint errors (`project/no-inline-query-keys`).
+- Mutations: `export const useCreateXMutation = () => useApiMutation({ method: "POST", url: EP,
+body: (input: XInput) => toBody(input), schema, invalidates: [xKeys.all], silent: true })`.
+  `url` may be a function of the input; `invalidates` a key list or `(data, vars) => keys`;
+  `onSuccess(data, vars, queryClient)` for cache writes (`setQueryData`). No `useQueryClient`
+  in features (a tiny `useRefreshX` only when a view needs a manual refresh). `silent: true` only
+  when the view renders the error itself. Callers add behaviour with `mutate(vars, { onSuccess })`
+  so the invalidation is not replaced.
 - `apiClient` (browser → BFF `/api/proxy`) and `bffClient` (login/logout only) are `HttpClient`
   instances: they resolve to the data or throw an `ApiError` (never raw fetch errors).
   Server-only code uses `upstream.get(url, { schema })`.

@@ -1,7 +1,6 @@
-import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
-import { apiClient } from "@/lib/http/client";
+import { useApiQuery } from "@/lib/query/api-hooks";
 
 import { userRoleSchema, type UsersList, type UsersListParams } from "./schemas/user.schema";
 
@@ -53,19 +52,13 @@ export const usersKeys = {
   list: (params: UsersListParams) => ["users", "list", params] as const,
 };
 
-export const usersListQuery = (params: UsersListParams) =>
-  queryOptions({
-    queryKey: usersKeys.list(params),
-    queryFn: ({ signal }) =>
-      apiClient.get(USERS_ENDPOINT, {
-        params: toBackendListQuery(params),
-        signal,
-        schema: usersListResponse,
-      }),
+/** One table page; the previous page stays visible while the next one loads. */
+export const useUsersListQuery = (params: UsersListParams) =>
+  useApiQuery({
+    key: usersKeys.list(params),
+    url: USERS_ENDPOINT,
+    params: toBackendListQuery(params),
+    schema: usersListResponse,
+    keepPrevious: true,
     staleTime: 30_000,
   });
-
-/** One table page; the previous page stays visible while the next one loads. */
-export function useUsersListQuery(params: UsersListParams) {
-  return useQuery({ ...usersListQuery(params), placeholderData: keepPreviousData });
-}

@@ -1,7 +1,6 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
-import { apiClient } from "@/lib/http/client";
+import { useApiQuery } from "@/lib/query/api-hooks";
 
 import type { BaseInfoOption, CitiesParams } from "./schemas/base-info.schema";
 
@@ -48,35 +47,22 @@ export const baseInfoKeys = {
 /** Lookups change rarely: keep them for an hour. */
 const LOOKUP_STALE_TIME = 60 * 60_000;
 
-export const provincesQuery = () =>
-  queryOptions({
-    queryKey: baseInfoKeys.provinces(),
-    queryFn: ({ signal }) =>
-      apiClient.get(BASE_INFO_ENUMS_ENDPOINT, {
-        params: toProvincesQuery(),
-        signal,
-        schema: baseInfoOptionsResponse,
-      }),
+export const useProvincesQuery = () =>
+  useApiQuery({
+    key: baseInfoKeys.provinces(),
+    url: BASE_INFO_ENUMS_ENDPOINT,
+    params: toProvincesQuery(),
+    schema: baseInfoOptionsResponse,
     staleTime: LOOKUP_STALE_TIME,
   });
-
-export const citiesQuery = (params: CitiesParams) =>
-  queryOptions({
-    queryKey: baseInfoKeys.cities(params),
-    queryFn: ({ signal }) =>
-      apiClient.get(BASE_INFO_ENUMS_ENDPOINT, {
-        params: toCitiesQuery(params),
-        signal,
-        schema: baseInfoOptionsResponse,
-      }),
-    staleTime: LOOKUP_STALE_TIME,
-  });
-
-export function useProvincesQuery() {
-  return useQuery(provincesQuery());
-}
 
 /** The cities of a province; `enabled: false` fetches nothing (no province chosen). */
-export function useCitiesQuery(params: CitiesParams, enabled: boolean) {
-  return useQuery({ ...citiesQuery(params), enabled });
-}
+export const useCitiesQuery = (params: CitiesParams, enabled: boolean) =>
+  useApiQuery({
+    key: baseInfoKeys.cities(params),
+    url: BASE_INFO_ENUMS_ENDPOINT,
+    params: toCitiesQuery(params),
+    schema: baseInfoOptionsResponse,
+    staleTime: LOOKUP_STALE_TIME,
+    enabled,
+  });

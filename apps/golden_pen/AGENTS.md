@@ -12,8 +12,9 @@ rewrites to `[locale]` internally), no language switcher. Don't add English stri
 ## Data layer
 
 Same as `apps/sample` (rule `data-fetching.md`): one `features/<f>/<f>.api.ts` per feature with endpoint,
-backend schemas + mapping, hierarchical keys (`usersKeys`), `queryOptions` factories and **ready hooks**
-(`useUsersListQuery`, `useIdentityActionMutation`, …) that own invalidation and `meta.silent`; callers add UI
+backend schemas + mapping, hierarchical keys (`usersKeys`), and **ready hooks** — one-expression
+`useApiQuery`/`useApiMutation` consts (`@/lib/query/api-hooks`; `useUsersListQuery`, `useIdentityActionMutation`, …) with
+`invalidates` and `silent`; callers add UI
 callbacks with `mutate(vars, { onSuccess })`. Server-needed parts stay in `<f>.backend.ts` (`auth`, `profile`
 upload). Pages do not prefetch: toolbar and table sit in `<Suspense>` with their placeholders (CLS test).
 Tables: `toTableController` + `<DataTableView>` (rows + pagination; the toolbar stays outside, see below).
