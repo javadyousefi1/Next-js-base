@@ -6,7 +6,7 @@ import { DEFAULT_STATUS_TAB, STATUS_TABS } from "./schemas/identity-requests.sch
 /**
  * URL state of the identity-requests table (own keys: independent of `/users`). The status tab
  * is NOT a filter of the Filters drawer, so it lives apart (`statusTabParser`) and is not
- * counted as an active filter; `identityRequestsLoaderParams` is both, for the page's prefetch.
+ * counted as an active filter.
  */
 export const identityRequestsSearchParams = {
   ...tableSearchParams,

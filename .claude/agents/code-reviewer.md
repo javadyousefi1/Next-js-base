@@ -15,7 +15,8 @@ Process:
 3. Check every changed file against:
    - Correctness: logic errors, unhandled states (loading/error/empty), race conditions, wrong
      React Query keys or missing invalidation, promise misuse.
-   - Conventions: ROUTES constants, `<f>.api.ts` keys + queryOptions with `schema`-validated responses,
+   - Conventions: ROUTES constants, `<f>.api.ts` keys + queryOptions + ready hooks (callers never compose
+     `useQuery`/`useMutation`/`queryClient`) with `schema`-validated responses,
      `cn()` for conditional classes, no logic in views, server/client boundary, env via
      `env` from `@/env`, kebab-case files.
    - Security: tokens only in httpOnly cookies, nothing secret in client bundles or logs, input

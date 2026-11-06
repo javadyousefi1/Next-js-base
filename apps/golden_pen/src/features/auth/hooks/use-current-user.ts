@@ -1,10 +1,10 @@
 "use client";
 
-import { sessionQuery } from "../api/auth.queries";
+import { useSessionQuery } from "../auth.api";
 
 /** The signed-in user (`undefined` while loading). */
 export function useCurrentUser() {
-  const query = sessionQuery.useQuery();
+  const query = useSessionQuery();
   const user = query.data;
 
   return {

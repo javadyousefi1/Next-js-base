@@ -1,4 +1,4 @@
-import { queryOptions } from "@tanstack/react-query";
+import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
 import { apiClient } from "@/lib/http/client";
@@ -64,3 +64,8 @@ export const usersListQuery = (params: UsersListParams) =>
       }),
     staleTime: 30_000,
   });
+
+/** One table page; the previous page stays visible while the next one loads. */
+export function useUsersListQuery(params: UsersListParams) {
+  return useQuery({ ...usersListQuery(params), placeholderData: keepPreviousData });
+}

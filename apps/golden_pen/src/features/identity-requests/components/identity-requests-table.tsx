@@ -1,10 +1,8 @@
 "use client";
 
-import { DataTableProvider } from "@repo/table/data-table-context";
 import { useTranslations } from "next-intl";
 
-import { DataTable } from "@/components/data-table/data-table";
-import { DataTablePagination } from "@/components/data-table/data-table-pagination";
+import { DataTableView } from "@/components/data-table/data-table-view";
 
 import { useIdentityActions } from "../hooks/use-identity-actions";
 import { useIdentityRequestsTable } from "../hooks/use-identity-requests-table";
@@ -15,24 +13,18 @@ import { IdentityReviewSheet } from "./identity-review-sheet";
 
 export function IdentityRequestsTable() {
   const t = useTranslations("IdentityRequests");
-  const table = useIdentityRequestsTable();
   const actions = useIdentityActions();
   const review = useIdentityReview();
-  const columns = useIdentityRequestsColumns({ actions, onReview: review.open });
-  const filters = useIdentityRequestsFilters();
 
   return (
-    <DataTableProvider
-      table={table}
-      columns={columns}
-      filters={filters}
+    <DataTableView
+      table={useIdentityRequestsTable()}
+      columns={useIdentityRequestsColumns({ actions, onReview: review.open })}
+      filters={useIdentityRequestsFilters()}
       searchPlaceholder={t("searchPlaceholder")}
+      emptyTitle={t("empty")}
     >
-      <div className="flex flex-col gap-4">
-        <DataTable emptyTitle={t("empty")} />
-        <DataTablePagination />
-      </div>
       <IdentityReviewSheet review={review} actions={actions} />
-    </DataTableProvider>
+    </DataTableView>
   );
 }

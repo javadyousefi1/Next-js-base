@@ -1,6 +1,6 @@
 ---
 name: add-mutation
-description: Add a validated write operation in apps/sample — mutationOptions in the feature's <f>.api.ts with invalidation of related queries, form hook with react-hook-form, MSW mock. Use for create/update/delete actions and forms.
+description: Add a validated write operation in apps/sample — a ready mutation hook in the feature's <f>.api.ts with invalidation of related queries, form hook with react-hook-form, MSW mock. Use for create/update/delete actions and forms.
 ---
 
 # Add a mutation
@@ -9,11 +9,12 @@ description: Add a validated write operation in apps/sample — mutationOptions 
    `z.string().min(1, { error: "nameRequired" })`) in `schemas/<f>.schema.ts`. The response
    schema and request-body mapping (`toBackend<X>Body`) go in `<f>.api.ts` (typed against the
    domain; omit `schema` when the endpoint answers 204 No Content).
-2. **Options factory** (`features/<f>/<f>.api.ts`):
+2. **Ready hook** (`features/<f>/<f>.api.ts`):
 
    ```ts
-   export const create<X>Mutation = (queryClient: QueryClient) =>
-     mutationOptions({
+   export function useCreate<X>Mutation() {
+     const queryClient = useQueryClient();
+     return useMutation({
        mutationFn: (input: <X>Input) =>
          apiClient.post(<X>_ENDPOINT, toBackend<X>Body(input), { schema: <x>Response }),
        meta: { silent: true }, // no global error toast (the form shows the error)
@@ -23,14 +24,15 @@ description: Add a validated write operation in apps/sample — mutationOptions 
            // cross-feature: queryClient.invalidateQueries({ queryKey: dashboardKeys.all }),
          ]),
      });
+   }
    ```
 
    Also `put`/`patch`/`delete`. Data-dependent keys: use the `onSuccess(data, variables)` args.
 
 3. **Form hook** (`hooks/use-<x>-form.ts`): `useForm({ resolver: zodResolver(schema) })`,
-   `const queryClient = useQueryClient(); const mutation = useMutation(create<X>Mutation(queryClient))`,
-   submit with `mutation.mutate(values, { onSuccess })` (call-level callbacks keep the invalidation
-   — passing `onSuccess` to `useMutation` would replace it). Return `register`, `errors`
+   `const mutation = useCreate<X>Mutation()` (no `useQueryClient` in the form hook),
+   submit with `mutation.mutate(values, { onSuccess })` (UI-only callbacks; the invalidation
+   stays in the ready hook). Return `register`, `errors`
    (translated), `onSubmit: (e) => void submit(e)`, `isSubmitting`, `formError`. Copy
    `features/tasks/hooks/use-task-form.ts` (a form inside `modal.open`, closes with the saved
    item; `useWatch`, not `watch`) or `features/auth/hooks/use-login-form.ts` (`"use no memo"`).

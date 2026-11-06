@@ -7,14 +7,24 @@ import type {
   RegisterInput,
   SessionToken,
   SessionUser,
-} from "../schemas/auth.schema";
+} from "./schemas/auth.schema";
 
 /**
  * The ONLY file that knows the backend's auth API: phone number + password or SMS code (OTP),
  * answered with ONE JWT (no refresh token, no logout endpoint). A new backend → change this file
- * (+ `API_ENDPOINTS`, the MSW mock), nothing else. It is imported by the browser too
- * (`meResponse`): no env and no secrets here.
+ * (+ the MSW mock), nothing else. It is imported by the browser too (`meResponse`): no env and
+ * no secrets here.
  */
+
+/** Relative to `API_BASE_URL` (server) or `/api/proxy` (browser). Token calls are server-only. */
+export const AUTH_ENDPOINTS = {
+  login: "/Authentication/Login",
+  register: "/Authentication/Register",
+  verifyOtp: "/Authentication/VerifyOtp",
+  resendOtp: "/Authentication/ResendOtp",
+  registerByInviteLink: "/Authentication/RegisterByInviteLink",
+  me: "/User/Get",
+} as const;
 
 /**
  * Role given to a newly registered user. The value is a guess: confirm the

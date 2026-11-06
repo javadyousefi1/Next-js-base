@@ -13,16 +13,11 @@ const { rules } = plugin;
 
 tester.run("no-inline-query-keys", rules["no-inline-query-keys"]!, {
   valid: [
-    "makeQuery({ key: QUERY_KEYS.users.list, params, response, fetcher })",
-    "queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users.all })",
-    "invalidateKeys(queryClient, [QUERY_KEYS.users.all])",
     "queryOptions({ queryKey: usersKeys.list(params), queryFn })",
     "queryClient.invalidateQueries({ queryKey: tasksKeys.all })",
   ],
   invalid: [
     { code: 'useQuery({ queryKey: ["users"], queryFn })', errors: 1 },
-    { code: 'makeQuery({ key: (p) => ["users", p] })', errors: 1 },
-    { code: 'invalidateKeys(queryClient, [["users"]])', errors: 1 },
     { code: 'queryClient.invalidateQueries({ queryKey: ["tasks"] })', errors: 1 },
   ],
 });

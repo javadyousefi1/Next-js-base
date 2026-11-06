@@ -2,7 +2,7 @@ import "server-only";
 import { HttpClient } from "@repo/http";
 
 import { env } from "@/env";
-import { authorizationHeader, backOfficeHeader } from "@/features/auth/api/auth.backend";
+import { authorizationHeader, backOfficeHeader } from "@/features/auth/auth.backend";
 
 /** Every upstream request is a back-office request (`back-office: true`). */
 function createUpstreamClient(headers?: Record<string, string>): HttpClient {
@@ -18,11 +18,11 @@ function createUpstreamClient(headers?: Record<string, string>): HttpClient {
  * upstream; the browser goes through the BFF (`/api/*`). Pass the response schema and get typed,
  * validated data back — errors are `ApiError`s labelled with the endpoint (`GET /User/Get`):
  *
- *   upstream.get(API_ENDPOINTS.users.me, { schema: meResponse })
+ *   upstream.get(AUTH_ENDPOINTS.me, { schema: meResponse })
  */
 export const upstream = createUpstreamClient();
 
-/** Upstream client that sends the user's access token (server prefetch, `<PrefetchBoundary>`). */
+/** Upstream client that sends the user's access token . */
 export function upstreamFor(accessToken: string): HttpClient {
   return createUpstreamClient(authorizationHeader(accessToken));
 }

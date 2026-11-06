@@ -1,4 +1,4 @@
-import { mutationOptions, queryOptions } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { API_ROUTES } from "@/config/routes";
 import { apiClient, bffClient } from "@/lib/http/client";
@@ -24,19 +24,28 @@ export const sessionQuery = () =>
     staleTime: 5 * 60_000,
   });
 
+export function useSessionQuery() {
+  return useQuery(sessionQuery());
+}
+
 /**
  * Login/logout go to our BFF routes: they are the only place auth cookies are written.
- * Login is `silent`: the login form renders its own error message.
+ * Login is `silent` (the login form renders its own error) and stores the signed-in user as the
+ * session, so no extra `/me` request follows. Redirects go to `mutate(vars, { onSuccess })`.
  */
-export const loginMutation = () =>
-  mutationOptions({
+export function useLoginMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
     mutationFn: (input: LoginInput) =>
       bffClient.post(API_ROUTES.auth.login, input, { schema: sessionResponseSchema }),
     meta: { silent: true },
+    onSuccess: ({ user }) => queryClient.setQueryData(authKeys.session(), user),
   });
+}
 
-export const logoutMutation = () =>
-  mutationOptions({
+export function useLogoutMutation() {
+  return useMutation({
     mutationFn: () =>
       bffClient.post(API_ROUTES.auth.logout, undefined, { schema: logoutResponseSchema }),
   });
+}

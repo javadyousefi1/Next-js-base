@@ -4,12 +4,12 @@ import { modal } from "@repo/ui/lib/modal";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { uploadMutation } from "../api/profile.queries";
+import { useUploadMutation } from "../profile.api";
 
 /** «حذف تصویر»: asks first, then deletes the avatar (an avatar upload without a file). */
 export function useRemoveAvatar() {
   const t = useTranslations("Profile.avatar");
-  const mutation = uploadMutation.useMutation();
+  const mutation = useUploadMutation();
 
   const confirmRemove = async () => {
     const answer = await modal.confirm(t("removeText"), {

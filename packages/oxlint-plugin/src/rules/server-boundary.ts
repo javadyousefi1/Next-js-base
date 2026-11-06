@@ -16,7 +16,7 @@ export const noServerImportInClient = defineRule({
     docs: { description: "Disallow importing server-only modules from client components." },
     messages: {
       serverImport:
-        '"{{source}}" is server-only and cannot be imported from a "use client" file. Fetch through the BFF (makeQuery) or a Server Action (*.actions.ts) instead.',
+        '"{{source}}" is server-only and cannot be imported from a "use client" file. Fetch through the BFF (apiClient in <f>.api.ts) or a Server Action (*.actions.ts) instead.',
     },
     schema: [],
   },

@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
-import { PAGE_INDEX_BASE } from "@/features/users/api/users.backend";
+import { PAGE_INDEX_BASE } from "@/features/users/users.api";
 
 import {
   createInviteLinkResponse,
   inviteLinksListResponse,
   toBackendCreateBody,
   toBackendListQuery,
-} from "./invite-links.backend";
+} from "./invite-links.api";
 
 const backendLink = {
   id: "1",

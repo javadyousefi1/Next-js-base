@@ -1,27 +1,13 @@
 "use client";
 
-import type { TableController } from "@repo/table/types";
+import { toTableController } from "@repo/table/to-table-controller";
 import { useTableState } from "@repo/table/use-table-state";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-import type { Task } from "../schemas/task.schema";
-import { tasksListQuery } from "../tasks.api";
+import { useTasksListQuery } from "../tasks.api";
 import { tasksSearchParams } from "../tasks.search-params";
 
-const NO_TASKS: Task[] = [];
-
 /** URL state → tasks query → everything the data-table components need. */
-export function useTasksTable(): TableController<Task> {
+export function useTasksTable() {
   const { params, ...controls } = useTableState(tasksSearchParams);
-  const query = useQuery({ ...tasksListQuery(params), placeholderData: keepPreviousData });
-
-  return {
-    ...controls,
-    rows: query.data?.items ?? NO_TASKS,
-    total: query.data?.total ?? 0,
-    isLoading: query.isPending,
-    isFetching: query.isFetching,
-    isError: query.isError && query.data === undefined,
-    retry: () => void query.refetch(),
-  };
+  return toTableController(controls, useTasksListQuery(params));
 }

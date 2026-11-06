@@ -1,13 +1,19 @@
+import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
-import type { UsersList, UsersListParams } from "../schemas/user.schema";
+import { apiClient } from "@/lib/http/client";
+
+import type { UsersList, UsersListParams } from "./schemas/user.schema";
 
 /**
  * The ONLY file that knows the backend's users API (`GET /User/GetAll`: PascalCase query,
- * `{ items, totalCount }`, identity as `{ statusType }`). A new backend → change this file
- * (+ `API_ENDPOINTS`, the MSW mock), nothing else: views, hooks and the BFF only see the domain
- * types in `schemas/`.
+ * `{ items, totalCount }`, identity as `{ statusType }`): endpoint, query mapping, response
+ * schema, keys and queries. A new backend → change this file (+ the MSW mock), nothing else:
+ * views, hooks and the BFF only see the domain types in `schemas/`.
  */
+
+/** Relative to `API_BASE_URL` on the server, or to `/api/proxy` in the browser (BFF). */
+export const USERS_ENDPOINT = "/User/GetAll";
 
 /** First `PageIndex` the API accepts. UNKNOWN: 1-based here; set 0 if the API is 0-based. */
 export const PAGE_INDEX_BASE = 1;
@@ -71,3 +77,26 @@ export const usersListResponse = z
     })),
     total: totalCount,
   }));
+
+/** Hierarchical: invalidating `all` refreshes every users query. */
+export const usersKeys = {
+  all: ["users"] as const,
+  list: (params: UsersListParams) => ["users", "list", params] as const,
+};
+
+export const usersListQuery = (params: UsersListParams) =>
+  queryOptions({
+    queryKey: usersKeys.list(params),
+    queryFn: ({ signal }) =>
+      apiClient.get(USERS_ENDPOINT, {
+        params: toBackendListQuery(params),
+        signal,
+        schema: usersListResponse,
+      }),
+    staleTime: 30_000,
+  });
+
+/** One table page; the previous page stays visible while the next one loads. */
+export function useUsersListQuery(params: UsersListParams) {
+  return useQuery({ ...usersListQuery(params), placeholderData: keepPreviousData });
+}

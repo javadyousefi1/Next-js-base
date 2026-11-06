@@ -7,8 +7,8 @@ import { toast } from "sonner";
 
 import type { User } from "@/features/users/schemas/user.schema";
 
-import { identityActionMutation } from "../api/identity-requests.queries";
 import { IdentityReasonForm } from "../components/identity-reason-form";
+import { useIdentityActionMutation } from "../identity-requests.api";
 import { rowActionsFor } from "../row-actions";
 import type { IdentityActionInput, ReasonAction } from "../schemas/identity-requests.schema";
 import { useCanReview } from "./use-can-review";
@@ -23,7 +23,7 @@ export function useIdentityActions() {
   const t = useTranslations("IdentityRequests");
   const canAct = useCanReview();
   const errorMessage = useIdentityErrorMessage();
-  const mutation = identityActionMutation.useMutation();
+  const mutation = useIdentityActionMutation();
 
   /** Runs the mutation; a failure becomes an `Error` with the Persian text the modal shows. */
   const run = async (input: IdentityActionInput) => {

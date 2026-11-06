@@ -1,9 +1,17 @@
 import { http, HttpResponse } from "msw/http";
 import { delay } from "msw/utils/delay";
 
-import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { env } from "@/env";
-import { PAGE_INDEX_BASE } from "@/features/users/api/users.backend";
+import { AUTH_ENDPOINTS } from "@/features/auth/auth.backend";
+import { BASE_INFO_ENUMS_ENDPOINT } from "@/features/base-info/base-info.api";
+import { IDENTITY_ENDPOINT } from "@/features/identity-requests/identity-requests.api";
+import {
+  CREATE_INVITE_LINK_ENDPOINT,
+  INVITE_LINKS_ENDPOINT,
+} from "@/features/invite-links/invite-links.api";
+import { UPDATE_ENDPOINT } from "@/features/profile/profile.api";
+import { UPLOAD_ENDPOINT } from "@/features/profile/profile.backend";
+import { PAGE_INDEX_BASE, USERS_ENDPOINT } from "@/features/users/users.api";
 
 import { db, MOCK_OTP_CODE, type MockUser } from "./db";
 import {
@@ -87,7 +95,7 @@ const missingBackOffice = (request: Request) =>
     : problem(400, "The back-office header is missing", "BackOffice.Missing");
 
 export const handlers = [
-  http.post(url(API_ENDPOINTS.auth.login), async ({ request }) => {
+  http.post(url(AUTH_ENDPOINTS.login), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
@@ -105,7 +113,7 @@ export const handlers = [
     return HttpResponse.json({ token: issueToken(user) });
   }),
 
-  http.post(url(API_ENDPOINTS.auth.register), async ({ request }) => {
+  http.post(url(AUTH_ENDPOINTS.register), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
@@ -137,7 +145,7 @@ export const handlers = [
     return HttpResponse.json({});
   }),
 
-  http.post(url(API_ENDPOINTS.auth.verifyOtp), async ({ request }) => {
+  http.post(url(AUTH_ENDPOINTS.verifyOtp), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
@@ -151,7 +159,7 @@ export const handlers = [
     return HttpResponse.json({ token: issueToken(user) });
   }),
 
-  http.put(url(API_ENDPOINTS.auth.resendOtp), async ({ request }) => {
+  http.put(url(AUTH_ENDPOINTS.resendOtp), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
@@ -161,7 +169,7 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.get(url(API_ENDPOINTS.users.me), ({ request }) => {
+  http.get(url(AUTH_ENDPOINTS.me), ({ request }) => {
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
 
@@ -213,7 +221,7 @@ export const handlers = [
     });
   }),
 
-  http.get(url(API_ENDPOINTS.users.list), async ({ request }) => {
+  http.get(url(USERS_ENDPOINT), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
@@ -246,7 +254,7 @@ export const handlers = [
     return HttpResponse.json({ items, totalCount: matches.length });
   }),
 
-  http.get(url(API_ENDPOINTS.users.inviteLinks), async ({ request }) => {
+  http.get(url(INVITE_LINKS_ENDPOINT), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
@@ -270,7 +278,7 @@ export const handlers = [
     });
   }),
 
-  http.post(url(API_ENDPOINTS.users.createInviteLink), async ({ request }) => {
+  http.post(url(CREATE_INVITE_LINK_ENDPOINT), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
@@ -324,7 +332,7 @@ export const handlers = [
     });
   }),
 
-  http.put(url(API_ENDPOINTS.users.update), async ({ request }) => {
+  http.put(url(UPDATE_ENDPOINT), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
@@ -372,7 +380,7 @@ export const handlers = [
     return problem(400, "نوع به‌روزرسانی معتبر نیست.", "User.Invalid");
   }),
 
-  http.put(url(API_ENDPOINTS.users.identity), async ({ request }) => {
+  http.put(url(IDENTITY_ENDPOINT), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
@@ -445,7 +453,7 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.post(url(API_ENDPOINTS.users.upload), async ({ request }) => {
+  http.post(url(UPLOAD_ENDPOINT), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;
@@ -487,7 +495,7 @@ export const handlers = [
     return problem(400, "درخواست بارگذاری معتبر نیست.", "Upload.Invalid");
   }),
 
-  http.get(url(API_ENDPOINTS.baseInfo.enums), async ({ request }) => {
+  http.get(url(BASE_INFO_ENUMS_ENDPOINT), async ({ request }) => {
     await delay(RESPONSE_DELAY_MS);
     const rejected = missingBackOffice(request);
     if (rejected) return rejected;

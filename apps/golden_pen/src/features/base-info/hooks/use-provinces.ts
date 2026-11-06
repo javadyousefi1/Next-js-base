@@ -1,9 +1,9 @@
 "use client";
 
-import { provincesQuery } from "../api/base-info.queries";
+import { useProvincesQuery } from "../base-info.api";
 
 /** All provinces (`[]` while loading). */
 export function useProvinces() {
-  const query = provincesQuery.useQuery();
+  const query = useProvincesQuery();
   return { provinces: query.data ?? [], isLoading: query.isPending };
 }

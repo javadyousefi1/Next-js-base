@@ -4,8 +4,7 @@ import { createLoader } from "nuqs/server";
 import { IS_USED_FILTERS } from "./schemas/invite-link.schema";
 
 /**
- * URL state of the invite links table. Used by `useInviteLinksTable` (browser) and by the page's
- * prefetch (server). The API has no search and no sorting (`q`, `sortBy`, `order` stay unused).
+ * URL state of the invite links table. Used by `useInviteLinksTable` and the toolbar (browser). The API has no search and no sorting (`q`, `sortBy`, `order` stay unused).
  */
 export const inviteLinksSearchParams = {
   ...tableSearchParams,

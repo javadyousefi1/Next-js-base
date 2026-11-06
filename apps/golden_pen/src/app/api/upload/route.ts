@@ -1,8 +1,7 @@
 import type { NextRequest } from "next/server";
 
-import { API_ENDPOINTS } from "@/config/api-endpoints";
-import { authorizationHeader } from "@/features/auth/api/auth.backend";
-import { validateUploadForm } from "@/features/profile/api/profile.backend";
+import { authorizationHeader } from "@/features/auth/auth.backend";
+import { UPLOAD_ENDPOINT, validateUploadForm } from "@/features/profile/profile.backend";
 import { withSession } from "@/server/auth/session";
 import { bffError, bffJson } from "@/server/bff/responses";
 import { upstream } from "@/server/http/upstream";
@@ -22,7 +21,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await withSession(request, (accessToken) =>
-      upstream.request("POST", API_ENDPOINTS.users.upload, {
+      upstream.request("POST", UPLOAD_ENDPOINT, {
         body: checked.form,
         headers: authorizationHeader(accessToken),
       }),

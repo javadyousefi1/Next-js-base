@@ -1,12 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-
-import { sessionQuery } from "../auth.api";
+import { useSessionQuery } from "../auth.api";
 
 /** The signed-in user (`undefined` while loading). */
 export function useCurrentUser() {
-  const query = useQuery(sessionQuery());
+  const query = useSessionQuery();
   const user = query.data;
 
   return {

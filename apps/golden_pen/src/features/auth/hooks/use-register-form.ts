@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, type FormEvent } from "react";
 import { useForm } from "react-hook-form";
 
-import { registerMutation } from "../api/auth.queries";
+import { useRegisterMutation } from "../auth.api";
 import { registerInputSchema, type RegisterInput } from "../schemas/auth.schema";
 import { useAuthMessages } from "./use-auth-messages";
 
@@ -24,7 +24,7 @@ export function useRegisterForm() {
     defaultValues: { firstName: "", lastName: "", phoneNumber: "" },
   });
 
-  const mutation = registerMutation.useMutation();
+  const mutation = useRegisterMutation();
 
   const submit = form.handleSubmit((values) =>
     mutation.mutate(values, { onSuccess: () => setSentTo(values.phoneNumber) }),

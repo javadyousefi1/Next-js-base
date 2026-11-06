@@ -27,16 +27,7 @@ Reference: `features/users` (`users.search-params.ts`, `use-users-table.ts`, `us
 
    ```ts
    const { params, ...controls } = useTableState(usersSearchParams);
-   const query = useQuery({ ...usersListQuery(params), placeholderData: keepPreviousData });
-   return {
-     ...controls,
-     rows: query.data?.items ?? NO_ROWS,
-     total: query.data?.total ?? 0,
-     isLoading: query.isPending,
-     isFetching: query.isFetching,
-     isError: query.isError && query.data === undefined,
-     retry: () => void query.refetch(),
-   };
+   return toTableController(controls, useUsersListQuery(params)); // @repo/table/to-table-controller
    ```
 
 4. **Columns and filters** — plain arrays from `components/<x>-columns.tsx` / `<x>-filters.ts`:
@@ -51,19 +42,15 @@ Reference: `features/users` (`users.search-params.ts`, `use-users-table.ts`, `us
    Column ids are the API sort fields. A filter's `id` is its URL key and its parser
    (`filterParams.<type>`) must match its `type`.
 
-5. **View** — the provider (`@repo/table/data-table-context`) hands the table to prop-less parts:
+5. **View** — one component renders toolbar, rows and pagination:
 
    ```tsx
-   <DataTableProvider
-     table={table}
-     columns={columns}
-     filters={filters}
+   <DataTableView
+     table={useUsersTable()}
+     columns={useUsersColumns()}
+     filters={useUsersFilters()}
      searchPlaceholder={t("searchPlaceholder")}
-   >
-     <DataTableToolbar />
-     <DataTable />
-     <DataTablePagination />
-   </DataTableProvider>
+   />
    ```
 
 6. **Page** — no prefetch: the header plus `<Suspense fallback={<DataTableSkeleton />}>` around

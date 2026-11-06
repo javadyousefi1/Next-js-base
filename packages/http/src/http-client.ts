@@ -31,10 +31,10 @@ type SendOptions = RequestOptions & { schema?: z.ZodType; body?: unknown };
  * The app's HTTP client. Every request, response and error goes through an instance, and only
  * two things come out:
  * - the response data: typed and validated with `{ schema }`, `unknown` without one (then e.g.
- *   `makeQuery` parses it with its `response` schema)
+ *   parse it yourself)
  * - an `ApiError` (network, timeout, 4xx/5xx, invalid response) — never a raw fetch error
  *
- *   const stats = await upstream.get(API_ENDPOINTS.stats, { schema: dashboardStatsResponse });
+ *   const stats = await upstream.get(STATS_ENDPOINT, { schema: dashboardStatsResponse });
  *
  * Apps create the instances, one per base URL (e.g. a browser client for their BFF and a
  * server client for the upstream API).

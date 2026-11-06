@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { useForm } from "react-hook-form";
 
-import { createInviteLinkMutation } from "../api/invite-links.queries";
+import { useCreateInviteLinkMutation } from "../invite-links.api";
 import {
   createInviteLinkFormSchema,
   type CreatedInviteLink,
@@ -37,9 +37,9 @@ export function useInviteLinkForm() {
     resolver: zodResolver(createInviteLinkFormSchema),
     defaultValues: { firstName: "", lastName: "", phoneNumber: "", expiresInDays: "" },
   });
-  const mutation = createInviteLinkMutation.useMutation({ onSuccess: setCreated });
+  const mutation = useCreateInviteLinkMutation();
 
-  const submit = form.handleSubmit((values) => mutation.mutate(values));
+  const submit = form.handleSubmit((values) => mutation.mutate(values, { onSuccess: setCreated }));
   const fieldError = (name: keyof CreateInviteLinkFormInput) => {
     const message = form.formState.errors[name]?.message;
     const key = VALIDATION_KEYS.find((candidate) => candidate === message);

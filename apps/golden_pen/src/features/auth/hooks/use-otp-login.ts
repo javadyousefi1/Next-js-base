@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, type FormEvent } from "react";
 import { useForm } from "react-hook-form";
 
-import { otpSendMutation } from "../api/auth.queries";
+import { useOtpSendMutation } from "../auth.api";
 import { otpSendInputSchema, type OtpSendInput } from "../schemas/auth.schema";
 import { useAuthMessages } from "./use-auth-messages";
 
@@ -24,7 +24,7 @@ export function useOtpLogin() {
     defaultValues: { phoneNumber: "" },
   });
 
-  const mutation = otpSendMutation.useMutation();
+  const mutation = useOtpSendMutation();
 
   const submit = form.handleSubmit((values) =>
     mutation.mutate(values, { onSuccess: () => setSentTo(values.phoneNumber) }),

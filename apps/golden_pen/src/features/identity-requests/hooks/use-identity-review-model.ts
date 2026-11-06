@@ -7,7 +7,7 @@ import { useProvinces } from "@/features/base-info/hooks/use-provinces";
 import { groupDocuments } from "@/features/profile/group-documents";
 import type { User } from "@/features/users/schemas/user.schema";
 
-import { identityDetailQuery } from "../api/identity-requests.queries";
+import { useIdentityDetailQuery } from "../identity-requests.api";
 import { isImageUrl, REVIEW_GROUPS, reviewFieldValues } from "../review-fields";
 
 /**
@@ -16,7 +16,7 @@ import { isImageUrl, REVIEW_GROUPS, reviewFieldValues } from "../review-fields";
  */
 export function useIdentityReviewModel(user: User) {
   const tProfile = useTranslations("Profile");
-  const query = identityDetailQuery.useQuery({ userId: user.id });
+  const query = useIdentityDetailQuery({ userId: user.id });
   const identity = query.data?.identity ?? null;
 
   const { provinces } = useProvinces();

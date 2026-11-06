@@ -1,7 +1,6 @@
 import type { NextRequest } from "next/server";
 
-import { API_ENDPOINTS } from "@/config/api-endpoints";
-import { authorizationHeader } from "@/features/auth/api/auth.backend";
+import { AUTH_ENDPOINTS, authorizationHeader } from "@/features/auth/auth.backend";
 import { withSession } from "@/server/auth/session";
 import { bffError, bffJson } from "@/server/bff/responses";
 import { upstream } from "@/server/http/upstream";
@@ -18,10 +17,10 @@ import { upstream } from "@/server/http/upstream";
  */
 const BLOCKED_PATHS = new Set<string>(
   [
-    API_ENDPOINTS.auth.login,
-    API_ENDPOINTS.auth.register,
-    API_ENDPOINTS.auth.verifyOtp,
-    API_ENDPOINTS.auth.registerByInviteLink,
+    AUTH_ENDPOINTS.login,
+    AUTH_ENDPOINTS.register,
+    AUTH_ENDPOINTS.verifyOtp,
+    AUTH_ENDPOINTS.registerByInviteLink,
   ].map((path) => path.toLowerCase()),
 );
 

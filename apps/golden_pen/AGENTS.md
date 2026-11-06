@@ -9,12 +9,23 @@ access control (yet). Dev/start port **3002**.
 **Persian only** (RTL, `messages/fa.json`): one locale, no URL prefix (`/settings`; next-intl
 rewrites to `[locale]` internally), no language switcher. Don't add English strings.
 
+## Data layer
+
+Same as `apps/sample` (rule `data-fetching.md`): one `features/<f>/<f>.api.ts` per feature with endpoint,
+backend schemas + mapping, hierarchical keys (`usersKeys`), `queryOptions` factories and **ready hooks**
+(`useUsersListQuery`, `useIdentityActionMutation`, …) that own invalidation and `meta.silent`; callers add UI
+callbacks with `mutate(vars, { onSuccess })`. Server-needed parts stay in `<f>.backend.ts` (`auth`, `profile`
+upload). Pages do not prefetch: toolbar and table sit in `<Suspense>` with their placeholders (CLS test).
+Tables: `toTableController` + `<DataTableView>` (rows + pagination; the toolbar stays outside, see below).
+Cross-feature refresh is explicit: a mutation that changes users or invite links also invalidates
+`dashboardKeys` (kept in `dashboard.backend.ts` to avoid an import cycle).
+
 ## Back-office API
 
 - Every upstream request sends the header `back-office: true` (`backOfficeHeader` in
-  `features/auth/api/auth.backend.ts`, applied in `src/server/http/upstream.ts`).
-- `features/auth/api/auth.backend.ts` is the ONLY file that knows the backend's auth contract
-  (swagger: `/Authentication/*`, `/User/Get`). Endpoint paths: `src/config/api-endpoints.ts`.
+  `features/auth/auth.backend.ts`, applied in `src/server/http/upstream.ts`).
+- `features/auth/auth.backend.ts` is the ONLY file that knows the backend's auth contract
+  (swagger: `/Authentication/*`, `/User/Get`). Endpoint paths live in the feature that owns them (`AUTH_ENDPOINTS`, `USERS_ENDPOINT`, …).
 - `REGISTER_ROLE_ID` (the role of a new user) is a guess: confirm it with the backend.
 
 ## Auth (BFF + one httpOnly cookie)
@@ -41,19 +52,19 @@ unverified until its code is verified.
 
 ## Users table
 
-`/users`: `GET /User/GetAll` (`features/users`, `users.backend.ts` is the only file that knows the API).
+`/users`: `GET /User/GetAll` (`features/users`, `users.api.ts` is the only file that knows the API).
 The toolbar search is `FullName`; the Filters drawer has `PhoneNumber`, `Role` (`USER_ROLES`, ids 1-4,
 sent as the role name) and `IdentityStatus` (0-5); `IncludeIdentity=true` is always sent; no sorting.
-`PAGE_INDEX_BASE` (`users.backend.ts`, now 1) is a guess: set 0 if the API's `PageIndex` is 0-based.
+`PAGE_INDEX_BASE` (`users.api.ts`, now 1) is a guess: set 0 if the API's `PageIndex` is 0-based.
 
 ## Invite links
 
 `/invite-links`: `GET /User/InviteLink/GetAll` (`IsUsed` filter, paging; no search, no sorting, so the
 toolbar hides the search box) and `POST /User/InviteLink/Create` (`features/invite-links`,
-`invite-links.backend.ts` is the only file that knows the API; `PAGE_INDEX_BASE` comes from users).
+`invite-links.api.ts` is the only file that knows the API; `PAGE_INDEX_BASE` comes from users).
 Create: the page-header button opens a `modal.open` form (first/last name, phone, optional
 `expiresInDays`; empty = the server's default); on success the modal stays open and shows the
-`inviteUrl` with a copy button, and the list is invalidated. 400/409 show the server's message.
+`inviteUrl` with a copy button, and the lists and dashboard counts are invalidated. 400/409 show the server's message.
 Status is derived in the mapper: used, else expired (`!isValid`), else active.
 
 Sidebar: one collapsible item "مدیریت کاربران" (`NavParent` in `config/navigation.ts`) holds
@@ -62,7 +73,7 @@ Sidebar: one collapsible item "مدیریت کاربران" (`NavParent` in `con
 ## Identity requests
 
 `/identity-requests` (sidebar: third child of «مدیریت کاربران»): `features/identity-requests`,
-`identity-requests.backend.ts` is the only file that knows the API. The list is `GET /User/GetAll` with
+`identity-requests.api.ts` is the only file that knows the API. The list is `GET /User/GetAll` with
 `IncludeIdentity=true` (users fetcher and mapper reused); the `status` tab (`requested` default, `verified`,
 `rejected`, `revoked`, `all`) is its own URL key, not a filter. The review sheet reads
 `GET /User/Get?userId=&includeIdentity=true` (profile mapper reused). Actions: `PUT /User/Identity`
@@ -84,8 +95,8 @@ uses `isRealSuperAdmin`. E2E: `e2e/role-switch.spec.ts`.
 
 ## Profile
 
-`/profile` (user menu → «پروفایل»; no sidebar item): `features/profile`, `profile.backend.ts` is the only
-file that knows the API. Read: `GET /User/Get?includeIdentity=true` (own query key, separate from the
+`/profile` (user menu → «پروفایل»; no sidebar item): `features/profile`, `profile.api.ts` is the only
+file that knows the API (the upload form + `validateUploadForm`, shared with the BFF route, are in `profile.backend.ts`). Read: `GET /User/Get?includeIdentity=true` (own query key, separate from the
 session). Write: `PUT /User/Update` through the proxy: `type` 1 = info, 2 = identity (every key of the
 section is sent, nullable; the other section is `null`; the response does not return the office address,
 so that form part starts empty). Upload: `POST /User/Upload` is multipart, so it goes through its own BFF

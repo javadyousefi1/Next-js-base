@@ -10,7 +10,7 @@ import { useCities } from "@/features/base-info/hooks/use-cities";
 import { useProvinces } from "@/features/base-info/hooks/use-provinces";
 import { useIdentityStatusLabel } from "@/features/users/hooks/use-identity-status-label";
 
-import { updateIdentityMutation } from "../api/profile.queries";
+import { useUpdateIdentityMutation } from "../profile.api";
 import {
   updateIdentityFormSchema,
   type ProfileIdentity,
@@ -57,12 +57,7 @@ export function useProfileIdentityForm(identity: ProfileIdentity | null) {
       companyRepresentativeName: identity?.companyRepresentativeName ?? "",
     },
   });
-  const mutation = updateIdentityMutation.useMutation({
-    onSuccess: () => {
-      form.reset(form.getValues());
-      toast.success(t("identity.saved"));
-    },
-  });
+  const mutation = useUpdateIdentityMutation();
 
   const [provinceId, cityId] = useWatch({
     control: form.control,
@@ -73,7 +68,14 @@ export function useProfileIdentityForm(identity: ProfileIdentity | null) {
     provinceId === "" ? null : Number(provinceId),
   );
 
-  const submit = form.handleSubmit((values) => mutation.mutate(values));
+  const submit = form.handleSubmit((values) =>
+    mutation.mutate(values, {
+      onSuccess: () => {
+        form.reset(form.getValues());
+        toast.success(t("identity.saved"));
+      },
+    }),
+  );
   const fieldError = (name: TextField) => {
     const message = form.formState.errors[name]?.message;
     const key = VALIDATION_KEYS.find((candidate) => candidate === message);

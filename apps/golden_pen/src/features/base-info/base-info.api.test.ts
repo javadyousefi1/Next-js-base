@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { baseInfoOptionsResponse, toCitiesQuery, toProvincesQuery } from "./base-info.backend";
+import { baseInfoOptionsResponse, toCitiesQuery, toProvincesQuery } from "./base-info.api";
 
 describe("queries", () => {
   test("provinces are type 1, cities type 2 with the province as parentId", () => {

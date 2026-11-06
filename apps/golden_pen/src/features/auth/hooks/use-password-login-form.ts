@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { FormEvent } from "react";
 import { useForm } from "react-hook-form";
 
-import { passwordLoginMutation } from "../api/auth.queries";
+import { usePasswordLoginMutation } from "../auth.api";
 import { passwordLoginInputSchema, type PasswordLoginInput } from "../schemas/auth.schema";
 import { useAuthMessages } from "./use-auth-messages";
 import { useSignInSuccess } from "./use-sign-in-success";
@@ -25,11 +25,11 @@ export function usePasswordLoginForm() {
     defaultValues: { phoneNumber: "", password: "" },
   });
 
-  const mutation = passwordLoginMutation.useMutation({ onSuccess: onSignedIn });
+  const mutation = usePasswordLoginMutation();
 
   const fieldError = (name: keyof PasswordLoginInput) =>
     messages.fieldError(form.formState.errors[name]?.message);
-  const submit = form.handleSubmit((values) => mutation.mutate(values));
+  const submit = form.handleSubmit((values) => mutation.mutate(values, { onSuccess: onSignedIn }));
 
   return {
     register: form.register,

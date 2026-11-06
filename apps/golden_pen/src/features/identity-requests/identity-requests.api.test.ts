@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { PAGE_INDEX_BASE } from "@/features/users/api/users.backend";
+import { PAGE_INDEX_BASE } from "@/features/users/users.api";
 
 import {
   identityErrorKind,
@@ -8,7 +8,7 @@ import {
   toBackendListQuery,
   toDetailQuery,
   toIdentityActionBody,
-} from "./identity-requests.backend";
+} from "./identity-requests.api";
 
 const list = { page: 1, pageSize: 10, q: "", phoneNumber: null } as const;
 

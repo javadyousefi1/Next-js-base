@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { serverMessage } from "@/features/profile/hooks/server-message";
 
-import { identityErrorKind } from "../api/identity-requests.backend";
+import { identityErrorKind } from "../identity-requests.api";
 
 /** A failed identity request → Persian text: by error code, else the server's reason, else generic. */
 export function useIdentityErrorMessage() {

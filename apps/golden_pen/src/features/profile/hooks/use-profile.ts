@@ -1,10 +1,10 @@
 "use client";
 
-import { profileQuery } from "../api/profile.queries";
+import { useProfileQuery } from "../profile.api";
 
 /** The signed-in user with their identity (`undefined` while loading). */
 export function useProfile() {
-  const query = profileQuery.useQuery();
+  const query = useProfileQuery();
 
   return {
     profile: query.data,

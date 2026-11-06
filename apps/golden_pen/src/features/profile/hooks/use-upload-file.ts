@@ -4,7 +4,7 @@ import type { FileRejection } from "@repo/ui/lib/file-validation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { uploadMutation } from "../api/profile.queries";
+import { useUploadMutation } from "../profile.api";
 import {
   AVATAR_MIME_TYPES,
   DOCUMENT_MIME_TYPES,
@@ -21,10 +21,7 @@ const MAX_UPLOAD_MB = MAX_UPLOAD_BYTES / (1024 * 1024);
  */
 export function useUploadFile(target: UploadTarget) {
   const t = useTranslations("Profile.upload");
-  const mutation = uploadMutation.useMutation({
-    onSuccess: () => toast.success(t("success")),
-    onError: () => toast.error(t("failed")),
-  });
+  const mutation = useUploadMutation();
 
   const reasons = { type: "invalidType", size: "tooLarge", count: "tooMany" } as const;
 
@@ -39,7 +36,12 @@ export function useUploadFile(target: UploadTarget) {
       busy: t("busy"),
     },
     onFiles: ([file]: File[]) => {
-      if (file) mutation.mutate({ target, file });
+      if (file) {
+        mutation.mutate(
+          { target, file },
+          { onSuccess: () => toast.success(t("success")), onError: () => toast.error(t("failed")) },
+        );
+      }
     },
     onReject: ([first]: FileRejection[]) => {
       if (first) toast.error(t(reasons[first.reason]));

@@ -63,8 +63,8 @@ when no app knowledge is involved.
   file. Shared non-personal data: Server Component + `'use cache'`. Writes: `useMutation`; Server
   Actions only for server-only effects (`updateTag`). Never pass tokens or secrets as props.
   Rule: `server.md`.
-- **Data** — TanStack Query directly: `useQuery(xQuery(params))` with `queryOptions` factories and
-  `useMutation(xMutation(queryClient))` declared in `features/<f>/<f>.api.ts` (keys, endpoint,
+- **Data** — TanStack Query directly: `queryOptions` factories plus ready hooks (`useXListQuery(params)`,
+  `useCreateXMutation()`, which own invalidation) declared in `features/<f>/<f>.api.ts` (keys, endpoint,
   `schema`-validated `apiClient` calls). Pages do not prefetch: the client loads, a skeleton
   shows meanwhile. Errors are always `ApiError` (`code`, `status`). Rule: `data-fetching.md`;
   skills: `add-query`, `add-mutation`.

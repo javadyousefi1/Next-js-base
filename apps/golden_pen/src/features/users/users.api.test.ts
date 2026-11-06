@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { PAGE_INDEX_BASE, toBackendListQuery, usersListResponse } from "./users.backend";
+import { PAGE_INDEX_BASE, toBackendListQuery, usersListResponse } from "./users.api";
 
 const empty = {
   page: 1,

@@ -2,13 +2,12 @@
 
 import { isApiError } from "@repo/http";
 import { modal } from "@repo/ui/lib/modal";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import type { ComponentType } from "react";
 import { toast } from "sonner";
 
 import type { Task } from "../schemas/task.schema";
-import { deleteTaskMutation, tasksKeys, updateTaskMutation } from "../tasks.api";
+import { useDeleteTaskMutation, useRefreshTasks, useUpdateTaskMutation } from "../tasks.api";
 
 type TaskActionsOptions = {
   /** The create/edit form shown by `modal.open`; it closes with the saved task. */
@@ -22,9 +21,9 @@ type TaskActionsOptions = {
  */
 export function useTaskActions({ Form }: TaskActionsOptions) {
   const t = useTranslations("Examples.data");
-  const queryClient = useQueryClient();
-  const remove = useMutation(deleteTaskMutation(queryClient));
-  const update = useMutation(updateTaskMutation(queryClient));
+  const remove = useDeleteTaskMutation();
+  const update = useUpdateTaskMutation();
+  const refresh = useRefreshTasks();
 
   const openForm = async (task?: Task) => {
     const saved = await modal.open<Task>(<Form task={task} />, {
@@ -71,6 +70,6 @@ export function useTaskActions({ Form }: TaskActionsOptions) {
       }),
     isUpdating: (task: Task) => update.isPending && update.variables?.id === task.id,
     /** Refetch every tasks query by key. */
-    refresh: () => void queryClient.invalidateQueries({ queryKey: tasksKeys.all }),
+    refresh: () => void refresh(),
   };
 }

@@ -8,7 +8,7 @@ import type { z } from "zod";
 
 import { OTP_RESEND_SECONDS } from "@/config/auth";
 
-import { otpResendMutation, otpVerifyMutation } from "../api/auth.queries";
+import { useOtpResendMutation, useOtpVerifyMutation } from "../auth.api";
 import { otpVerifyInputSchema } from "../schemas/auth.schema";
 import { useAuthMessages } from "./use-auth-messages";
 import { useSignInSuccess } from "./use-sign-in-success";
@@ -33,19 +33,15 @@ export function useOtpVerify(phoneNumber: string) {
     defaultValues: { code: "" },
   });
 
-  const verify = otpVerifyMutation.useMutation({ onSuccess: onSignedIn });
-  const resend = otpResendMutation.useMutation({
-    onSuccess: () => {
-      // A new code is on its way: the previous "wrong code" error no longer applies.
-      verify.reset();
-      setSecondsLeft(OTP_RESEND_SECONDS);
-    },
-  });
+  const verify = useOtpVerifyMutation();
+  const resend = useOtpResendMutation();
 
   // The code was just sent: count down once per second until "Resend" is available.
   useInterval(() => setSecondsLeft((seconds) => seconds - 1), secondsLeft > 0 ? 1000 : null);
 
-  const submit = form.handleSubmit(({ code }) => verify.mutate({ phoneNumber, code }));
+  const submit = form.handleSubmit(({ code }) =>
+    verify.mutate({ phoneNumber, code }, { onSuccess: onSignedIn }),
+  );
 
   return {
     register: form.register,
@@ -57,6 +53,16 @@ export function useOtpVerify(phoneNumber: string) {
     isSubmitting: verify.isPending || verify.isSuccess,
     secondsLeft,
     canResend: secondsLeft <= 0 && !resend.isPending,
-    resendCode: () => resend.mutate({ phoneNumber }),
+    resendCode: () =>
+      resend.mutate(
+        { phoneNumber },
+        {
+          onSuccess: () => {
+            // A new code is on its way: the previous "wrong code" error no longer applies.
+            verify.reset();
+            setSecondsLeft(OTP_RESEND_SECONDS);
+          },
+        },
+      ),
   };
 }

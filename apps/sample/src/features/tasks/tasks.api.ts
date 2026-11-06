@@ -1,4 +1,10 @@
-import { mutationOptions, queryOptions, type QueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { z } from "zod";
 
 import { apiClient } from "@/lib/http/client";
@@ -87,33 +93,48 @@ export const tasksListQuery = (params: TasksListParams) =>
     staleTime: 30_000,
   });
 
-/**
+/** One table page; the previous page stays visible while the next one loads. */
+export function useTasksListQuery(params: TasksListParams) {
+  return useQuery({ ...tasksListQuery(params), placeholderData: keepPreviousData });
+}
+
+/** Refetches every tasks query (lists included). */
+export function useRefreshTasks() {
+  const queryClient = useQueryClient();
+  return () => queryClient.invalidateQueries({ queryKey: tasksKeys.all });
+}
+
+/*
  * Mutations refresh the lists on success. `silent`: the form / confirm modal renders the error
  * itself, so no global toast. Callers add their own `onSuccess` to `mutate(vars, { onSuccess })`.
  */
-const refreshTasks = (queryClient: QueryClient) =>
-  queryClient.invalidateQueries({ queryKey: tasksKeys.all });
 
-export const createTaskMutation = (queryClient: QueryClient) =>
-  mutationOptions({
+export function useCreateTaskMutation() {
+  const refresh = useRefreshTasks();
+  return useMutation({
     mutationFn: (input: TaskInput) =>
       apiClient.post(TASKS_ENDPOINT, toBackendTaskBody(input), { schema: taskResponse }),
     meta: { silent: true },
-    onSuccess: () => refreshTasks(queryClient),
+    onSuccess: refresh,
   });
+}
 
-export const updateTaskMutation = (queryClient: QueryClient) =>
-  mutationOptions({
+export function useUpdateTaskMutation() {
+  const refresh = useRefreshTasks();
+  return useMutation({
     mutationFn: ({ id, ...input }: UpdateTaskInput) =>
       apiClient.patch(taskEndpoint(id), toBackendTaskBody(input), { schema: taskResponse }),
     meta: { silent: true },
-    onSuccess: () => refreshTasks(queryClient),
+    onSuccess: refresh,
   });
+}
 
 /** DELETE answers 204 No Content. */
-export const deleteTaskMutation = (queryClient: QueryClient) =>
-  mutationOptions({
+export function useDeleteTaskMutation() {
+  const refresh = useRefreshTasks();
+  return useMutation({
     mutationFn: ({ id }: TaskId) => apiClient.delete(taskEndpoint(id)),
     meta: { silent: true },
-    onSuccess: () => refreshTasks(queryClient),
+    onSuccess: refresh,
   });
+}

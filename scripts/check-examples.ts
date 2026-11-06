@@ -21,18 +21,7 @@ const SKIP = /\.(test|spec)\.tsx?$|\.d\.ts$/;
 /** Index exports that only serve the package itself (or its tests): no example needed. */
 const PLUMBING: Record<string, string[]> = {
   "@repo/http": ["codeFromStatus", "parseResponse"],
-  // `createMakeQuery`, `makeMutation`, `useInvalidate` and their helpers: deprecated — golden_pen
-  // only, removed after its migration (sample uses TanStack Query directly).
-  "@repo/query": [
-    "collectAffectedQueries",
-    "createMakeQuery",
-    "invalidateKeys",
-    "labelFromKey",
-    "makeMutation",
-    "makeQueryClient",
-    "parseInput",
-    "useInvalidate",
-  ],
+  "@repo/query": ["makeQueryClient"],
 };
 
 type ImportEntry = { importName: { kind: string; name?: string | null }; isType: boolean };

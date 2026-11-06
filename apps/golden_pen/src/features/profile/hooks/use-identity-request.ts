@@ -4,9 +4,11 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { identityErrorKind } from "@/features/identity-requests/api/identity-requests.backend";
-import { identityActionMutation } from "@/features/identity-requests/api/identity-requests.queries";
 import { useIdentityErrorMessage } from "@/features/identity-requests/hooks/use-identity-error-message";
+import {
+  identityErrorKind,
+  useIdentityActionMutation,
+} from "@/features/identity-requests/identity-requests.api";
 
 import type { ProfileIdentity } from "../schemas/profile.schema";
 
@@ -23,15 +25,7 @@ export function useIdentityRequest(identity: ProfileIdentity | null) {
   const t = useTranslations("Profile.identityRequest");
   const errorMessage = useIdentityErrorMessage();
   const [error, setError] = useState<string | null>(null);
-  const mutation = identityActionMutation.useMutation({
-    onSuccess: () => toast.success(t("done")),
-    onError: (failure) =>
-      setError(
-        identityErrorKind(failure) === "profileNotComplete"
-          ? t("notComplete")
-          : errorMessage(failure),
-      ),
-  });
+  const mutation = useIdentityActionMutation();
 
   const status = identity?.statusType ?? 0;
   const state: RequestState =
@@ -55,7 +49,18 @@ export function useIdentityRequest(identity: ProfileIdentity | null) {
     isSubmitting: mutation.isPending,
     request: () => {
       setError(null);
-      mutation.mutate({ action: "request" });
+      mutation.mutate(
+        { action: "request" },
+        {
+          onSuccess: () => toast.success(t("done")),
+          onError: (failure) =>
+            setError(
+              identityErrorKind(failure) === "profileNotComplete"
+                ? t("notComplete")
+                : errorMessage(failure),
+            ),
+        },
+      );
     },
   };
 }

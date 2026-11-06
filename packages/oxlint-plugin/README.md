@@ -5,7 +5,7 @@ loaded natively by Node's type stripping). Enabled in the root `oxlint.config.ts
 
 | Rule                         | Enforces                                                                         |
 | ---------------------------- | -------------------------------------------------------------------------------- |
-| `no-inline-query-keys`       | React Query keys come from `QUERY_KEYS` / `MUTATION_KEYS`                        |
+| `no-inline-query-keys`       | React Query keys come from the feature's `<f>.api.ts` (`usersKeys`)              |
 | `no-hardcoded-routes`        | `href` / `router.push` / `redirect` use `ROUTES` constants                       |
 | `cn-for-conditional-classes` | Conditional / composed `className` goes through `cn()`                           |
 | `no-logic-in-views`          | No state, effects, data fetching or forms in view files                          |

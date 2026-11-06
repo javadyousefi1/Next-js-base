@@ -6,7 +6,7 @@ import type { FormEvent } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { updateInfoMutation } from "../api/profile.queries";
+import { useUpdateInfoMutation } from "../profile.api";
 import {
   updateInfoFormSchema,
   type ProfileInfo,
@@ -39,15 +39,17 @@ export function useProfileInfoForm(info: ProfileInfo) {
       email: info.email ?? "",
     },
   });
-  const mutation = updateInfoMutation.useMutation({
-    onSuccess: () => {
-      // The saved values are the new baseline: the button is disabled again.
-      form.reset(form.getValues());
-      toast.success(t("info.saved"));
-    },
-  });
+  const mutation = useUpdateInfoMutation();
 
-  const submit = form.handleSubmit((values) => mutation.mutate(values));
+  const submit = form.handleSubmit((values) =>
+    mutation.mutate(values, {
+      onSuccess: () => {
+        // The saved values are the new baseline: the button is disabled again.
+        form.reset(form.getValues());
+        toast.success(t("info.saved"));
+      },
+    }),
+  );
   const fieldError = (name: keyof UpdateInfoFormInput) => {
     const message = form.formState.errors[name]?.message;
     const key = VALIDATION_KEYS.find((candidate) => candidate === message);

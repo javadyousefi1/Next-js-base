@@ -1,27 +1,34 @@
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 
+import { API_ROUTES } from "@/config/routes";
+import { authKeys } from "@/features/auth/auth.api";
+import { AUTH_ENDPOINTS, ignoredResponse } from "@/features/auth/auth.backend";
+import { apiClient, bffClient } from "@/lib/http/client";
+
+import { DOCUMENT_FIELD, toUploadFormData } from "./profile.backend";
 import {
-  checkUploadFile,
   DOCUMENT_KINDS,
   type DocumentKind,
   type Profile,
   type UpdateIdentityInput,
   type UpdateInfoInput,
   type UploadInput,
-  type UploadTarget,
-} from "../schemas/profile.schema";
+} from "./schemas/profile.schema";
 
 /**
- * The ONLY file that knows the backend's profile API: `GET /User/Get?includeIdentity=true`,
- * `PUT /User/Update` (`type` 1 = info, 2 = identity; every key of the chosen section is sent,
- * the other section is `null`) and `POST /User/Upload` (multipart: `uploadType` 1 = avatar,
- * 2 = identity document with a `fieldType`). A new backend → change this file (+
- * `API_ENDPOINTS`, the MSW mock), nothing else.
+ * The ONLY file that knows the backend's profile API: `GET /User/Get?includeIdentity=true` and
+ * `PUT /User/Update` (`type` 1 = info, 2 = identity; every key of the chosen section is sent, the
+ * other section is `null`), plus the upload call (its multipart form is in `profile.backend.ts`,
+ * which the BFF route shares). Endpoints, mapping, response schemas, keys, queries and
+ * mutations. A new backend → change this file (+ the MSW mock), nothing else.
  */
+
+/** Relative to `API_BASE_URL` on the server, or to `/api/proxy` in the browser (BFF). */
+export const PROFILE_ENDPOINT = AUTH_ENDPOINTS.me;
+export const UPDATE_ENDPOINT = "/User/Update";
+
 export const UPDATE_TYPE = { info: 1, identity: 2 } as const;
-export const UPLOAD_TYPE = { avatar: 1, identityDocument: 2 } as const;
-/** `fieldType` of an identity document. */
-export const DOCUMENT_FIELD = { license: "licenseFile", document: "documents" } as const;
 
 /** The signed-in user together with their identity. */
 export function toProfileQuery() {
@@ -134,60 +141,75 @@ export function toUpdateIdentityBody(input: UpdateIdentityInput) {
   return { type: UPDATE_TYPE.identity, info: null, identity: { ...input } };
 }
 
-/** The upload form the browser sends to our BFF (`/api/upload`): the backend's own field names. */
-export function toUploadFormData({ target, file }: UploadInput): FormData {
-  const form = new FormData();
-  if (target === "avatar") {
-    form.append("uploadType", String(UPLOAD_TYPE.avatar));
-  } else {
-    form.append("uploadType", String(UPLOAD_TYPE.identityDocument));
-    form.append("fieldType", DOCUMENT_FIELD[target]);
-  }
-  if (file) {
-    form.append("file", file, file.name);
-    form.append("originalFileName", file.name);
-  }
-  return form;
+/** Hierarchical: invalidating `all` refreshes every profile query. */
+export const profileKeys = {
+  all: ["profile"] as const,
+  detail: () => ["profile", "detail"] as const,
+};
+
+/** The signed-in user with their identity (its own key: the session query has no identity). */
+export const profileQuery = () =>
+  queryOptions({
+    queryKey: profileKeys.detail(),
+    queryFn: ({ signal }) =>
+      apiClient.get(PROFILE_ENDPOINT, {
+        params: toProfileQuery(),
+        signal,
+        schema: profileResponse,
+      }),
+    staleTime: 30_000,
+  });
+
+export function useProfileQuery() {
+  return useQuery(profileQuery());
 }
 
-/** Which `UploadTarget` an upload form is for (`null` = not a valid combination). */
-function targetOf(uploadType: string, fieldType: string | null): UploadTarget | null {
-  if (uploadType === String(UPLOAD_TYPE.avatar)) return "avatar";
-  if (uploadType !== String(UPLOAD_TYPE.identityDocument)) return null;
-  return DOCUMENT_KINDS.find((kind) => DOCUMENT_FIELD[kind] === fieldType) ?? null;
+/*
+ * The forms show their own errors (`silent`); the writes answer 204. Callers add their own
+ * `onSuccess` to `mutate(vars, { onSuccess })`.
+ */
+
+/** Refreshes the profile and the session (the sidebar shows the name). */
+export function useUpdateInfoMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateInfoInput) =>
+      apiClient.put(UPDATE_ENDPOINT, toUpdateInfoBody(input), { schema: ignoredResponse }),
+    meta: { silent: true },
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: profileKeys.all }),
+        queryClient.invalidateQueries({ queryKey: authKeys.session() }),
+      ]),
+  });
 }
 
-export type UploadFormCheck = { ok: true; form: FormData } | { ok: false; message: string };
+export function useUpdateIdentityMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateIdentityInput) =>
+      apiClient.put(UPDATE_ENDPOINT, toUpdateIdentityBody(input), { schema: ignoredResponse }),
+    meta: { silent: true },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: profileKeys.all }),
+  });
+}
 
 /**
- * The pure part of the upload route: validates what the browser sent (`toUploadFormData`) and
- * builds the form for the upstream `POST /User/Upload`. An avatar without a file deletes it.
+ * Files go to our own multipart BFF route (the generic proxy is JSON-only). An avatar change
+ * also refreshes the session (the sidebar shows the avatar).
  */
-export function validateUploadForm(input: FormData): UploadFormCheck {
-  const uploadType = input.get("uploadType");
-  const fieldType = input.get("fieldType");
-  const file = input.get("file");
-
-  const target =
-    typeof uploadType === "string"
-      ? targetOf(uploadType, typeof fieldType === "string" ? fieldType : null)
-      : null;
-  if (target === null) return { ok: false, message: "Invalid upload type" };
-  if (file !== null && !(file instanceof File)) return { ok: false, message: "Invalid file" };
-  if (file === null && target !== "avatar") return { ok: false, message: "A file is required" };
-
-  const form = new FormData();
-  form.append(
-    "uploadType",
-    String(target === "avatar" ? UPLOAD_TYPE.avatar : UPLOAD_TYPE.identityDocument),
-  );
-  if (target !== "avatar") form.append("fieldType", DOCUMENT_FIELD[target]);
-  if (file) {
-    const problem = checkUploadFile(target, file);
-    if (problem === "type") return { ok: false, message: "Unsupported file type" };
-    if (problem === "size") return { ok: false, message: "The file is too large" };
-    form.append("file", file, file.name);
-    form.append("originalFileName", file.name);
-  }
-  return { ok: true, form };
+export function useUploadMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UploadInput) =>
+      bffClient.post(API_ROUTES.upload, toUploadFormData(input), { schema: ignoredResponse }),
+    meta: { silent: true },
+    onSuccess: (_data, { target }) =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: profileKeys.all }),
+        target === "avatar"
+          ? queryClient.invalidateQueries({ queryKey: authKeys.session() })
+          : undefined,
+      ]),
+  });
 }

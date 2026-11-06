@@ -6,14 +6,11 @@ import { DataTablePlaceholder } from "@/components/data-table/data-table-placeho
 import { DataTableToolbarPlaceholder } from "@/components/data-table/data-table-toolbar-placeholder";
 import { PageHeader } from "@/components/layout/page-header";
 import { ROUTES } from "@/config/routes";
-import { usersListQuery } from "@/features/users/api/users.queries";
 import { UsersTable } from "@/features/users/components/users-table";
 import { UsersToolbar } from "@/features/users/components/users-toolbar";
 import { USERS_COLUMN_KEYS } from "@/features/users/users-column-keys";
-import { loadUsersSearchParams } from "@/features/users/users.search-params";
 import { getLocaleParam } from "@/i18n/params";
 import { pageMetadata } from "@/lib/seo/metadata";
-import { PrefetchBoundary } from "@/server/query/prefetch-boundary";
 
 export async function generateMetadata({
   params,
@@ -21,7 +18,7 @@ export async function generateMetadata({
   return pageMetadata(await getLocaleParam(params), "Users", ROUTES.users);
 }
 
-export default async function UsersPage({ searchParams }: PageProps<"/[locale]/users">) {
+export default async function UsersPage() {
   const t = await getTranslations("Users");
 
   return (
@@ -31,14 +28,13 @@ export default async function UsersPage({ searchParams }: PageProps<"/[locale]/u
         <Suspense fallback={<DataTableToolbarPlaceholder />}>
           <UsersToolbar />
         </Suspense>
-        <PrefetchBoundary
-          queries={[usersListQuery.with(loadUsersSearchParams(searchParams))]}
+        <Suspense
           fallback={
             <DataTablePlaceholder headers={USERS_COLUMN_KEYS.map((key) => t(`columns.${key}`))} />
           }
         >
           <UsersTable />
-        </PrefetchBoundary>
+        </Suspense>
       </div>
     </>
   );

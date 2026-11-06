@@ -33,14 +33,18 @@ description: Add a validated read endpoint in apps/sample — endpoint constant,
          apiClient.get(`${<X>_ENDPOINT}/${params.id}`, { signal, schema: <x>Response }),
        staleTime: 30_000, // optional
      });
+
+   export function use<X>Query(params: <X>Params) {
+     return useQuery(<x>Query(params)); // tables: { ...<x>Query(params), placeholderData: keepPreviousData }
+   }
    ```
 
    `schema` validates the response (`INVALID_RESPONSE`) and types the data. Copy
    `features/users/users.api.ts`.
 
-3. **Use it in a hook** — `const query = useQuery(<x>Query(params))`; map `query.data`,
-   `query.isPending`, `query.isError` to a view model. Never in a component. Options:
-   `useQuery({ ...<x>Query(params), placeholderData: keepPreviousData })`.
+3. **Use it in a hook** — `const query = use<X>Query(params)`; map `query.data`,
+   `query.isPending`, `query.isError` to a view model. Never in a component, and never call
+   `useQuery(<x>Query(…))` outside `<f>.api.ts`.
 4. **Page** — no prefetch: render the client view in `<Suspense fallback={<Skeleton />}>`.
 5. **Mock** — handler in `src/mocks/handlers.ts` (import the endpoint const) returning the
    BACKEND shape (what `<x>Response` parses).

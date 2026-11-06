@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { JalaliDate } from "@repo/jalali";
 import { useModalClose } from "@repo/ui/hooks/use-modal-close";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -20,7 +19,7 @@ import {
   type TaskStatus,
 } from "../schemas/task.schema";
 import { isoToJalali, jalaliToIso } from "../task-dates";
-import { createTaskMutation, updateTaskMutation } from "../tasks.api";
+import { useCreateTaskMutation, useUpdateTaskMutation } from "../tasks.api";
 
 /** zod messages in task.schema.ts are keys of `Examples.data.validation`. */
 const VALIDATION_KEYS = ["titleMin", "titleMax"] as const;
@@ -44,9 +43,8 @@ export function useTaskForm(task?: Task) {
       dueDate: task?.dueDate ?? null,
     },
   });
-  const queryClient = useQueryClient();
-  const create = useMutation(createTaskMutation(queryClient));
-  const update = useMutation(updateTaskMutation(queryClient));
+  const create = useCreateTaskMutation();
+  const update = useUpdateTaskMutation();
   const mutation = task ? update : create;
 
   const submit = form.handleSubmit((values) =>

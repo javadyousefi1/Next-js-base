@@ -2,11 +2,8 @@ import { defineRule, type ESTree } from "@oxlint/plugins";
 
 import { calleeName } from "./utils.ts";
 
-/** React Query APIs (and our wrappers) that receive query/mutation keys. */
+/** React Query APIs that receive query/mutation keys. */
 const KEY_CONSUMERS = new Set([
-  "makeQuery",
-  "makeMutation",
-  "invalidateKeys",
   "queryOptions",
   "mutationOptions",
   "useQuery",

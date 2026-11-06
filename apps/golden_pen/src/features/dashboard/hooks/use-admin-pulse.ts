@@ -6,7 +6,7 @@ import { createSerializer } from "nuqs/server";
 import { ROUTES } from "@/config/routes";
 import { inviteLinksSearchParams } from "@/features/invite-links/invite-links.search-params";
 
-import { dashboardCountQuery } from "../api/dashboard.queries";
+import { useDashboardCountQuery } from "../dashboard.api";
 
 const inviteLinksUrl = createSerializer(inviteLinksSearchParams);
 
@@ -22,10 +22,10 @@ const format = (value: number | undefined) =>
 /** The admin pulse's model: three stat cards (value `undefined` while loading). */
 export function useAdminPulse() {
   const t = useTranslations("Dashboard.pulse");
-  const users = dashboardCountQuery.useQuery({ count: "users" });
-  const pending = dashboardCountQuery.useQuery({ count: "identityPending" });
-  const requested = dashboardCountQuery.useQuery({ count: "identityRequested" });
-  const unused = dashboardCountQuery.useQuery({ count: "inviteLinksUnused" });
+  const users = useDashboardCountQuery({ count: "users" });
+  const pending = useDashboardCountQuery({ count: "identityPending" });
+  const requested = useDashboardCountQuery({ count: "identityRequested" });
+  const unused = useDashboardCountQuery({ count: "inviteLinksUnused" });
 
   const pendingTotal =
     pending.data !== undefined && requested.data !== undefined

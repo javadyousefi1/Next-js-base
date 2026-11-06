@@ -4,8 +4,7 @@ import { ApiError } from "./errors";
 
 /**
  * Response validation: server data is parsed BEFORE it reaches the app (cache, UI, server code)
- * → `INVALID_RESPONSE`. Used by `HttpClient` (when a request has a `schema`), `makeQuery` and
- * `makeMutation`. Parsing applies the schema's defaults/coercions/transforms.
+ * → `INVALID_RESPONSE`. Used by `HttpClient` (when a request has a `schema`). Parsing applies the schema's defaults/coercions/transforms.
  */
 export function parseResponse<TSchema extends z.ZodType>(
   schema: TSchema,
